@@ -737,10 +737,6 @@ actionBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
-    setBodyHeight();
-    
-    // 监听窗口大小变化
-    window.addEventListener('resize', setBodyHeight);
 });
 
 // Initialize mode
@@ -884,9 +880,4 @@ function setOutputText(text) {
     }
     // 重置复制按钮状态
     outputButtons.copy.classList.remove('is-success');
-}
-
-// 设置body高度为视口高度
-function setBodyHeight() {
-    document.body.style.height = `${window.innerHeight}px`;
 } 
