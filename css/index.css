@@ -49,16 +49,15 @@
 body {
     background-color: var(--bg-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    min-height: 100vh;
-    height: 100dvh; /* 使用 dvh 单位来确保在移动端正确计算视口高度 */
+    min-height: 100vh; /* Keep min-height as fallback */
+    height: 100vh; /* Force body to viewport height */
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     color: var(--text-color);
     transition: background-color 0.3s ease;
-    overflow-x: hidden; /* 水平方向保持隐藏 */
-    overflow-y: auto; /* 垂直方向允许滚动 */
+    overflow: hidden; /* Prevent body scrollbar */
 }
 
 .title {
@@ -264,12 +263,11 @@ body {
     padding: 30px;
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    /* Remove margin-bottom: auto; */
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     display: flex; /* Make container a flex column */
     flex-direction: column;
     flex-grow: 1; /* Allow container to fill body space */
-    overflow: visible; /* 允许内容溢出 */
+    overflow-y: auto; /* Allow container to scroll if needed, not body */
 }
 
 .mode-switch {
@@ -787,10 +785,10 @@ input[type="password"]:focus {
 @media (max-width: 768px) {
     body {
         padding: 10px;
-        /* 确保可以根据内容扩展 */
-        height: auto; 
+        /* Ensure height is still 100vh on mobile */
+        height: 100vh; 
         min-height: 100vh;
-        overflow-y: auto; /* 确保移动设备上也能滚动 */
+        overflow: hidden; /* Prevent body scroll on mobile too */
     }
     
     .title {
