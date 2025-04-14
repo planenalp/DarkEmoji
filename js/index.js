@@ -737,34 +737,6 @@ actionBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
-    
-    // 确保页面完全加载后所有内容可见
-    window.requestAnimationFrame(() => {
-        // 检查文档高度是否超出视口高度
-        if (document.body.scrollHeight > window.innerHeight) {
-            // 轻微滚动到顶部，触发浏览器重新计算布局
-            window.scrollTo(0, 0);
-            
-            // 如果有需要，可以添加第二个帧以确保布局更新
-            window.requestAnimationFrame(() => {
-                // 检查是否有被隐藏的底部内容
-                const containerBottom = document.querySelector('.container').getBoundingClientRect().bottom;
-                const viewportBottom = window.innerHeight;
-                
-                // 如果容器底部超出视口，轻微滚动以显示
-                if (containerBottom > viewportBottom) {
-                    window.scrollBy({
-                        top: 1,
-                        behavior: 'auto'
-                    });
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'auto'
-                    });
-                }
-            });
-        }
-    });
 });
 
 // Initialize mode
