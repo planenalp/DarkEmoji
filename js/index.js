@@ -3,16 +3,6 @@ document.addEventListener('touchstart', function() {}, { passive: true });
 document.addEventListener('touchend', function() {}, { passive: true });
 document.addEventListener('touchcancel', function() {}, { passive: true });
 
-// 获取真实可视窗口高度的辅助函数
-function getVisibleViewportHeight() {
-    // 使用 visualViewport API 获取真实可视区域高度（如果支持）
-    if (window.visualViewport) {
-        return window.visualViewport.height;
-    }
-    // 回退到 innerHeight
-    return window.innerHeight;
-}
-
 // DOM Elements
 const encryptBtn = document.getElementById('encryptBtn');
 const decryptBtn = document.getElementById('decryptBtn');
@@ -421,7 +411,7 @@ inputButtons.expand.addEventListener('click', (e) => {
                 // 等待过渡完成后手动计算并滚动居中
                 setTimeout(() => {
                     const rect = inputText.getBoundingClientRect();
-                    const viewportHeight = getVisibleViewportHeight();
+                    const viewportHeight = document.documentElement.clientHeight;
                     const elementCenter = rect.top + rect.height / 2;
                     const viewportCenter = viewportHeight / 2;
                     const scrollOffset = elementCenter - viewportCenter;
@@ -445,7 +435,7 @@ inputButtons.expand.addEventListener('click', (e) => {
         // 等待过渡完成后手动计算并滚动居中
         setTimeout(() => {
             const rect = inputText.getBoundingClientRect();
-            const viewportHeight = getVisibleViewportHeight();
+            const viewportHeight = document.documentElement.clientHeight;
             const elementCenter = rect.top + rect.height / 2;
             const viewportCenter = viewportHeight / 2;
             const scrollOffset = elementCenter - viewportCenter;
@@ -518,7 +508,7 @@ outputButtons.expand.addEventListener('click', (e) => {
                 // 等待过渡完成后手动计算并滚动居中
                 setTimeout(() => {
                     const rect = outputText.getBoundingClientRect();
-                    const viewportHeight = getVisibleViewportHeight();
+                    const viewportHeight = document.documentElement.clientHeight;
                     const elementCenter = rect.top + rect.height / 2;
                     const viewportCenter = viewportHeight / 2;
                     const scrollOffset = elementCenter - viewportCenter;
@@ -542,7 +532,7 @@ outputButtons.expand.addEventListener('click', (e) => {
         // 等待过渡完成后手动计算并滚动居中
         setTimeout(() => {
             const rect = outputText.getBoundingClientRect();
-            const viewportHeight = getVisibleViewportHeight();
+            const viewportHeight = document.documentElement.clientHeight;
             const elementCenter = rect.top + rect.height / 2;
             const viewportCenter = viewportHeight / 2;
             const scrollOffset = elementCenter - viewportCenter;
