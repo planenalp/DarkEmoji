@@ -411,7 +411,7 @@ inputButtons.expand.addEventListener('click', (e) => {
                 // 等待过渡完成后手动计算并滚动居中
                 setTimeout(() => {
                     const rect = inputText.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
+                    const viewportHeight = document.documentElement.clientHeight;
                     const elementCenter = rect.top + rect.height / 2;
                     const viewportCenter = viewportHeight / 2;
                     const scrollOffset = elementCenter - viewportCenter;
@@ -435,7 +435,7 @@ inputButtons.expand.addEventListener('click', (e) => {
         // 等待过渡完成后手动计算并滚动居中
         setTimeout(() => {
             const rect = inputText.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
+            const viewportHeight = document.documentElement.clientHeight;
             const elementCenter = rect.top + rect.height / 2;
             const viewportCenter = viewportHeight / 2;
             const scrollOffset = elementCenter - viewportCenter;
@@ -508,7 +508,7 @@ outputButtons.expand.addEventListener('click', (e) => {
                 // 等待过渡完成后手动计算并滚动居中
                 setTimeout(() => {
                     const rect = outputText.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
+                    const viewportHeight = document.documentElement.clientHeight;
                     const elementCenter = rect.top + rect.height / 2;
                     const viewportCenter = viewportHeight / 2;
                     const scrollOffset = elementCenter - viewportCenter;
@@ -532,7 +532,7 @@ outputButtons.expand.addEventListener('click', (e) => {
         // 等待过渡完成后手动计算并滚动居中
         setTimeout(() => {
             const rect = outputText.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
+            const viewportHeight = document.documentElement.clientHeight;
             const elementCenter = rect.top + rect.height / 2;
             const viewportCenter = viewportHeight / 2;
             const scrollOffset = elementCenter - viewportCenter;
