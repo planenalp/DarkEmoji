@@ -385,20 +385,12 @@ function clearTextarea(textarea) {
 }
 
 // Input button event listeners
-inputButtons.expand.addEventListener('click', (e) => {
+inputButtons.expand.addEventListener('mousedown', (e) => {
     e.stopPropagation();
-    // Check if currently expanded *before* toggling
-    const isCurrentlyExpanded = inputText.classList.contains('expanded');
-    
-    inputText.classList.toggle('expanded');
-    inputButtons.expand.classList.toggle('is-success');
-    
-    // Set focus only when expanding, blur when collapsing
-    if (!isCurrentlyExpanded) {
-        inputText.focus(); // Expanding, set focus
-    } else {
-        inputText.blur(); // Collapsing, remove focus
-    }
+    // Prevent default mousedown behavior (like losing focus from textarea)
+    e.preventDefault();
+    // Set focus when button is pressed down
+    inputText.focus();
 });
 
 inputButtons.paste.addEventListener('click', async () => {
@@ -415,7 +407,7 @@ inputButtons.clear.addEventListener('click', () => {
     if (inputText.classList.contains('expanded')) {
         inputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
-        inputButtons.expand.classList.remove('is-success');
+        // inputButtons.expand.classList.remove('is-success'); // Removed
     }
     
     // 取消输入框焦点
@@ -423,20 +415,12 @@ inputButtons.clear.addEventListener('click', () => {
 });
 
 // Output button event listeners
-outputButtons.expand.addEventListener('click', (e) => {
+outputButtons.expand.addEventListener('mousedown', (e) => {
     e.stopPropagation();
-    // Check if currently expanded *before* toggling
-    const isCurrentlyExpanded = outputText.classList.contains('expanded');
-    
-    outputText.classList.toggle('expanded');
-    outputButtons.expand.classList.toggle('is-success');
-    
-    // Set focus only when expanding, blur when collapsing
-    if (!isCurrentlyExpanded) {
-        outputText.focus(); // Expanding, set focus
-    } else {
-        outputText.blur(); // Collapsing, remove focus
-    }
+    // Prevent default mousedown behavior (like losing focus from textarea)
+    e.preventDefault();
+    // Set focus when button is pressed down
+    outputText.focus();
 });
 
 outputButtons.copy.addEventListener('click', () => {
@@ -453,7 +437,7 @@ outputButtons.clear.addEventListener('click', () => {
     if (outputText.classList.contains('expanded')) {
         outputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
-        outputButtons.expand.classList.remove('is-success');
+        // outputButtons.expand.classList.remove('is-success'); // Removed
     }
     
     // 取消输出框焦点
@@ -471,8 +455,8 @@ outputText.addEventListener('input', () => {
 
 // 确保所有按钮点击都阻止冒泡和默认行为
 const allButtons = [
-    inputButtons.expand, inputButtons.paste, inputButtons.clear,
-    outputButtons.expand, outputButtons.copy, outputButtons.clear,
+    /*inputButtons.expand,*/ inputButtons.paste, inputButtons.clear, // Removed inputExpand
+    /*outputButtons.expand,*/ outputButtons.copy, outputButtons.clear, // Removed outputExpand
     passwordButtons.copy, passwordButtons.paste, passwordButtons.clear, passwordButtons.generate
 ];
 
