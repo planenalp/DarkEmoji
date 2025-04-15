@@ -276,16 +276,6 @@ function switchMode(mode) {
     passwordButtons.copy.classList.remove('is-success');
     passwordButtons.paste.classList.remove('is-success');
     passwordButtons.generate.classList.remove('is-success');
-    
-    // 重置expanded状态
-    inputText.classList.remove('expanded');
-    outputText.classList.remove('expanded');
-    inputButtons.expand.classList.remove('is-success');
-    outputButtons.expand.classList.remove('is-success');
-    
-    // 重置input和output section的伸缩比例
-    inputText.parentElement.style.flexGrow = "1";
-    outputText.parentElement.style.flexGrow = "1";
 }
 
 // Event listeners for mode switching
@@ -403,14 +393,10 @@ inputButtons.expand.addEventListener('click', (e) => {
     inputText.classList.toggle('expanded');
     inputButtons.expand.classList.toggle('is-success');
     
-    // 如果添加了expanded类，让输入区域的flex-grow变成3，以便显示更多空间
+    // Set focus only when expanding, blur when collapsing
     if (!isCurrentlyExpanded) {
-        inputText.parentElement.style.flexGrow = "3"; // 展开时增加权重
-        outputText.parentElement.style.flexGrow = "1"; // 保持另一个区域为正常权重
         inputText.focus(); // Expanding, set focus
     } else {
-        inputText.parentElement.style.flexGrow = "1"; // 恢复正常权重
-        outputText.parentElement.style.flexGrow = "1"; // 保持另一个区域为正常权重
         inputText.blur(); // Collapsing, remove focus
     }
 });
@@ -430,8 +416,6 @@ inputButtons.clear.addEventListener('click', () => {
         inputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
         inputButtons.expand.classList.remove('is-success');
-        // 恢复输入区域的正常权重
-        inputText.parentElement.style.flexGrow = "1";
     }
     
     // 取消输入框焦点
@@ -447,14 +431,10 @@ outputButtons.expand.addEventListener('click', (e) => {
     outputText.classList.toggle('expanded');
     outputButtons.expand.classList.toggle('is-success');
     
-    // 如果添加了expanded类，让输出区域的flex-grow变成3，以便显示更多空间
+    // Set focus only when expanding, blur when collapsing
     if (!isCurrentlyExpanded) {
-        outputText.parentElement.style.flexGrow = "3"; // 展开时增加权重
-        inputText.parentElement.style.flexGrow = "1"; // 保持另一个区域为正常权重
         outputText.focus(); // Expanding, set focus
     } else {
-        outputText.parentElement.style.flexGrow = "1"; // 恢复正常权重
-        inputText.parentElement.style.flexGrow = "1"; // 保持另一个区域为正常权重
         outputText.blur(); // Collapsing, remove focus
     }
 });
@@ -474,8 +454,6 @@ outputButtons.clear.addEventListener('click', () => {
         outputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
         outputButtons.expand.classList.remove('is-success');
-        // 恢复输出区域的正常权重
-        outputText.parentElement.style.flexGrow = "1";
     }
     
     // 取消输出框焦点
@@ -627,16 +605,6 @@ actionBtn.addEventListener('click', () => {
         return;
     }
     
-    // 重置expanded状态
-    inputText.classList.remove('expanded');
-    outputText.classList.remove('expanded');
-    inputButtons.expand.classList.remove('is-success');
-    outputButtons.expand.classList.remove('is-success');
-    
-    // 重置input和output section的伸缩比例
-    inputText.parentElement.style.flexGrow = "1";
-    outputText.parentElement.style.flexGrow = "1";
-    
     // TODO: Add encryption/decryption logic here
     if (isEncryptMode) {
         // Hide logic
@@ -651,10 +619,6 @@ actionBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
-    
-    // 初始化设置input和output section的伸缩比例
-    inputText.parentElement.style.flexGrow = "1";
-    outputText.parentElement.style.flexGrow = "1";
 });
 
 // Initialize mode

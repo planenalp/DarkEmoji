@@ -1,3 +1,7 @@
+html {
+    height: 100%; /* 让 html 元素占满视口 */
+}
+
 :root {
     /* Variables moved to [data-theme="light"] */
 }
@@ -49,16 +53,14 @@
 body {
     background-color: var(--bg-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    min-height: 100vh;
-    height: 100vh; /* 设置为固定的视窗高度 */
-    margin: 0; /* 确保没有外边距 */
+    height: 100vh; /* 让 body 占满视口高度 */
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     color: var(--text-color);
     transition: background-color 0.3s ease;
-    box-sizing: border-box; /* 确保padding计入总高度 */
+    box-sizing: border-box; /* 确保 padding 不会撑开 body 高度 */
 }
 
 .title {
@@ -264,11 +266,11 @@ body {
     padding: 30px;
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    margin-bottom: auto;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* 允许容器伸展填充可用空间 */
+    flex-grow: 1; /* 让容器填充 body 的剩余垂直空间 */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* 垂直排列子元素 */
+    overflow: hidden; /* 防止内容溢出容器 */
 }
 
 .mode-switch {
@@ -335,18 +337,19 @@ body {
 .input-section,
 .output-section {
     position: relative;
-    padding-bottom: 40px;
+    padding-bottom: 40px; /* 保留底部空间给按钮组 */
     margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* 允许每个部分伸展 */
+    flex-grow: 1; /* 让输入和输出区域均分剩余空间 */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* 垂直排列内部元素 */
+    overflow: hidden; /* 防止内容溢出 */
 }
 
 .password-section {
     margin-bottom: 20px;
     position: relative;
-    padding-bottom: 40px;
-    /* 不为password-section添加flex-grow，保持其原有尺寸 */
+    padding-bottom: 40px; /* 保留底部空间给按钮组 */
+    /* 不添加 flex-grow，保持其原有高度 */
 }
 
 textarea {
@@ -362,23 +365,25 @@ textarea {
     border-top-right-radius: 6px;
     font-size: 16px;
     resize: none;
-    min-height: 40px; /* 更改为40px的最小高度 */
-    height: 100%; /* 使其填充父容器可用高度 */
-    flex-grow: 1; /* 允许在flex容器中伸展 */
+    /* min-height: 140px; 移除固定最小高度 */
+    /* height: 140px; 移除固定高度 */
+    min-height: 40px; /* 设置最小高度与密码框一致 */
     background: var(--input-bg);
     color: var(--text-color);
-    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* 保持高度过渡 */
     overflow: auto;
-    display: block;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-    outline: none !important;
-    touch-action: manipulation;
-    overscroll-behavior-y: contain;
+    display: block; /* display: block 通常不是 flex item 的最佳选择，但这里为了配合之前的样式可能需要 */
+    flex-grow: 1; /* 让 textarea 填充父容器的剩余空间 */
+    box-sizing: border-box; /* 确保 padding 和 border 包含在尺寸内 */
+    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+    -webkit-user-select: text; /* 允许 iOS Safari 文本选择，因为这是文本区域 */
+    -moz-user-select: text; /* 适用于 Firefox */
+    -ms-user-select: text; /* 适用于 IE10+ 和 Edge */
+    user-select: text; /* 标准语法 */
+    outline: none !important; /* 解决按压边框闪烁 */
+    touch-action: manipulation; /* 提高触摸设备响应性能 */
+    overscroll-behavior-y: contain; /* 防止文本框滚动影响页面滚动 */
 }
 
 /* Style scrollbars for Webkit browsers */
@@ -414,10 +419,10 @@ textarea::-webkit-scrollbar-thumb {
 } */
 
 textarea.expanded {
-    height: 70vh; /* 保持原有的展开行为 */
-    max-height: 500px;
+    height: 70vh; /* 保持展开时的固定高度 */
+    max-height: 500px; /* Optional: Add a max-height for very large screens */
     overflow-y: auto;
-    /* 由于采用了flex布局，这里设置的高度会覆盖flex计算的高度 */
+    flex-grow: 0; /* 展开时不再自动增长，使用固定高度 */
 }
 
 input[type="password"] {
@@ -428,8 +433,8 @@ input[type="password"] {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     padding: 12px;
-    min-height: auto;
-    height: 40px;
+    min-height: auto; /* 保持原样 */
+    height: 40px; /* 保持原样 */
     font-family: inherit;
     font-size: 16px;
     color: var(--text-color);
@@ -778,12 +783,12 @@ input[type="password"]:focus {
 /* 移动设备适配 */
 @media (max-width: 768px) {
     body {
-        padding: 10px; /* 减小内边距但不完全移除 */
+        padding: 10px;
     }
     
     .title {
         font-size: 42px;
-        margin: 0 0 10px 0; /* 添加底部外边距 */
+        margin: 0;
     }
     
     .subtitle-container {
@@ -796,11 +801,17 @@ input[type="password"]:focus {
     }
     
     .container {
-        padding: 15px; /* 减少内边距以节省空间 */
-        margin-bottom: 0;
+        padding: 20px;
+        /* margin-bottom: 0; 移除，由 flex 处理 */
+        /* 确保在移动设备上也应用 flex 布局 */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .dropdown-menu {
+        /* Override min-width to allow shrinking */
         min-width: auto;
         padding: 8px;
     }
@@ -808,6 +819,7 @@ input[type="password"]:focus {
     .menu-item {
         font-size: 12px;
         padding: 4px 8px;
+        /* Slightly reduce margin for better fit */
         margin: 0 2px;
     }
 
@@ -826,11 +838,19 @@ input[type="password"]:focus {
         font-size: 12px;
     }
 
-    /* 移除固定的textarea高度设置 */
-    /* 
+    /* Remove specific mobile height for textarea */
+    /*
     textarea {
         min-height: 200px;
         height: 200px;
+    }
+    */
+
+    /* Remove specific mobile height for password input to maintain original height */
+    /*
+    input[type="password"] {
+        height: 36px;
+        min-height: auto; 
     }
     */
 
