@@ -386,11 +386,14 @@ function clearTextarea(textarea) {
 
 // Input button event listeners
 inputButtons.expand.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // Prevent blur
+    inputText.focus();  // Focus immediately on press
+});
+
+inputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Prevent default mousedown behavior (like losing focus from textarea)
-    e.preventDefault();
-    // Set focus when button is pressed down
-    inputText.focus();
+    // Removed expand/collapse logic
+    // Focus moved to mousedown listener
 });
 
 inputButtons.paste.addEventListener('click', async () => {
@@ -416,11 +419,14 @@ inputButtons.clear.addEventListener('click', () => {
 
 // Output button event listeners
 outputButtons.expand.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // Prevent blur
+    outputText.focus(); // Focus immediately on press
+});
+
+outputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Prevent default mousedown behavior (like losing focus from textarea)
-    e.preventDefault();
-    // Set focus when button is pressed down
-    outputText.focus();
+    // Removed expand/collapse logic
+    // Focus moved to mousedown listener
 });
 
 outputButtons.copy.addEventListener('click', () => {
@@ -454,16 +460,18 @@ outputText.addEventListener('input', () => {
 });
 
 // 确保所有按钮点击都阻止冒泡和默认行为
-const allButtons = [
-    /*inputButtons.expand,*/ inputButtons.paste, inputButtons.clear, // Removed inputExpand
-    /*outputButtons.expand,*/ outputButtons.copy, outputButtons.clear, // Removed outputExpand
+const allActionButtons = [
+    inputButtons.expand, inputButtons.paste, inputButtons.clear,
+    outputButtons.expand, outputButtons.copy, outputButtons.clear,
     passwordButtons.copy, passwordButtons.paste, passwordButtons.clear, passwordButtons.generate
 ];
 
-allButtons.forEach(button => {
+allActionButtons.forEach(button => {
     button.addEventListener('mousedown', (e) => {
-        // 阻止点击按钮导致文本框失去焦点
-        e.preventDefault();
+        // Prevent click causing blur, except for expand buttons which handle focus themselves
+        if (button !== inputButtons.expand && button !== outputButtons.expand) {
+            e.preventDefault();
+        }
     });
 });
 
