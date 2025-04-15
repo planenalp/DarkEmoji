@@ -276,24 +276,18 @@ body {
     position: relative; 
 }
 
-/* Styles for expanded states */
+/* Remove display:none rules */
+/*
 .container.input-expanded .password-section,
 .container.input-expanded .output-section {
-    max-height: 0; /* 折叠时高度为0 */
-    margin: 0; /* 移除边距 */
-    padding: 0; /* 移除内边距 */
-    opacity: 0; /* 淡出效果 */
-    pointer-events: none; /* 禁用交互 */
+    display: none;
 }
 
 .container.output-expanded .password-section,
 .container.output-expanded .input-section {
-    max-height: 0; /* 折叠时高度为0 */
-    margin: 0; /* 移除边距 */
-    padding: 0; /* 移除内边距 */
-    opacity: 0; /* 淡出效果 */
-    pointer-events: none; /* 禁用交互 */
+    display: none;
 }
+*/
 
 /* When input is expanded, let it grow */
 .container.input-expanded .input-section {
@@ -376,18 +370,37 @@ body {
     flex-grow: 1; /* Allow sections to grow */
     flex-basis: 0; /* Distribute space evenly */
     min-height: 0; /* Allow shrinking */
-    transition: all 0.3s ease; /* 添加过渡效果 */
-    max-height: 1000px; /* 设置一个足够大的最大高度 */
-    overflow: hidden; /* 防止内容溢出 */
+    /* Add transition and overflow */
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    /* Set a large max-height for visible state */
+    max-height: 1000px; /* Adjust if needed */
+    opacity: 1;
 }
 
 .password-section {
     margin-bottom: 20px;
     position: relative;
     padding-bottom: 40px;
-    transition: all 0.3s ease, opacity 0.3s ease; /* 添加过渡效果 */
-    max-height: 100px; /* 设置一个合理的最大高度 */
-    overflow: hidden; /* 防止内容溢出 */
+    /* Add transition and overflow */
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+    /* Set a large max-height for visible state */
+    max-height: 1000px; /* Adjust if needed */
+    opacity: 1;
+}
+
+/* Define hidden state using max-height, opacity, margin, padding */
+.container.input-expanded .password-section,
+.container.input-expanded .output-section,
+.container.output-expanded .password-section,
+.container.output-expanded .input-section {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: none; /* Hide borders during transition */
 }
 
 textarea {
@@ -462,7 +475,6 @@ textarea.expanded {
     /* height: 70vh; */
     /* max-height: 500px; */
     overflow-y: auto; 
-    transition: height 0.3s ease, flex-grow 0.3s ease; /* 添加过渡效果 */
 }
 
 input[type="password"] {
