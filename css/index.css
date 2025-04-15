@@ -41,7 +41,7 @@
 }
 
 html {
-    height: 100vh; /* Ensure html takes full height */
+    height: 100dvh; /* Use dynamic viewport height */
 }
 
 * {
@@ -53,8 +53,8 @@ html {
 body {
     background-color: var(--bg-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    min-height: 100vh;
-    height: 100%; /* Make body take full viewport height */
+    min-height: 100dvh; /* Use dynamic viewport height */
+    height: 100dvh; /* Use dynamic viewport height */
     display: flex;
     flex-direction: column;
     align-items: center;
