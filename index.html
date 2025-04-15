@@ -3,18 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DarkEmoji</title>
+    <title>Safemoji | Safe Worlds with Emoji</title>
     <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+    <style>
+        :root {
+            --bg-color: #face64;
+            --title-color: #000000;
+        }
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --title-color: #face64;
+        }
+        body {
+            background-color: var(--bg-color);
+        }
+        .title {
+            color: var(--title-color);
+        }
+    </style>
     <script>
         // 立即设置主题，避免闪烁
         document.documentElement.setAttribute('data-theme', 
-            localStorage.getItem('theme') === 'light' ? 'light' : 'dark'
+            localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'
         );
     </script>
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-    <h1 class="title">DarkEmoji</h1>
+    <h1 class="title">Safemoji</h1>
     <div class="subtitle-container">
         <h2 class="subtitle" id="cipherSubtitle">AES-256-GCM & Base64</h2>
         <div class="dropdown-menu" id="cipherMenu">

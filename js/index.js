@@ -49,7 +49,7 @@ let currentEncrypt = 'AES-256-GCM';
 let currentEncode = 'Base64';
 
 // Theme state
-let isDarkTheme = localStorage.getItem('theme') === 'light' ? false : true;
+let isDarkTheme = localStorage.getItem('theme') === 'dark';
 
 // State for preserving content across modes
 const encryptState = { input: '', output: '', password: '' };
@@ -387,76 +387,17 @@ function clearTextarea(textarea) {
 // Input button event listeners
 inputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
+    // Check if currently expanded *before* toggling
     const isCurrentlyExpanded = inputText.classList.contains('expanded');
-
-    if (!isCurrentlyExpanded) { // Expanding
-        // 检查输出框是否已经展开，如果是，先以动画方式收缩它
-        if (outputText.classList.contains('expanded')) {
-            // 使用与手动折叠相同的动画效果
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            setTimeout(() => {
-                outputText.classList.remove('expanded');
-                outputButtons.expand.classList.remove('is-success');
-                outputText.blur();
-            }, 150); // 使用较短的延迟，让输出框先开始收缩，再展开输入框
-            
-            // 延迟输入框的展开，确保输出框有时间开始收缩
-            setTimeout(() => {
-                // 展开输入框
-                inputText.classList.add('expanded');
-                inputButtons.expand.classList.add('is-success');
-                inputText.focus();
-                
-                // 等待过渡完成后手动计算并滚动居中
-                setTimeout(() => {
-                    const rect = inputText.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-                    const elementCenter = rect.top + rect.height / 2;
-                    const viewportCenter = viewportHeight / 2;
-                    const scrollOffset = elementCenter - viewportCenter;
-                    const targetScrollY = window.scrollY + scrollOffset;
-                    
-                    window.scrollTo({
-                        top: targetScrollY,
-                        behavior: 'smooth'
-                    });
-                }, 300);
-            }, 100);
-            
-            return; // 防止立即执行下面的展开代码
-        }
-        
-        // 如果输出框没有展开，正常展开输入框
-        inputText.classList.add('expanded');
-        inputButtons.expand.classList.add('is-success');
-        inputText.focus();
-        
-        // 等待过渡完成后手动计算并滚动居中
-        setTimeout(() => {
-            const rect = inputText.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const elementCenter = rect.top + rect.height / 2;
-            const viewportCenter = viewportHeight / 2;
-            const scrollOffset = elementCenter - viewportCenter;
-            const targetScrollY = window.scrollY + scrollOffset;
-            
-            window.scrollTo({
-                top: targetScrollY,
-                behavior: 'smooth'
-            });
-        }, 300);
-    } else { // Collapsing
-        // 1. Scroll page to top smoothly
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // 2. After a delay matching the transition duration, remove classes and blur
-        setTimeout(() => {
-             inputText.classList.remove('expanded');
-             inputButtons.expand.classList.remove('is-success');
-             // 保持焦点，不调用blur
-             inputText.focus(); // 确保在折叠后输入框仍然有焦点
-        }, 300);
+    
+    inputText.classList.toggle('expanded');
+    inputButtons.expand.classList.toggle('is-success');
+    
+    // Set focus only when expanding, blur when collapsing
+    if (!isCurrentlyExpanded) {
+        inputText.focus(); // Expanding, set focus
+    } else {
+        inputText.blur(); // Collapsing, remove focus
     }
 });
 
@@ -472,7 +413,7 @@ inputButtons.clear.addEventListener('click', () => {
     
     // 如果输入框是展开状态，则折叠它
     if (inputText.classList.contains('expanded')) {
-    inputText.classList.remove('expanded');
+        inputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
         inputButtons.expand.classList.remove('is-success');
     }
@@ -484,76 +425,17 @@ inputButtons.clear.addEventListener('click', () => {
 // Output button event listeners
 outputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
+    // Check if currently expanded *before* toggling
     const isCurrentlyExpanded = outputText.classList.contains('expanded');
-
-    if (!isCurrentlyExpanded) { // Expanding
-        // 检查输入框是否已经展开，如果是，先以动画方式收缩它
-        if (inputText.classList.contains('expanded')) {
-            // 使用与手动折叠相同的动画效果
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            setTimeout(() => {
-                inputText.classList.remove('expanded');
-                inputButtons.expand.classList.remove('is-success');
-                inputText.blur();
-            }, 150); // 使用较短的延迟，让输入框先开始收缩，再展开输出框
-            
-            // 延迟输出框的展开，确保输入框有时间开始收缩
-            setTimeout(() => {
-                // 展开输出框
-                outputText.classList.add('expanded');
-                outputButtons.expand.classList.add('is-success');
-                outputText.focus();
-                
-                // 等待过渡完成后手动计算并滚动居中
-                setTimeout(() => {
-                    const rect = outputText.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-                    const elementCenter = rect.top + rect.height / 2;
-                    const viewportCenter = viewportHeight / 2;
-                    const scrollOffset = elementCenter - viewportCenter;
-                    const targetScrollY = window.scrollY + scrollOffset;
-                    
-                    window.scrollTo({
-                        top: targetScrollY,
-                        behavior: 'smooth'
-                    });
-                }, 300);
-            }, 100);
-            
-            return; // 防止立即执行下面的展开代码
-        }
-        
-        // 如果输入框没有展开，正常展开输出框
-        outputText.classList.add('expanded');
-        outputButtons.expand.classList.add('is-success');
-        outputText.focus();
-        
-        // 等待过渡完成后手动计算并滚动居中
-        setTimeout(() => {
-            const rect = outputText.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const elementCenter = rect.top + rect.height / 2;
-            const viewportCenter = viewportHeight / 2;
-            const scrollOffset = elementCenter - viewportCenter;
-            const targetScrollY = window.scrollY + scrollOffset;
-            
-            window.scrollTo({
-                top: targetScrollY,
-                behavior: 'smooth'
-            });
-        }, 300);
-    } else { // Collapsing
-        // 1. Scroll page to top smoothly
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // 2. After a delay matching the transition duration, remove classes and blur
-        setTimeout(() => {
-            outputText.classList.remove('expanded');
-            outputButtons.expand.classList.remove('is-success');
-            // 保持焦点，不调用blur
-            outputText.focus(); // 确保在折叠后输出框仍然有焦点
-        }, 300);
+    
+    outputText.classList.toggle('expanded');
+    outputButtons.expand.classList.toggle('is-success');
+    
+    // Set focus only when expanding, blur when collapsing
+    if (!isCurrentlyExpanded) {
+        outputText.focus(); // Expanding, set focus
+    } else {
+        outputText.blur(); // Collapsing, remove focus
     }
 });
 
@@ -569,7 +451,7 @@ outputButtons.clear.addEventListener('click', () => {
     
     // 如果输出框是展开状态，则折叠它
     if (outputText.classList.contains('expanded')) {
-    outputText.classList.remove('expanded');
+        outputText.classList.remove('expanded');
         // 同时重置展开按钮的状态
         outputButtons.expand.classList.remove('is-success');
     }
@@ -750,7 +632,7 @@ title.addEventListener('click', () => {
 });
 
 // Initialize theme
-document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light'); 
+document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
 // 密码按钮功能实现
 // Copy 密码
