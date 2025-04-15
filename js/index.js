@@ -49,7 +49,7 @@ let currentEncrypt = 'AES-256-GCM';
 let currentEncode = 'Base64';
 
 // Theme state
-let isDarkTheme = localStorage.getItem('theme') === 'dark';
+let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark unless explicitly light
 
 // State for preserving content across modes
 const encryptState = { input: '', output: '', password: '' };

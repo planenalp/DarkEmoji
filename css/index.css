@@ -1,4 +1,8 @@
 :root {
+    /* Variables moved to [data-theme="light"] */
+}
+
+[data-theme="light"] {
     /* Brand/Excepted Colors */
     --bg-color: #face64;
     --title-color: #000000;
@@ -46,15 +50,14 @@ body {
     background-color: var(--bg-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     min-height: 100vh;
-    height: auto; /* 改为auto允许内容扩展 */
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     color: var(--text-color);
     transition: background-color 0.3s ease;
-    overflow-x: hidden; /* 水平方向保持隐藏 */
-    overflow-y: auto; /* 垂直方向允许滚动 */
+    height: 100vh; /* Force body to viewport height */
+    overflow: hidden; /* Prevent body scrollbar */
 }
 
 .title {
@@ -260,18 +263,20 @@ body {
     padding: 30px;
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    /* Remove margin-bottom: auto; */
+    /* margin-bottom: auto; */ /* Remove margin-bottom auto */
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex; /* Make container a flex column */
-    flex-direction: column;
-    flex-grow: 1; /* Allow container to fill body space */
-    overflow: visible; /* 允许内容溢出 */
+    display: flex; /* Enable flexbox */
+    flex-direction: column; /* Stack children vertically */
+    flex-grow: 1; /* Allow container to fill body */
+    overflow: hidden; /* Prevent container scrollbar */
+    min-height: 0; /* Allow shrinking */
 }
 
 .mode-switch {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 .mode-btn {
@@ -331,46 +336,45 @@ body {
 
 .input-section,
 .output-section {
-    position: relative; /* Keep for button group */
-    padding-bottom: 40px; /* Keep space for button group */
+    position: relative;
+    padding-bottom: 40px; /* Space for buttons */
     margin-bottom: 20px;
-    display: flex; /* Use flex for vertical sizing */
-    flex-direction: column;
-    flex-grow: 1; /* Allow these sections to grow */
-    min-height: 80px; /* Min height (40px textarea + 40px buttons) */
-    overflow: hidden; /* Hide overflow unless textarea is expanded */
+    display: flex; /* Enable flexbox */
+    flex-direction: column; /* Stack textarea and button group */
+    flex-grow: 1; /* Allow section to grow */
+    flex-basis: 0; /* Distribute space evenly */
+    min-height: 80px; /* Minimum height: 40px textarea + 40px buttons */
 }
 
 .password-section {
     margin-bottom: 20px;
     position: relative;
     padding-bottom: 40px;
+    flex-shrink: 0; /* Prevent shrinking/growing */
 }
 
 textarea {
-    /* Remove fixed height/min-height from base style */
-    /* min-height: 140px; */
-    /* height: 140px; */
     padding: 12px;
-    border-bottom: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    /* border-bottom: none; */ /* Removed, handled by button group border */
+    /* border-bottom-left-radius: 0; */ /* Removed */
+    /* border-bottom-right-radius: 0; */ /* Removed */
     width: 100%;
-    border-top: 1px solid var(--input-border);
-    border-left: 1px solid var(--input-border);
-    border-right: 1px solid var(--input-border);
+    border: 1px solid var(--input-border); /* Use full border */
+    border-bottom: none; /* Button group provides bottom visually */
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
+    border-bottom-left-radius: 0; /* Set bottom radius to 0 */
+    border-bottom-right-radius: 0; /* Set bottom radius to 0 */
     font-size: 16px;
     resize: none;
+    /* min-height: 140px; */ /* Remove old min-height */
+    min-height: 40px; /* Set new min-height */
+    /* height: 140px; */ /* Remove fixed height */
     background: var(--input-bg);
     color: var(--text-color);
-    transition: all 0.3s ease;
-    overflow: auto; /* Keep internal scroll */
-    display: block; /* Keep as block */
-    flex-grow: 1; /* Allow textarea to grow within its section */
-    min-height: 40px; /* Enforce minimum height */
-    height: 40px; /* Set initial height */
+    /* transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease; */ /* Remove height transition */
+    overflow: auto;
+    display: block;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: text;
@@ -380,6 +384,11 @@ textarea {
     outline: none !important;
     touch-action: manipulation;
     overscroll-behavior-y: contain;
+    flex-grow: 1; /* Allow textarea to grow */
+    flex-basis: 0; /* Distribute space */
+    /* Add transition for height/max-height for expand/collapse */
+    transition: height 0.3s ease, max-height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    max-height: none; /* Allow flex growth by default */
 }
 
 /* Style scrollbars for Webkit browsers */
@@ -415,13 +424,14 @@ textarea::-webkit-scrollbar-thumb {
 } */
 
 textarea.expanded {
-    height: 70vh !important; /* Use !important to override the initial height */
-    max-height: 500px; /* Keep max-height */
-    overflow-y: auto;
-    flex-grow: 0; /* Stop flexible sizing when expanded */
-    /* Position relative might help stacking context if needed later */
-    /* position: relative; */ 
-    /* z-index: 1; */
+    /* height: 70vh; */ /* Remove vh height */
+    /* max-height: 500px; */ /* Remove max-height or adjust */
+    /* Use height and max-height for transition */
+    height: 50vh; /* Define a height for the expanded state */
+    max-height: 60vh; /* Limit the expanded height */
+    /* Flex properties might also be adjusted if needed, but height transition is simpler */
+    /* flex-grow: 10; */
+    /* flex-basis: 400px; */
 }
 
 input[type="password"] {
@@ -480,17 +490,19 @@ input[type="password"]:focus {
     right: 0;
     height: 40px;
     background: var(--input-bg);
-    border-left: 1px solid var(--input-border);
-    border-right: 1px solid var(--input-border);
-    border-bottom: 1px solid var(--input-border);
-    border-top: 1px solid var(--input-border);
+    /* border-left: 1px solid var(--input-border); */ /* Part of full border now */
+    /* border-right: 1px solid var(--input-border); */ /* Part of full border now */
+    /* border-bottom: 1px solid var(--input-border); */ /* Part of full border now */
+    /* border-top: 1px solid var(--input-border); */ /* Use full border */
+    border: 1px solid var(--input-border);
+    border-top: none; /* Top border visually comes from textarea */
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    border-top-left-radius: 0; /* Match textarea top */
+    border-top-right-radius: 0; /* Match textarea top */
     overflow: hidden;
     transition: border-color 0.3s ease, background-color 0.3s ease;
-    box-sizing: border-box; /* 确保边框包含在高度内 */
+    box-sizing: border-box;
 }
 
 .button-group > .action-btn,
@@ -566,6 +578,7 @@ input[type="password"]:focus {
     -moz-user-select: none; /* 适用于 Firefox */
     -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
     outline: none !important; /* 解决按压边框闪烁 */
+    flex-shrink: 0; /* Prevent shrinking/growing */
 }
 
 .main-btn:active {
@@ -782,49 +795,31 @@ input[type="password"]:focus {
 /* 移动设备适配 */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
-        /* 确保可以根据内容扩展 */
-        height: auto; 
+        padding: 0; /* Keep */
+        /* height: 100%; */ /* Keep 100vh */
         min-height: 100vh;
-        overflow-y: auto; /* 确保移动设备上也能滚动 */
     }
     
     .title {
         font-size: 42px;
-        margin: 10px 0 0 0; /* Adjust margin for spacing */
+        margin: 0;
     }
     
     .subtitle-container {
-        margin: 5px 0 10px 0; /* Adjust margin */
+        margin: 0 0 10px 0;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+        padding: 3px 8px;
     }
     
     .container {
-        padding: 15px; /* Reduce padding on mobile */
-        margin-bottom: 0; 
-        box-shadow: none; /* Remove shadow on mobile */
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .input-section,
-    .output-section,
-    .password-section {
-        margin-bottom: 15px; /* Reduce margin between sections */
-        min-height: 80px; /* Ensure min-height applies on mobile too */
+        padding: 10px; /* Further reduce padding */
+        /* margin-bottom: 0; */ /* Keep container filling space */
     }
 
-    textarea {
-        min-height: 40px; /* Ensure min-height applies */
-    }
-
-    /* Adjust expanded height slightly for mobile if needed */
-    textarea.expanded {
-        height: 65vh; /* Slightly less height on mobile */
-        max-height: 450px; 
-    }
-    
     .dropdown-menu {
-        /* Override min-width to allow shrinking */
         min-width: auto;
         padding: 8px;
     }
@@ -832,7 +827,6 @@ input[type="password"]:focus {
     .menu-item {
         font-size: 12px;
         padding: 4px 8px;
-        /* Slightly reduce margin for better fit */
         margin: 0 2px;
     }
 
@@ -851,21 +845,22 @@ input[type="password"]:focus {
         font-size: 12px;
     }
 
-    /* Remove specific mobile height for textarea */
-    /*
-    textarea {
-        min-height: 200px;
-        height: 200px;
+    /* Adjust section margins for mobile */
+    .input-section,
+    .output-section,
+    .password-section {
+        margin-bottom: 10px;
     }
-    */
 
-    /* Remove specific mobile height for password input to maintain original height */
-    /*
-    input[type="password"] {
-        height: 36px;
-        min-height: auto; 
+    textarea {
+        /* Mobile specific textarea adjustments if needed */
+        /* min-height: 60px; /* Example: slightly larger min-height on mobile */
     }
-    */
+
+    textarea.expanded {
+        height: 60vh; /* Adjust expanded height for mobile */
+        max-height: 70vh;
+    }
 
     .action-btn,
     .file-msg {
