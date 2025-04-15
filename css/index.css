@@ -46,14 +46,12 @@ body {
     background-color: var(--bg-color);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     min-height: 100vh;
-    height: 100vh; /* Force body to viewport height */
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 20px;
     color: var(--text-color);
     transition: background-color 0.3s ease;
-    overflow: hidden; /* Prevent body scrollbar */
 }
 
 .title {
@@ -259,12 +257,8 @@ body {
     padding: 30px;
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    /* Remove margin-bottom: auto; */
+    margin-bottom: auto;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: flex; /* Make container a flex column */
-    flex-direction: column;
-    flex-grow: 1; /* Allow container to fill body space */
-    overflow: hidden; /* Prevent container scrolling */
 }
 
 .mode-switch {
@@ -330,14 +324,9 @@ body {
 
 .input-section,
 .output-section {
-    position: relative; /* Keep for button group */
-    padding-bottom: 40px; /* Keep space for button group */
+    position: relative;
+    padding-bottom: 40px;
     margin-bottom: 20px;
-    display: flex; /* Use flex for vertical sizing */
-    flex-direction: column;
-    flex-grow: 1; /* Allow these sections to grow */
-    min-height: 80px; /* Min height (40px textarea + 40px buttons) */
-    overflow: hidden; /* Hide overflow unless textarea is expanded */
 }
 
 .password-section {
@@ -347,9 +336,6 @@ body {
 }
 
 textarea {
-    /* Remove fixed height/min-height from base style */
-    /* min-height: 140px; */
-    /* height: 140px; */
     padding: 12px;
     border-bottom: none;
     border-bottom-left-radius: 0;
@@ -362,23 +348,22 @@ textarea {
     border-top-right-radius: 6px;
     font-size: 16px;
     resize: none;
+    min-height: 140px;
+    height: 140px;
     background: var(--input-bg);
     color: var(--text-color);
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    overflow: auto; /* Keep internal scroll */
-    display: block; /* Keep as block */
-    flex-grow: 1; /* Allow textarea to grow within its section */
-    min-height: 40px; /* Enforce minimum height */
-    height: auto; /* Let flexbox determine height initially */
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-    outline: none !important;
-    touch-action: manipulation;
-    overscroll-behavior-y: contain;
+    overflow: auto;
+    display: block;
+    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+    -webkit-user-select: text; /* 允许 iOS Safari 文本选择，因为这是文本区域 */
+    -moz-user-select: text; /* 适用于 Firefox */
+    -ms-user-select: text; /* 适用于 IE10+ 和 Edge */
+    user-select: text; /* 标准语法 */
+    outline: none !important; /* 解决按压边框闪烁 */
+    touch-action: manipulation; /* 提高触摸设备响应性能 */
+    overscroll-behavior-y: contain; /* 防止文本框滚动影响页面滚动 */
 }
 
 /* Style scrollbars for Webkit browsers */
@@ -414,13 +399,9 @@ textarea::-webkit-scrollbar-thumb {
 } */
 
 textarea.expanded {
-    height: 70vh; /* Keep expanded height */
-    max-height: 500px; /* Keep max-height */
+    height: 70vh; /* Use viewport height instead of fixed pixels */
+    max-height: 500px; /* Optional: Add a max-height for very large screens */
     overflow-y: auto;
-    flex-grow: 0; /* Stop flexible sizing when expanded */
-    /* Position relative might help stacking context if needed later */
-    /* position: relative; */ 
-    /* z-index: 1; */
 }
 
 input[type="password"] {
@@ -781,46 +762,28 @@ input[type="password"]:focus {
 /* 移动设备适配 */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
-        /* Ensure height is still 100vh on mobile */
-        height: 100vh; 
-        min-height: 100vh;
+        padding: 0;
     }
     
     .title {
         font-size: 42px;
-        margin: 10px 0 0 0; /* Adjust margin for spacing */
+        margin: 0;
     }
     
     .subtitle-container {
-        margin: 5px 0 10px 0; /* Adjust margin */
+        margin: 0 0 10px 0;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+        padding: 3px 8px;
     }
     
     .container {
-        padding: 15px; /* Reduce padding on mobile */
-        margin-bottom: 0; 
-        box-shadow: none; /* Remove shadow on mobile */
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .input-section,
-    .output-section,
-    .password-section {
-        margin-bottom: 15px; /* Reduce margin between sections */
-        min-height: 80px; /* Ensure min-height applies on mobile too */
+        padding: 20px;
+        margin-bottom: 0; /* Prevent extra space at bottom on mobile */
     }
 
-    textarea {
-        min-height: 40px; /* Ensure min-height applies */
-    }
-
-    /* Adjust expanded height slightly for mobile if needed */
-    textarea.expanded {
-        height: 65vh; /* Slightly less height on mobile */
-        max-height: 450px; 
-    }
-    
     .dropdown-menu {
         /* Override min-width to allow shrinking */
         min-width: auto;
