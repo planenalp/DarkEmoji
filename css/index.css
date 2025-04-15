@@ -41,7 +41,7 @@
 }
 
 html {
-    height: 100%; /* Ensure html takes full height */
+    height: 100vh; /* Ensure html takes full height */
 }
 
 * {
