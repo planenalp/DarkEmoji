@@ -18,6 +18,7 @@ const cipherMenu = document.getElementById('cipherMenu');
 const defaultBtn = document.getElementById('defaultBtn');
 const customBtn = document.getElementById('customBtn');
 const title = document.querySelector('.title');
+const container = document.querySelector('.container'); // Get container element
 
 // Button groups
 const inputButtons = {
@@ -385,15 +386,27 @@ function clearTextarea(textarea) {
 }
 
 // Input button event listeners
-inputButtons.expand.addEventListener('mousedown', (e) => {
-    e.preventDefault(); // Prevent blur
-    inputText.focus();  // Focus immediately on press
-});
-
 inputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Removed expand/collapse logic
-    // Focus moved to mousedown listener
+    const isExpanding = !inputText.classList.contains('expanded');
+
+    // If output is expanded, collapse it first
+    if (outputText.classList.contains('expanded')) {
+        outputText.classList.remove('expanded');
+        outputButtons.expand.classList.remove('is-success');
+        container.classList.remove('output-expanded');
+    }
+
+    // Toggle input expansion
+    inputText.classList.toggle('expanded');
+    inputButtons.expand.classList.toggle('is-success');
+    container.classList.toggle('input-expanded', isExpanding);
+
+    if (isExpanding) {
+        inputText.focus();
+    } else {
+        inputText.blur();
+    }
 });
 
 inputButtons.paste.addEventListener('click', async () => {
@@ -404,29 +417,38 @@ inputButtons.paste.addEventListener('click', async () => {
 });
 
 inputButtons.clear.addEventListener('click', () => {
-    clearTextarea(inputText);
-    
-    // 如果输入框是展开状态，则折叠它
+    // If input is expanded, collapse it when clearing
     if (inputText.classList.contains('expanded')) {
         inputText.classList.remove('expanded');
-        // 同时重置展开按钮的状态
-        // inputButtons.expand.classList.remove('is-success'); // Removed
+        inputButtons.expand.classList.remove('is-success');
+        container.classList.remove('input-expanded');
     }
-    
-    // 取消输入框焦点
+    clearTextarea(inputText);
     inputText.blur();
 });
 
 // Output button event listeners
-outputButtons.expand.addEventListener('mousedown', (e) => {
-    e.preventDefault(); // Prevent blur
-    outputText.focus(); // Focus immediately on press
-});
-
 outputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
-    // Removed expand/collapse logic
-    // Focus moved to mousedown listener
+    const isExpanding = !outputText.classList.contains('expanded');
+
+    // If input is expanded, collapse it first
+    if (inputText.classList.contains('expanded')) {
+        inputText.classList.remove('expanded');
+        inputButtons.expand.classList.remove('is-success');
+        container.classList.remove('input-expanded');
+    }
+
+    // Toggle output expansion
+    outputText.classList.toggle('expanded');
+    outputButtons.expand.classList.toggle('is-success');
+    container.classList.toggle('output-expanded', isExpanding);
+
+    if (isExpanding) {
+        outputText.focus();
+    } else {
+        outputText.blur();
+    }
 });
 
 outputButtons.copy.addEventListener('click', () => {
@@ -437,16 +459,13 @@ outputButtons.copy.addEventListener('click', () => {
 });
 
 outputButtons.clear.addEventListener('click', () => {
-    clearTextarea(outputText);
-    
-    // 如果输出框是展开状态，则折叠它
+    // If output is expanded, collapse it when clearing
     if (outputText.classList.contains('expanded')) {
         outputText.classList.remove('expanded');
-        // 同时重置展开按钮的状态
-        // outputButtons.expand.classList.remove('is-success'); // Removed
+        outputButtons.expand.classList.remove('is-success');
+        container.classList.remove('output-expanded');
     }
-    
-    // 取消输出框焦点
+    clearTextarea(outputText);
     outputText.blur();
 });
 
@@ -459,23 +478,21 @@ outputText.addEventListener('input', () => {
     outputButtons.copy.classList.remove('is-success');
 });
 
-// 确保所有按钮点击都阻止冒泡和默认行为
+// Ensure all button clicks prevent default behavior and focus loss
 const allActionButtons = [
-    inputButtons.expand, inputButtons.paste, inputButtons.clear,
-    outputButtons.expand, outputButtons.copy, outputButtons.clear,
+    inputButtons.expand, inputButtons.paste, inputButtons.clear, // Re-add expand
+    outputButtons.expand, outputButtons.copy, outputButtons.clear, // Re-add expand
     passwordButtons.copy, passwordButtons.paste, passwordButtons.clear, passwordButtons.generate
 ];
 
 allActionButtons.forEach(button => {
     button.addEventListener('mousedown', (e) => {
-        // Prevent click causing blur, except for expand buttons which handle focus themselves
-        if (button !== inputButtons.expand && button !== outputButtons.expand) {
-            e.preventDefault();
-        }
+        // Prevent click causing blur 
+        e.preventDefault();
     });
 });
 
-// 简化的焦点处理逻辑
+// Simplified focus handling (keep existing)
 inputText.addEventListener('focus', () => {
     // 文本框获得焦点时，添加高亮
     inputText.closest('.input-section').classList.add('focused');
