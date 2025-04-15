@@ -371,7 +371,7 @@ body {
     flex-basis: 0; /* Distribute space evenly */
     min-height: 0; /* Allow shrinking */
     /* Add transition and overflow */
-    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
     overflow: hidden;
     /* Set a large max-height for visible state */
     max-height: 1000px; /* Adjust if needed */
@@ -383,7 +383,7 @@ body {
     position: relative;
     padding-bottom: 40px;
     /* Add transition and overflow */
-    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
     overflow: hidden;
     /* Set a large max-height for visible state */
     max-height: 1000px; /* Adjust if needed */
@@ -401,7 +401,23 @@ body {
     padding-top: 0;
     padding-bottom: 0;
     border: none; /* Hide borders during transition */
+    /* Default transform (no movement initially) */
+    transform: translateY(0);
 }
+
+/* Specific transform for sliding UP when output expands */
+.container.output-expanded .input-section,
+.container.output-expanded .password-section {
+    transform: translateY(-100%);
+}
+
+/* Optional: Specific transform for sliding DOWN when input expands (might not be needed if default is fine) */
+/*
+.container.input-expanded .password-section,
+.container.input-expanded .output-section {
+    transform: translateY(100%); 
+}
+*/
 
 textarea {
     padding: 12px;
