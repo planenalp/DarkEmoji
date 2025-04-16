@@ -292,11 +292,15 @@ body {
 /* When input is expanded, let it grow */
 .container.input-expanded .input-section {
     flex-grow: 1;
+    opacity: 1;
+    pointer-events: auto; /* Allow interaction with expanded section */
 }
 
 /* When output is expanded, let it grow */
 .container.output-expanded .output-section {
     flex-grow: 1;
+    opacity: 1;
+    pointer-events: auto; /* Allow interaction with expanded section */
 }
 
 .mode-switch {
@@ -370,55 +374,61 @@ body {
     flex-grow: 1; /* Allow sections to grow */
     flex-basis: 0; /* Distribute space evenly */
     min-height: 0; /* Allow shrinking */
-    /* Add transition and overflow */
-    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    /* Add max-height to transition for slide effect */
+    transition: opacity 0.3s ease, flex-grow 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
     overflow: hidden;
-    /* Set a large max-height for visible state */
-    max-height: 1000px; /* Adjust if needed */
     opacity: 1;
+    max-height: 600px; /* Initial max-height large enough for content */
 }
 
 .password-section {
     margin-bottom: 20px;
     position: relative;
     padding-bottom: 40px;
-    /* Add transition and overflow */
-    transition: max-height 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+    /* Add max-height to transition for slide effect */
+    transition: opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
     overflow: hidden;
-    /* Set a large max-height for visible state */
-    max-height: 1000px; /* Adjust if needed */
     opacity: 1;
+    max-height: 100px; /* Initial max-height for password section */
 }
 
-/* Define hidden state using max-height, opacity, margin, padding */
+/* Define hidden state using opacity and max-height */
 .container.input-expanded .password-section,
 .container.input-expanded .output-section,
 .container.output-expanded .password-section,
 .container.output-expanded .input-section {
-    max-height: 0;
     opacity: 0;
-    margin-bottom: 0;
+    max-height: 0; /* Collapse height */
     padding-top: 0;
     padding-bottom: 0;
-    border: none; /* Hide borders during transition */
-    /* Default transform (no movement initially) */
-    transform: translateY(0);
+    margin-bottom: 0;
+    border-top-width: 0; /* Hide potential borders */
+    border-bottom-width: 0;
+    flex-grow: 0; /* Don't allow hidden sections to grow */
+    pointer-events: none; /* Prevent interaction with hidden sections */
 }
 
-/* Specific transform for sliding UP when output expands */
-.container.output-expanded .input-section,
-.container.output-expanded .password-section {
-    transform: translateY(-100%);
+/* When input is expanded, let it grow and restore styles */
+.container.input-expanded .input-section {
+    flex-grow: 1;
+    opacity: 1;
+    max-height: 100vh; /* Allow full expansion */
+    padding-bottom: 40px; /* Restore padding */
+    margin-bottom: 20px; /* Restore margin */
+    pointer-events: auto; /* Allow interaction with expanded section */
 }
 
-/* Optional: Specific transform for sliding DOWN when input expands (might not be needed if default is fine) */
-/*
-.container.input-expanded .password-section,
-.container.input-expanded .output-section {
-    transform: translateY(100%); 
+/* When output is expanded, let it grow and restore styles */
+.container.output-expanded .output-section {
+    flex-grow: 1;
+    opacity: 1;
+    max-height: 100vh; /* Allow full expansion */
+    padding-bottom: 40px; /* Restore padding */
+    margin-bottom: 20px; /* Restore margin */
+    pointer-events: auto; /* Allow interaction with expanded section */
 }
-*/
 
+/* Keep textarea styles as they were, flex-grow handles vertical sizing */
 textarea {
     padding: 12px;
     border-bottom: none;
@@ -437,18 +447,18 @@ textarea {
     flex-grow: 1; /* Allow textarea to grow vertically */
     background: var(--input-bg);
     color: var(--text-color);
-    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease; /* Restore height transition */
+    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     overflow: auto; /* Keep scroll enabled */
     display: block;
-    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
-    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
-    -webkit-user-select: text; /* 允许 iOS Safari 文本选择，因为这是文本区域 */
-    -moz-user-select: text; /* 适用于 Firefox */
-    -ms-user-select: text; /* 适用于 IE10+ 和 Edge */
-    user-select: text; /* 标准语法 */
-    outline: none !important; /* 解决按压边框闪烁 */
-    touch-action: manipulation; /* 提高触摸设备响应性能 */
-    overscroll-behavior-y: contain; /* 防止文本框滚动影响页面滚动 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    outline: none !important;
+    touch-action: manipulation;
+    overscroll-behavior-y: contain;
 }
 
 /* Style scrollbars for Webkit browsers */
@@ -487,10 +497,8 @@ textarea::-webkit-scrollbar-thumb {
 textarea.expanded {
     height: auto; /* Let flexbox determine height */
     flex-grow: 1; /* Allow expanded textarea to fill its section */
-    /* Remove fixed viewport height rules */
-    /* height: 70vh; */
-    /* max-height: 500px; */
-    overflow-y: auto; 
+    overflow-y: auto;
+    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 input[type="password"] {
