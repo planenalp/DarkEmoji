@@ -794,19 +794,29 @@ function smoothScrollToCenter(element) {
     // 判断是否为横屏模式
     const isLandscape = window.innerWidth > window.innerHeight;
     
-    // 根据屏幕方向设置不同的目标位置
-    // 竖屏：居中显示
-    // 横屏：更靠上显示，避免被键盘遮挡
-    const viewportTargetY = isLandscape 
-        ? visualViewport.height * 0.1  // 横屏时定位到视口高度的 10% 处
-        : visualViewport.height / 2;   // 竖屏时保持居中
+    let viewportTargetY;
+    if (isLandscape) {
+        // 横屏模式：计算键盘上方剩余空间的上半部分
+        // 假设键盘高度约为视口高度的 40%（这是一个常见值，可以根据实际测试调整）
+        const keyboardHeight = visualViewport.height * 0.4;
+        const availableSpace = visualViewport.height - keyboardHeight;
+        // 目标位置：键盘上方剩余空间的上半部分
+        viewportTargetY = availableSpace * 0.5;
+    } else {
+        // 竖屏模式：保持居中显示
+        viewportTargetY = visualViewport.height / 2;
+    }
 
     // 计算需要滚动的距离
     const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportTargetY;
 
+    // 确保不会滚动到页面顶部以上
+    const minScrollY = 0;
+    const finalScrollY = Math.max(minScrollY, scrollTargetY);
+
     // 平滑滚动到目标位置
     window.scrollTo({
-        top: scrollTargetY,
+        top: finalScrollY,
         behavior: 'smooth'
     });
 }
