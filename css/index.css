@@ -888,6 +888,50 @@ input[type="password"]:focus {
     .container {
         padding: 10px;
         margin-bottom: 0; /* Prevent extra space at bottom on mobile */
+        min-height: 360px;
+    }
+
+    /* 调整 Expand 状态下的样式以利用额外空间 */
+    .container.input-expanded .input-section,
+    .container.output-expanded .output-section {
+        flex-grow: 1;
+        opacity: 1;
+        max-height: none; /* 移除 max-height 限制 */
+        min-height: 80px; /* 保持最小高度 */
+        padding-bottom: 40px;
+        margin-bottom: 10px; /* 使用移动端的 margin */
+        pointer-events: auto;
+    }
+
+    /* 调整折叠状态下的样式 */
+    .container.input-expanded .output-section,
+    .container.output-expanded .input-section,
+    .container.input-expanded .password-section,
+    .container.output-expanded .password-section {
+        opacity: 0;
+        max-height: 0;
+        min-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border-top-width: 0;
+        border-bottom-width: 0;
+        flex-grow: 0;
+        pointer-events: none;
+    }
+
+    /* 调整 textarea 在移动端的样式 */
+    textarea {
+        min-height: 40px;
+        height: auto; /* 允许高度自适应 */
+        flex-grow: 1; /* 允许填充可用空间 */
+    }
+
+    /* 调整 expanded textarea 的样式 */
+    textarea.expanded {
+        height: auto;
+        flex-grow: 1;
+        overflow-y: auto;
     }
 
     .dropdown-menu {
@@ -929,22 +973,6 @@ input[type="password"]:focus {
     .password-section {
         margin-bottom: 10px;
     }
-
-    /* Remove specific mobile height for textarea */
-    /*
-    textarea {
-        min-height: 200px;
-        height: 200px;
-    }
-    */
-
-    /* Remove specific mobile height for password input to maintain original height */
-    /*
-    input[type="password"] {
-        height: 36px;
-        min-height: auto; 
-    }
-    */
 
     .action-btn,
     .file-msg {
