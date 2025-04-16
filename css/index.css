@@ -42,10 +42,10 @@
 
 html {
     height: 100dvh; /* Use dynamic viewport height */
-    /* Add scroll behavior for smooth scrolling */
-    scroll-behavior: smooth;
-    /* Add scroll padding to ensure focused elements are not hidden by keyboard */
-    scroll-padding-bottom: 40vh;
+    /* Use a more gentle scroll behavior */
+    scroll-behavior: auto;
+    /* Reduce scroll padding to avoid excessive space */
+    scroll-padding-bottom: 30vh;
 }
 
 * {
@@ -74,7 +74,17 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* Add new rule for fixing position when keyboard is open */
+/* Update how expanded textareas behave */
+textarea.expanded {
+    height: auto; /* Let flexbox determine height */
+    flex-grow: 1; /* Allow expanded textarea to fill its section */
+    overflow-y: auto;
+    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    /* Limit max-height to ensure it doesn't grow too large */
+    max-height: 50vh;
+}
+
+/* Modify mobile media query */
 @media (max-height: 600px) {
     body {
         /* On very small screens or when keyboard is open, reduce padding */
@@ -83,14 +93,17 @@ body {
     
     .container {
         padding: 20px;
-        /* Allow container to scroll properly when keyboard is open */
-        overflow-y: auto;
+        min-height: 320px; /* Slightly reduced min-height for small screens */
     }
     
+    /* Simplify this to avoid conflicts with JS scrolling */
     textarea:focus, input:focus {
-        /* Ensure focused elements are visible when keyboard is open */
-        position: relative;
-        z-index: 2;
+        position: static;
+    }
+    
+    /* Make expanded textarea more compact on small screens */
+    textarea.expanded {
+        max-height: 40vh;
     }
 }
 
@@ -544,6 +557,8 @@ textarea.expanded {
     flex-grow: 1; /* Allow expanded textarea to fill its section */
     overflow-y: auto;
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    /* Limit max-height to ensure it doesn't grow too large */
+    max-height: 50vh;
 }
 
 input[type="password"] {

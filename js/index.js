@@ -624,7 +624,7 @@ actionBtn.addEventListener('click', () => {
     }
 });
 
-// Add keyboard handling for mobile devices
+// Replace the entire setupMobileKeyboardHandling function with optimized version
 function setupMobileKeyboardHandling() {
     // Elements that can receive focus and open the keyboard
     const inputs = [
@@ -633,59 +633,106 @@ function setupMobileKeyboardHandling() {
         password
     ];
     
-    // Helper function to ensure input is visible when focused
-    function ensureVisibleOnFocus(element) {
-        element.addEventListener('focus', () => {
-            // Delay the scroll slightly to allow keyboard to appear first
-            setTimeout(() => {
-                // Use scrollIntoView with options to prioritize visibility
-                element.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-            }, 300);
-        });
+    // Track whether element was programmatically scrolled to
+    let isAdjustingScroll = false;
+    
+    // Helper function to optimally position focused element
+    function adjustScrollForInput(element) {
+        // Don't adjust scroll if we're already handling it
+        if (isAdjustingScroll) return;
         
-        // For iOS devices, add additional handling for when keyboard appears
-        element.addEventListener('click', () => {
-            // iOS sometimes needs a direct click handler
-            setTimeout(() => element.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            }), 100);
-        });
+        isAdjustingScroll = true;
+        
+        // Cancel any pending scroll adjustments
+        clearTimeout(window.scrollAdjustTimeout);
+        
+        // Get element position relative to viewport
+        const rect = element.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        
+        // Calculate if element is visible in viewport
+        const isVisible = (
+            rect.top >= 0 && 
+            rect.bottom <= viewportHeight &&
+            rect.height < viewportHeight
+        );
+        
+        if (!isVisible) {
+            // Calculate optimal position - aim to position element 1/3 from the top
+            const targetPosition = window.scrollY + rect.top - (viewportHeight / 3);
+            
+            // Scroll with better control than scrollIntoView
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+        }
+        
+        // Reset flag after scrolling completes
+        window.scrollAdjustTimeout = setTimeout(() => {
+            isAdjustingScroll = false;
+        }, 300);
     }
     
-    // Apply focus handling to all inputs
-    inputs.forEach(ensureVisibleOnFocus);
-    
-    // Handle landscape orientation on mobile
-    window.addEventListener('resize', () => {
-        // If an element has focus when orientation changes, ensure it's visible
-        const activeElement = document.activeElement;
-        if (inputs.includes(activeElement)) {
-            setTimeout(() => {
-                activeElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-            }, 100);
-        }
+    // Add focused element handling
+    inputs.forEach(element => {
+        // Use focusin instead of focus for better mobile compatibility
+        element.addEventListener('focusin', (e) => {
+            // Short delay to allow any browser default scrolling to finish
+            setTimeout(() => adjustScrollForInput(element), 100);
+        });
     });
     
-    // Detect virtual keyboard visibility change
-    // This uses a visual viewport API available in modern browsers
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', () => {
-            const activeElement = document.activeElement;
-            if (inputs.includes(activeElement)) {
-                // Keyboard likely changed visibility, ensure element is visible
-                setTimeout(() => {
-                    activeElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
+    // Handle expand buttons more carefully
+    const expandButtons = [inputButtons.expand, outputButtons.expand];
+    
+    expandButtons.forEach(button => {
+        // Add custom handling for expand actions
+        const originalClickHandler = button.onclick;
+        
+        button.onclick = function(e) {
+            // Call the original handler first
+            if (originalClickHandler) {
+                originalClickHandler.call(this, e);
+            }
+            
+            // Give time for expand animation to start
+            setTimeout(() => {
+                // Get the associated textarea
+                let textarea = button.closest('.button-group').previousElementSibling;
+                
+                // Only adjust if expanded
+                if (textarea.classList.contains('expanded')) {
+                    // Just scroll to show the top of expanded content
+                    const container = document.querySelector('.container');
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    // Scroll to position the container properly
+                    window.scrollTo({
+                        top: window.scrollY + containerRect.top - 20,
+                        behavior: 'smooth'
                     });
-                }, 100);
+                }
+            }, 50);
+        };
+    });
+    
+    // A more gentle approach to viewport changes
+    if (window.visualViewport) {
+        let lastViewportHeight = window.visualViewport.height;
+        
+        window.visualViewport.addEventListener('resize', () => {
+            const currentViewportHeight = window.visualViewport.height;
+            
+            // Only react to significant viewport height changes (keyboard appears/disappears)
+            if (Math.abs(currentViewportHeight - lastViewportHeight) > 150) {
+                // Check if we're focused and there's a significant viewport change
+                const activeElement = document.activeElement;
+                if (inputs.includes(activeElement)) {
+                    setTimeout(() => adjustScrollForInput(activeElement), 100);
+                }
+                
+                lastViewportHeight = currentViewportHeight;
             }
         });
     }
