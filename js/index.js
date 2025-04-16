@@ -798,7 +798,7 @@ function smoothScrollToCenter(element) {
     // 竖屏：居中显示
     // 横屏：更靠上显示，避免被键盘遮挡
     const viewportTargetY = isLandscape 
-        ? visualViewport.height * 0.3  // 横屏时定位到视口高度的 30% 处
+        ? visualViewport.height * 0.1  // 横屏时定位到视口高度的 10% 处
         : visualViewport.height / 2;   // 竖屏时保持居中
 
     // 计算需要滚动的距离
