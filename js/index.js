@@ -403,7 +403,7 @@ inputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('input-expanded', isExpanding);
 
     if (isExpanding) {
-        inputText.focus();
+        // inputText.focus(); // Removed focus call
     } else {
         inputText.blur();
     }
@@ -413,7 +413,7 @@ inputButtons.paste.addEventListener('click', async () => {
     await pasteFromClipboard(inputText);
     
     // 自动设置焦点到输入框
-    inputText.focus();
+    // inputText.focus(); // Removed focus call
 });
 
 inputButtons.clear.addEventListener('click', () => {
@@ -445,7 +445,7 @@ outputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('output-expanded', isExpanding);
 
     if (isExpanding) {
-        outputText.focus();
+        // outputText.focus(); // Removed focus call
     } else {
         outputText.blur();
     }
@@ -455,7 +455,7 @@ outputButtons.copy.addEventListener('click', () => {
     copyToClipboard(outputText);
     
     // 自动设置焦点到输出框
-    outputText.focus();
+    // outputText.focus(); // Removed focus call
 });
 
 outputButtons.clear.addEventListener('click', () => {
@@ -557,7 +557,7 @@ fileDropArea.addEventListener('drop', (e) => {
         reader.onload = (e) => {
             inputText.value = e.target.result;
             // 自动设置焦点到输入框
-            inputText.focus();
+            // inputText.focus(); // Removed focus call
         };
         reader.readAsText(file);
     }
@@ -570,7 +570,7 @@ fileInput.addEventListener('change', (e) => {
         reader.onload = (e) => {
             inputText.value = e.target.result;
             // 自动设置焦点到输入框
-            inputText.focus();
+            // inputText.focus(); // Removed focus call
             // 清空 fileInput 的值，确保下次选择相同文件时也能触发 change 事件
             fileInput.value = '';
         };
@@ -583,7 +583,7 @@ fileDropArea.addEventListener('click', () => {
     // 清空 fileInput 的值，确保选择相同文件时也能触发 change 事件
     fileInput.value = '';
     // 自动设置焦点到输入框
-    inputText.focus();
+    // inputText.focus(); // Removed focus call
 });
 
 // Save file functionality
@@ -604,7 +604,7 @@ saveFileArea.addEventListener('click', () => {
     URL.revokeObjectURL(url);
     
     // 自动设置焦点到输出框
-    outputText.focus();
+    // outputText.focus(); // Removed focus call
 });
 
 // Action button click handler
@@ -654,7 +654,7 @@ passwordButtons.copy.addEventListener('click', () => {
         passwordButtons.copy.classList.add('is-success');
         
         // 自动设置焦点到密码框
-        password.focus();
+        // password.focus(); // Removed focus call
     }).catch(err => {
         console.error('复制密码失败: ', err);
         alert('复制密码失败');
@@ -681,7 +681,7 @@ passwordButtons.paste.addEventListener('click', async () => {
         }
         
         // 自动设置焦点到密码框
-        password.focus();
+        // password.focus(); // Removed focus call
     } catch (err) {
         console.error('粘贴密码失败: ', err);
         alert('粘贴密码失败。可能需要浏览器权限。');
@@ -757,7 +757,7 @@ passwordButtons.generate.addEventListener('click', () => {
     passwordButtons.paste.classList.remove('is-success');
     
     // 自动设置焦点到密码框
-    password.focus();
+    // password.focus(); // Removed focus call
 });
 
 // 用于设置输出框内容的辅助函数，确保重置复制状态并保存到状态对象
