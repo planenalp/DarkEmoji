@@ -403,12 +403,7 @@ inputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('input-expanded', isExpanding);
 
     if (isExpanding) {
-        // Delay focus and scroll slightly after animation starts
-        setTimeout(() => {
-            inputText.focus();
-            // Scroll the focused element towards the center of the viewport
-            inputText.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 350); // Delay slightly longer than CSS transition (300ms)
+        // inputText.focus(); // Removed focus call
     } else {
         inputText.blur();
     }
@@ -450,12 +445,7 @@ outputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('output-expanded', isExpanding);
 
     if (isExpanding) {
-        // Delay focus and scroll slightly after animation starts
-        setTimeout(() => {
-            outputText.focus();
-            // Scroll the focused element towards the center of the viewport
-            outputText.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 350); // Delay slightly longer than CSS transition (300ms)
+        // outputText.focus(); // Removed focus call
     } else {
         outputText.blur();
     }
@@ -781,4 +771,87 @@ function setOutputText(text) {
     }
     // 重置复制按钮状态
     outputButtons.copy.classList.remove('is-success');
-} 
+}
+
+// --- 新增：移动设备输入框自动滚动到视图中间 ---
+
+function isMobileDevice() {
+    // 简单的移动设备检测：触摸屏 + 较小宽度
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 768;
+}
+
+function smoothScrollToCenter(element) {
+    if (!element || typeof element.getBoundingClientRect !== 'function') return;
+
+    const elementRect = element.getBoundingClientRect();
+    const visualViewport = window.visualViewport;
+
+    if (!visualViewport) return; // 需要 visualViewport API
+
+    // 计算元素中心相对于视口顶部的距离
+    const elementCenterRelativeToViewport = elementRect.top + element.offsetHeight / 2;
+    // 计算视口中心点
+    const viewportCenterY = visualViewport.height / 2;
+
+    // 计算需要滚动的距离 (当前滚动位置 + 元素中心点 - 视口中心点)
+    const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY;
+
+    // 平滑滚动到目标位置
+    window.scrollTo({
+        top: scrollTargetY,
+        behavior: 'smooth'
+    });
+}
+
+let scrollTimeoutId = null;
+
+function handleMobileInputFocus(event) {
+    if (!isMobileDevice()) {
+        return; // 非移动设备则跳过
+    }
+
+    const focusedElement = event.target;
+    const visualViewport = window.visualViewport;
+
+    if (!visualViewport) return;
+
+    // 键盘弹出/收起时，visualViewport会resize
+    const viewportResizeHandler = () => {
+        // 清除之前的延时滚动（如果在短时间内多次触发resize）
+        clearTimeout(scrollTimeoutId);
+        // 设置延时，等待键盘动画基本完成
+        scrollTimeoutId = setTimeout(() => {
+            // 再次检查焦点，确保用户没有切换焦点
+            if (document.activeElement === focusedElement) {
+                smoothScrollToCenter(focusedElement);
+            }
+            // 移除监听器，避免重复执行
+             if (visualViewport) {
+                visualViewport.removeEventListener('resize', viewportResizeHandler);
+            }
+        }, 300); // 300ms 延迟，可根据测试调整
+    };
+
+    // 添加一次性的 resize 监听器
+    visualViewport.addEventListener('resize', viewportResizeHandler, { once: true });
+
+    // 作为后备：如果键盘已弹出或resize事件未触发，短时间后也尝试滚动
+    // (例如，在已弹出键盘的情况下切换输入框)
+    clearTimeout(scrollTimeoutId);
+    scrollTimeoutId = setTimeout(() => {
+        if (document.activeElement === focusedElement) {
+             // 在尝试滚动前移除可能已添加的监听器，避免重复
+             if (visualViewport) {
+                visualViewport.removeEventListener('resize', viewportResizeHandler);
+            }
+            smoothScrollToCenter(focusedElement);
+        }
+    }, 400); // 稍长一点的延迟作为后备
+}
+
+// 为需要处理的文本输入框添加 focus 事件监听器
+inputText.addEventListener('focus', handleMobileInputFocus);
+outputText.addEventListener('focus', handleMobileInputFocus); // 如果Output可交互
+password.addEventListener('focus', handleMobileInputFocus);
+
+// --- 结束：移动设备输入框自动滚动 --- 
