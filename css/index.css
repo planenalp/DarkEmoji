@@ -275,7 +275,7 @@ body {
     flex-direction: column; /* Stack children vertically */
     flex-grow: 1; /* Allow container to grow and fill body */
     /* Add min-height to ensure container is always tall enough for base layout */
-    min-height: 440px; 
+    min-height: 460px; 
     /* Add relative positioning for absolute positioning of expanded elements */
     position: relative; 
 }
