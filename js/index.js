@@ -780,8 +780,8 @@ function isMobileDevice() {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
 
-// 修改函数名并调整滚动逻辑
-function smoothScrollElementIntoView(element) {
+// 重命名函数，并调整滚动目标位置
+function smoothScrollToTarget(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const elementRect = element.getBoundingClientRect();
@@ -789,18 +789,26 @@ function smoothScrollElementIntoView(element) {
 
     if (!visualViewport) return; // 需要 visualViewport API
 
-    // 目标：将元素顶部滚动到视口顶部下方一点的位置
-    const desiredTopOffset = 20; // 距视口顶部 20px
+    let targetViewportFraction = 0.5; // Default: center (50%)
+    const shortViewportThreshold = 300; // Viewport height threshold (pixels)
 
-    // 计算需要滚动的距离 (当前元素顶部位置 - 目标偏移量)
-    const scrollOffset = elementRect.top - desiredTopOffset;
+    // If viewport height is very small (likely landscape/large keyboard), aim higher
+    if (visualViewport.height < shortViewportThreshold) {
+        targetViewportFraction = 0.25; // Target top 25%
+    }
 
-    // 计算最终的滚动位置
-    const scrollTargetY = window.scrollY + scrollOffset;
+    // Calculate element top relative to visual viewport top
+    const elementTopRelativeToViewport = elementRect.top;
+
+    // Calculate the target Y position within the visual viewport
+    const targetViewportY = visualViewport.height * targetViewportFraction;
+
+    // Calculate the scroll distance needed to place the element's top near the target viewport position
+    const scrollTargetY = window.scrollY + elementTopRelativeToViewport - targetViewportY;
 
     // 平滑滚动到目标位置
     window.scrollTo({
-        top: scrollTargetY,
+        top: Math.max(0, scrollTargetY), // Ensure not scrolling above page top
         behavior: 'smooth'
     });
 }
@@ -825,8 +833,7 @@ function handleMobileInputFocus(event) {
         scrollTimeoutId = setTimeout(() => {
             // 再次检查焦点，确保用户没有切换焦点
             if (document.activeElement === focusedElement) {
-                // 使用新的滚动函数
-                smoothScrollElementIntoView(focusedElement);
+                smoothScrollToTarget(focusedElement); // Use updated function
             }
             // 移除监听器，避免重复执行
              if (visualViewport) {
@@ -847,8 +854,7 @@ function handleMobileInputFocus(event) {
              if (visualViewport) {
                 visualViewport.removeEventListener('resize', viewportResizeHandler);
             }
-             // 使用新的滚动函数
-             smoothScrollElementIntoView(focusedElement);
+            smoothScrollToTarget(focusedElement); // Use updated function
         }
     }, 400); // 稍长一点的延迟作为后备
 }
