@@ -780,8 +780,7 @@ function isMobileDevice() {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
 
-// 重命名函数，并调整滚动目标位置
-function smoothScrollToTarget(element) {
+function smoothScrollToCenter(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const elementRect = element.getBoundingClientRect();
@@ -789,26 +788,23 @@ function smoothScrollToTarget(element) {
 
     if (!visualViewport) return; // 需要 visualViewport API
 
-    let targetViewportFraction = 0.5; // Default: center (50%)
-    const shortViewportThreshold = 300; // Viewport height threshold (pixels)
+    // 计算元素中心相对于视口顶部的距离
+    const elementCenterRelativeToViewport = elementRect.top + element.offsetHeight / 2;
+    
+    // 判断是否为横屏模式
+    const isLandscape = window.innerWidth > window.innerHeight;
+    
+    // 计算视口中心点，横屏模式下调整到更上方
+    const viewportCenterY = isLandscape 
+        ? visualViewport.height * 0.3  // 横屏时使用视口高度的30%位置
+        : visualViewport.height / 2;   // 竖屏保持原有逻辑
 
-    // If viewport height is very small (likely landscape/large keyboard), aim higher
-    if (visualViewport.height < shortViewportThreshold) {
-        targetViewportFraction = 0.25; // Target top 25%
-    }
-
-    // Calculate element top relative to visual viewport top
-    const elementTopRelativeToViewport = elementRect.top;
-
-    // Calculate the target Y position within the visual viewport
-    const targetViewportY = visualViewport.height * targetViewportFraction;
-
-    // Calculate the scroll distance needed to place the element's top near the target viewport position
-    const scrollTargetY = window.scrollY + elementTopRelativeToViewport - targetViewportY;
+    // 计算需要滚动的距离 (当前滚动位置 + 元素中心点 - 视口中心点)
+    const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY;
 
     // 平滑滚动到目标位置
     window.scrollTo({
-        top: Math.max(0, scrollTargetY), // Ensure not scrolling above page top
+        top: scrollTargetY,
         behavior: 'smooth'
     });
 }
@@ -833,7 +829,7 @@ function handleMobileInputFocus(event) {
         scrollTimeoutId = setTimeout(() => {
             // 再次检查焦点，确保用户没有切换焦点
             if (document.activeElement === focusedElement) {
-                smoothScrollToTarget(focusedElement); // Use updated function
+                smoothScrollToCenter(focusedElement);
             }
             // 移除监听器，避免重复执行
              if (visualViewport) {
@@ -854,7 +850,7 @@ function handleMobileInputFocus(event) {
              if (visualViewport) {
                 visualViewport.removeEventListener('resize', viewportResizeHandler);
             }
-            smoothScrollToTarget(focusedElement); // Use updated function
+            smoothScrollToCenter(focusedElement);
         }
     }, 400); // 稍长一点的延迟作为后备
 }
