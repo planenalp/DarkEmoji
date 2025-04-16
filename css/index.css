@@ -232,23 +232,27 @@ body {
 }
 
 .menu-item {
+    height: 30px;
     padding: 5px 10px;
+    font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
     transition: all 0.3s ease;
     white-space: nowrap;
     color: var(--menu-text);
     margin: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     /* Prevent text selection on click */
     user-select: none;
-    -webkit-user-select: none; /* For Safari */
+    -webkit-user-select: none;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
-    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
-    -moz-user-select: none; /* 适用于 Firefox */
-    -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
-    outline: none !important; /* 解决按压边框闪烁 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    outline: none !important;
 }
 
 .menu-item.active {
@@ -258,8 +262,8 @@ body {
 
 .menu-item:active {
     transform: scale(0.95);
-    background-color: #e9b54d; /* Add active background color */
-    color: #000;              /* Add active text color */
+    background-color: #e9b54d;
+    color: #000;
 }
 
 .container {
@@ -941,9 +945,9 @@ input[type="password"]:focus {
     }
 
     .menu-item {
-        font-size: 12px;
+        height: 28px;
         padding: 4px 8px;
-        /* Slightly reduce margin for better fit */
+        font-size: 12px;
         margin: 0 2px;
     }
 
