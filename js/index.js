@@ -520,7 +520,7 @@ function scrollToFocus(element) {
         if (Math.abs(elementRect.top - desiredTop) > 10) { // Add a small threshold
              window.scrollTo({
                 top: scrollAmount,
-                behavior: 'smooth'
+                behavior: 'auto'
             });
         }
     }, 300); // Adjust timeout if needed (300ms)
