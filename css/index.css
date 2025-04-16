@@ -42,10 +42,6 @@
 
 html {
     height: 100dvh; /* Use dynamic viewport height */
-    /* Use a more gentle scroll behavior */
-    scroll-behavior: auto;
-    /* Reduce scroll padding to avoid excessive space */
-    scroll-padding-bottom: 30vh;
 }
 
 * {
@@ -68,52 +64,6 @@ body {
     transition: background-color 0.3s ease;
     /* Ensure content doesn't overflow at the bottom */
     overflow-y: auto;
-    /* Add overscroll behavior to improve mobile scrolling */
-    overscroll-behavior-y: contain;
-    /* Improve touch scrolling on iOS */
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Update how expanded textareas behave */
-textarea.expanded {
-    height: auto; /* Let flexbox determine height */
-    flex-grow: 1; /* Allow expanded textarea to fill its section */
-    overflow-y: auto;
-    transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    /* Limit max-height to ensure it doesn't grow too large */
-    max-height: 50vh;
-}
-
-/* Modify mobile media query */
-@media (max-height: 600px) {
-    body {
-        /* On very small screens or when keyboard is open, reduce padding */
-        padding: 10px;
-    }
-    
-    .container {
-        padding: 20px;
-        min-height: 320px; /* Slightly reduced min-height for small screens */
-    }
-    
-    /* Simplify this to avoid conflicts with JS scrolling */
-    textarea:focus, input:focus {
-        position: static;
-    }
-    
-    /* Make expanded textarea more compact on small screens */
-    textarea.expanded {
-        max-height: 40vh;
-    }
-}
-
-/* Add specific iOS fix for focusing */
-@supports (-webkit-touch-callout: none) {
-    /* iOS specific styles */
-    textarea, input[type="password"] {
-        /* Prevent iOS zoom on focus */
-        font-size: 16px;
-    }
 }
 
 .title {
@@ -557,8 +507,6 @@ textarea.expanded {
     flex-grow: 1; /* Allow expanded textarea to fill its section */
     overflow-y: auto;
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    /* Limit max-height to ensure it doesn't grow too large */
-    max-height: 50vh;
 }
 
 input[type="password"] {

@@ -492,20 +492,59 @@ allActionButtons.forEach(button => {
     });
 });
 
-// Simplified focus handling (keep existing)
+// Function to scroll the focused element into view on mobile
+function scrollToFocus(element) {
+    // Only run on mobile devices (screen width <= 768px)
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+        return;
+    }
+
+    // Delay execution slightly to allow keyboard to appear and resize viewport
+    setTimeout(() => {
+        const elementRect = element.getBoundingClientRect();
+        const elementHeight = element.offsetHeight;
+        
+        // Use visualViewport if available for more accuracy with virtual keyboard
+        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        
+        // Calculate desired position: vertically centered in the top half of the viewport
+        // Target center = viewportHeight * 0.25 (center of top half)
+        // Target top = Target center - elementHeight / 2
+        const desiredTop = (viewportHeight / 2) - (elementHeight / 2);
+        
+        // Calculate the necessary scroll amount
+        const currentScrollY = window.scrollY;
+        const scrollAmount = currentScrollY + elementRect.top - desiredTop;
+
+        // Only scroll if the element is not already roughly in the desired position
+        if (Math.abs(elementRect.top - desiredTop) > 10) { // Add a small threshold
+             window.scrollTo({
+                top: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }, 300); // Adjust timeout if needed (300ms)
+}
+
+// Add focus listeners to relevant inputs
 inputText.addEventListener('focus', () => {
-    // 文本框获得焦点时，添加高亮
     inputText.closest('.input-section').classList.add('focused');
+    scrollToFocus(inputText);
+});
+
+outputText.addEventListener('focus', () => {
+    outputText.closest('.output-section').classList.add('focused');
+    scrollToFocus(outputText);
+});
+
+password.addEventListener('focus', () => {
+    password.closest('.password-section').classList.add('focused');
+    scrollToFocus(password);
 });
 
 inputText.addEventListener('blur', () => {
     // 文本框失去焦点时，立即移除高亮
     inputText.closest('.input-section').classList.remove('focused');
-});
-
-outputText.addEventListener('focus', () => {
-    // 文本框获得焦点时，添加高亮
-    outputText.closest('.output-section').classList.add('focused');
 });
 
 outputText.addEventListener('blur', () => {
@@ -624,125 +663,10 @@ actionBtn.addEventListener('click', () => {
     }
 });
 
-// Replace the entire setupMobileKeyboardHandling function with optimized version
-function setupMobileKeyboardHandling() {
-    // Elements that can receive focus and open the keyboard
-    const inputs = [
-        inputText,
-        outputText,
-        password
-    ];
-    
-    // Track whether element was programmatically scrolled to
-    let isAdjustingScroll = false;
-    
-    // Helper function to optimally position focused element
-    function adjustScrollForInput(element) {
-        // Don't adjust scroll if we're already handling it
-        if (isAdjustingScroll) return;
-        
-        isAdjustingScroll = true;
-        
-        // Cancel any pending scroll adjustments
-        clearTimeout(window.scrollAdjustTimeout);
-        
-        // Get element position relative to viewport
-        const rect = element.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        
-        // Calculate if element is visible in viewport
-        const isVisible = (
-            rect.top >= 0 && 
-            rect.bottom <= viewportHeight &&
-            rect.height < viewportHeight
-        );
-        
-        if (!isVisible) {
-            // Calculate optimal position - aim to position element 1/3 from the top
-            const targetPosition = window.scrollY + rect.top - (viewportHeight / 3);
-            
-            // Scroll with better control than scrollIntoView
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-            });
-        }
-        
-        // Reset flag after scrolling completes
-        window.scrollAdjustTimeout = setTimeout(() => {
-            isAdjustingScroll = false;
-        }, 300);
-    }
-    
-    // Add focused element handling
-    inputs.forEach(element => {
-        // Use focusin instead of focus for better mobile compatibility
-        element.addEventListener('focusin', (e) => {
-            // Short delay to allow any browser default scrolling to finish
-            setTimeout(() => adjustScrollForInput(element), 100);
-        });
-    });
-    
-    // Handle expand buttons more carefully
-    const expandButtons = [inputButtons.expand, outputButtons.expand];
-    
-    expandButtons.forEach(button => {
-        // Add custom handling for expand actions
-        const originalClickHandler = button.onclick;
-        
-        button.onclick = function(e) {
-            // Call the original handler first
-            if (originalClickHandler) {
-                originalClickHandler.call(this, e);
-            }
-            
-            // Give time for expand animation to start
-            setTimeout(() => {
-                // Get the associated textarea
-                let textarea = button.closest('.button-group').previousElementSibling;
-                
-                // Only adjust if expanded
-                if (textarea.classList.contains('expanded')) {
-                    // Just scroll to show the top of expanded content
-                    const container = document.querySelector('.container');
-                    const containerRect = container.getBoundingClientRect();
-                    
-                    // Scroll to position the container properly
-                    window.scrollTo({
-                        top: window.scrollY + containerRect.top - 20,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 50);
-        };
-    });
-    
-    // A more gentle approach to viewport changes
-    if (window.visualViewport) {
-        let lastViewportHeight = window.visualViewport.height;
-        
-        window.visualViewport.addEventListener('resize', () => {
-            const currentViewportHeight = window.visualViewport.height;
-            
-            // Only react to significant viewport height changes (keyboard appears/disappears)
-            if (Math.abs(currentViewportHeight - lastViewportHeight) > 150) {
-                // Check if we're focused and there's a significant viewport change
-                const activeElement = document.activeElement;
-                if (inputs.includes(activeElement)) {
-                    setTimeout(() => adjustScrollForInput(activeElement), 100);
-                }
-                
-                lastViewportHeight = currentViewportHeight;
-            }
-        });
-    }
-}
-
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
-    setupMobileKeyboardHandling();
 });
 
 // Initialize mode
