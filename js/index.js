@@ -403,7 +403,12 @@ inputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('input-expanded', isExpanding);
 
     if (isExpanding) {
-        // inputText.focus(); // Removed focus call
+        // Delay focus and scroll slightly after animation starts
+        setTimeout(() => {
+            inputText.focus();
+            // Scroll the focused element towards the center of the viewport
+            inputText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350); // Delay slightly longer than CSS transition (300ms)
     } else {
         inputText.blur();
     }
@@ -445,7 +450,12 @@ outputButtons.expand.addEventListener('click', (e) => {
     container.classList.toggle('output-expanded', isExpanding);
 
     if (isExpanding) {
-        // outputText.focus(); // Removed focus call
+        // Delay focus and scroll slightly after animation starts
+        setTimeout(() => {
+            outputText.focus();
+            // Scroll the focused element towards the center of the viewport
+            outputText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 350); // Delay slightly longer than CSS transition (300ms)
     } else {
         outputText.blur();
     }
@@ -492,59 +502,20 @@ allActionButtons.forEach(button => {
     });
 });
 
-// Function to scroll the focused element into view on mobile
-function scrollToFocus(element) {
-    // Only run on mobile devices (screen width <= 768px)
-    if (!window.matchMedia('(max-width: 768px)').matches) {
-        return;
-    }
-
-    // Delay execution slightly to allow keyboard to appear and resize viewport
-    setTimeout(() => {
-        const elementRect = element.getBoundingClientRect();
-        const elementHeight = element.offsetHeight;
-        
-        // Use visualViewport if available for more accuracy with virtual keyboard
-        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        
-        // Calculate desired position: vertically centered in the top half of the viewport
-        // Target center = viewportHeight * 0.25 (center of top half)
-        // Target top = Target center - elementHeight / 2
-        const desiredTop = (viewportHeight / 2) - (elementHeight / 2);
-        
-        // Calculate the necessary scroll amount
-        const currentScrollY = window.scrollY;
-        const scrollAmount = currentScrollY + elementRect.top - desiredTop;
-
-        // Only scroll if the element is not already roughly in the desired position
-        if (Math.abs(elementRect.top - desiredTop) > 10) { // Add a small threshold
-             window.scrollTo({
-                top: scrollAmount,
-                behavior: 'auto'
-            });
-        }
-    }, 300); // Adjust timeout if needed (300ms)
-}
-
-// Add focus listeners to relevant inputs
+// Simplified focus handling (keep existing)
 inputText.addEventListener('focus', () => {
+    // 文本框获得焦点时，添加高亮
     inputText.closest('.input-section').classList.add('focused');
-    scrollToFocus(inputText);
-});
-
-outputText.addEventListener('focus', () => {
-    outputText.closest('.output-section').classList.add('focused');
-    scrollToFocus(outputText);
-});
-
-password.addEventListener('focus', () => {
-    password.closest('.password-section').classList.add('focused');
-    scrollToFocus(password);
 });
 
 inputText.addEventListener('blur', () => {
     // 文本框失去焦点时，立即移除高亮
     inputText.closest('.input-section').classList.remove('focused');
+});
+
+outputText.addEventListener('focus', () => {
+    // 文本框获得焦点时，添加高亮
+    outputText.closest('.output-section').classList.add('focused');
 });
 
 outputText.addEventListener('blur', () => {
