@@ -438,7 +438,7 @@ body {
 
 /* Keep textarea styles as they were, flex-grow handles vertical sizing */
 textarea {
-    padding: 12px;
+    padding: 10px;
     border-bottom: none;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -516,7 +516,7 @@ input[type="password"] {
     border-radius: 6px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    padding: 12px;
+    padding: 10px;
     min-height: auto;
     height: 40px;
     font-family: inherit;
