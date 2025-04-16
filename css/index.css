@@ -64,6 +64,8 @@ body {
     transition: background-color 0.3s ease;
     /* Ensure content doesn't overflow at the bottom */
     overflow-y: auto;
+    /* Add padding at the bottom for scrolling, helps with virtual keyboards */
+    scroll-padding-bottom: 250px; 
 }
 
 .title {
