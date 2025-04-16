@@ -161,25 +161,14 @@ body {
     box-shadow: 0 4px 6px var(--shadow-color);
     padding: 10px;
     z-index: 1000;
-    /* Restore opacity/pointer-events for transition */
     opacity: 0;
     pointer-events: none;
-    /* Remove display: none */
-    /* display: none; */ 
-    min-width: 400px;
+    min-width: 300px;
     max-width: calc(100vw - 40px);
-    /* Remove margin-top */
-    /* margin-top: 5px; */
     transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Remove pointer-events from base style if using display none/block */
-/* opacity: 0; */
-/* pointer-events: none; */
-
 .dropdown-menu.show {
-    /* Remove display: block */
-    /* display: block; */ 
     opacity: 1;
     transform: translateX(-50%) scale(1);
     pointer-events: auto;
@@ -232,27 +221,23 @@ body {
 }
 
 .menu-item {
-    height: 30px;
     padding: 5px 10px;
-    font-size: 14px;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 14px;
     transition: all 0.3s ease;
     white-space: nowrap;
     color: var(--menu-text);
     margin: 0 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     /* Prevent text selection on click */
     user-select: none;
-    -webkit-user-select: none;
+    -webkit-user-select: none; /* For Safari */
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    outline: none !important;
+    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+    -moz-user-select: none; /* 适用于 Firefox */
+    -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
+    outline: none !important; /* 解决按压边框闪烁 */
 }
 
 .menu-item.active {
@@ -262,8 +247,8 @@ body {
 
 .menu-item:active {
     transform: scale(0.95);
-    background-color: #e9b54d;
-    color: #000;
+    background-color: #e9b54d; /* Add active background color */
+    color: #000;              /* Add active text color */
 }
 
 .container {
@@ -736,28 +721,40 @@ input[type="password"]:focus {
 }
 
 .menu-mode-switch {
-    margin: 5px 0 15px;
+    display: flex;
+    gap: 10px;
     justify-content: center;
-    display: flex; /* Ensure it behaves like a block for background */
-    background: var(--button-bg); /* Change background to button background variable */
-    padding: 5px; /* Add some padding to mimic menu-options spacing */
-    border-radius: 6px; /* Add border-radius like menu-options */
+    margin-bottom: 10px;
 }
 
 .mode-btn-menu {
-    height: 30px;
-    padding: 5px 10px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
     font-size: 14px;
+    transition: all 0.3s ease;
+    color: var(--menu-text);
+    background: var(--button-bg);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    outline: none !important;
+    white-space: nowrap;
 }
 
-.mode-btn-menu span {
-    font-weight: 500;
-    font-size: 14px;
-    filter: none;
+.mode-btn-menu.active {
+    background: var(--button-hover);
+    color: #000;
 }
 
-.mode-btn-menu.active span {
-    filter: none;
+.mode-btn-menu:active {
+    transform: scale(0.95);
+    background-color: #e9b54d;
+    color: #000;
 }
 
 /* 处理所有悬停效果，仅在支持悬停的设备上应用 */
@@ -939,30 +936,17 @@ input[type="password"]:focus {
     }
 
     .dropdown-menu {
-        /* Override min-width to allow shrinking */
         min-width: auto;
         padding: 8px;
     }
 
-    .menu-item {
-        height: 28px;
-        padding: 4px 8px;
-        font-size: 12px;
-        margin: 0 2px;
-    }
-
     .menu-mode-switch {
-        margin: 5px 0 10px;
         gap: 5px;
+        margin-bottom: 8px;
     }
 
     .mode-btn-menu {
-        height: 28px;
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-
-    .mode-btn-menu span {
+        padding: 6px 12px;
         font-size: 12px;
     }
 
