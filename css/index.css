@@ -1014,18 +1014,4 @@ input[type="password"]:focus {
 .action-btn.is-query .btn-text.query {
     opacity: 1;
     pointer-events: auto; /* Allow interaction */
-}
-
-/* --- 新增：移动设备横屏时压缩输入框高度 --- */
-@media (any-hover: none) { /* Apply only on likely touch devices */
-    .textarea-landscape-condensed {
-        height: 40px !important; /* Force height */
-        min-height: 40px !important; /* Force min-height */
-        overflow-y: hidden !important; /* Hide vertical scrollbar */
-        /* Optionally, adjust padding if needed */
-        /* padding-top: 10px; */
-        /* padding-bottom: 10px; */
-        transition: height 0.2s ease, min-height 0.2s ease; /* Add transition for smoothness */
-    }
-}
-/* --- 结束：新增样式 --- */ 
+} 

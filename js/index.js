@@ -828,32 +828,14 @@ function smoothScrollToTop(element) {
 // --- 结束：新增滚动函数 ---
 
 let scrollTimeoutId = null;
-const landscapeCondensedClass = 'textarea-landscape-condensed'; // Define class name
 
 function handleMobileInputFocus(event) {
     if (!isMobileDevice()) {
-        // Ensure class is removed if not on mobile (edge case)
-        event.target.classList.remove(landscapeCondensedClass);
-        return; 
+        return; // 非移动设备则跳过
     }
 
     const focusedElement = event.target;
     const visualViewport = window.visualViewport;
-
-    // --- 修改：在聚焦时根据方向添加/移除压缩类 (仅对 inputText) ---
-    if (focusedElement === inputText) {
-        if (window.innerWidth > window.innerHeight) {
-            // 横屏
-            focusedElement.classList.add(landscapeCondensedClass);
-        } else {
-            // 竖屏
-            focusedElement.classList.remove(landscapeCondensedClass);
-        }
-    } else {
-         // 对于其他输入框（例如 outputText），确保移除该类
-         focusedElement.classList.remove(landscapeCondensedClass);
-    }
-    // --- 结束：修改 ---
 
     if (!visualViewport) return;
 
@@ -909,31 +891,7 @@ function handleMobileInputFocus(event) {
 
 // 为需要处理的文本输入框添加 focus 事件监听器
 inputText.addEventListener('focus', handleMobileInputFocus);
-outputText.addEventListener('focus', handleMobileInputFocus); // Output 保持滚动，但不应用压缩类
-
-// --- 新增：inputText 的 blur 事件监听器，移除压缩类 ---
-inputText.addEventListener('blur', () => {
-    inputText.classList.remove(landscapeCondensedClass);
-});
-// --- 结束：新增 blur 监听器 ---
-
-// --- 新增：窗口 resize/orientationchange 监听器，处理旋转 ---
-window.addEventListener('resize', () => {
-    // 只在移动设备且 inputText 当前有焦点时处理
-    if (isMobileDevice() && document.activeElement === inputText) {
-        if (window.innerWidth > window.innerHeight) {
-            // 旋转到横屏
-            inputText.classList.add(landscapeCondensedClass);
-            // 横屏时重新触发滚动到顶部逻辑，确保位置正确
-            smoothScrollToTop(inputText);
-        } else {
-            // 旋转到竖屏
-            inputText.classList.remove(landscapeCondensedClass);
-             // 竖屏时重新触发滚动到居中逻辑，确保位置正确
-            smoothScrollToCenter(inputText);
-        }
-    }
-});
-// --- 结束：新增 resize 监听器 ---
+outputText.addEventListener('focus', handleMobileInputFocus); // 如果Output可交互
+// password.addEventListener('focus', handleMobileInputFocus); // 移除密码框的监听器
 
 // --- 结束：移动设备输入框自动滚动 --- 
