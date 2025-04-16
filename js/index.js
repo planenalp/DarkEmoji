@@ -19,8 +19,6 @@ const defaultBtn = document.getElementById('defaultBtn');
 const customBtn = document.getElementById('customBtn');
 const title = document.querySelector('.title');
 const container = document.querySelector('.container'); // Get container element
-const encryptOptionsContainer = document.getElementById('optionCipher');
-const encodeOptionsContainer = document.getElementById('optionBase');
 
 // Button groups
 const inputButtons = {
@@ -44,16 +42,12 @@ const passwordButtons = {
 
 // Mode state
 let isEncryptMode = true;
-let isDefaultMode = true; // Default to Default mode
+let isDefaultMode = true;
 let isCopying = false; // Flag to prevent expansion during copy
 
-// RE-ADD: Cipher state variables
+// Cipher state
 let currentEncrypt = 'AES-256-GCM';
 let currentEncode = 'Base64';
-
-// Default values (used for switching back to Default mode)
-const DEFAULT_ENCRYPT = 'AES-256-GCM';
-const DEFAULT_ENCODE = 'Base64';
 
 // Theme state
 let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark unless explicitly light
@@ -62,41 +56,21 @@ let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark 
 const encryptState = { input: '', output: '', password: '' };
 const decryptState = { input: '', output: '', password: '' };
 
-// Update subtitle text (Restored)
+// Update subtitle text
 function updateSubtitle() {
-    if (isDefaultMode) {
-        cipherSubtitle.textContent = `${DEFAULT_ENCRYPT} & ${DEFAULT_ENCODE}`;
-    } else {
-        // Show selected custom options in subtitle
-        cipherSubtitle.textContent = `${currentEncrypt} & ${currentEncode}`;
-    }
+    cipherSubtitle.textContent = `${currentEncrypt} & ${currentEncode}`;
 }
 
-// Initialize menu state (Restored and Updated)
+// Initialize menu state
 function initializeMenuState() {
-    // Set Default mode as active initially
+    // Set Default as active
+    defaultBtn.classList.add('active');
+    customBtn.classList.remove('active');
     isDefaultMode = true;
-    currentEncrypt = DEFAULT_ENCRYPT;
-    currentEncode = DEFAULT_ENCODE;
-    updateButtonActiveStates();
-    updateSubtitle();
-}
-
-// Helper function to update active states for all buttons
-function updateButtonActiveStates() {
-    // Update Default/Custom buttons
-    defaultBtn.classList.toggle('active', isDefaultMode);
-    customBtn.classList.toggle('active', !isDefaultMode);
-
-    // Update Encrypt option items (divs)
-    encryptOptionsContainer.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
-        item.classList.toggle('active', item.dataset.encrypt === currentEncrypt);
-    });
-
-    // Update Encode option items (divs)
-    encodeOptionsContainer.querySelectorAll('.menu-item[data-encode]').forEach(item => {
-        item.classList.toggle('active', item.dataset.encode === currentEncode);
-    });
+    
+    // Set AES-256-GCM and Base64 as active
+    document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
+    document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
 }
 
 // Toggle dropdown menu
@@ -107,69 +81,152 @@ cipherSubtitle.addEventListener('click', (e) => {
 
 // Mode switching for Default/Custom
 defaultBtn.addEventListener('click', () => {
-    if (!isDefaultMode) { // Only switch if not already default
-        isDefaultMode = true;
-        currentEncrypt = DEFAULT_ENCRYPT;
-        currentEncode = DEFAULT_ENCODE;
-        updateButtonActiveStates();
-        updateSubtitle();
-        // Optional: Close menu after selection
-        // cipherMenu.classList.remove('show');
-    }
+    // Always switch to default mode and set AES-256-GCM and Base64
+    currentEncrypt = 'AES-256-GCM';
+    currentEncode = 'Base64';
+    switchCipherMode('default');
+    
+    // Update menu items
+    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.encrypt === 'AES-256-GCM') {
+            item.classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.encode === 'Base64') {
+            item.classList.add('active');
+        }
+    });
+        
+    updateSubtitle();
 });
 
 customBtn.addEventListener('click', () => {
-    if (isDefaultMode) { // Only switch if not already custom
-        isDefaultMode = false;
-        // Keep current custom selections or set defaults if needed
-        // (Current implementation keeps the last selected custom options)
-        updateButtonActiveStates();
-        updateSubtitle();
-        // Optional: Close menu after selection
-        // cipherMenu.classList.remove('show');
-    }
+    // Always switch to custom mode and set AES-256-GCM and Base1024
+    currentEncrypt = 'AES-256-GCM';
+    currentEncode = 'Base1024';
+    switchCipherMode('custom');
+    
+    // Update menu items
+    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.encrypt === 'AES-256-GCM') {
+            item.classList.add('active');
+        }
+    });
+    
+    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.encode === 'Base1024') {
+            item.classList.add('active');
+        }
+    });
+    
+    updateSubtitle();
 });
 
-// RE-ADD: Event listener for cipherMenu clicks (delegated)
+function switchCipherMode(mode) {
+    isDefaultMode = mode === 'default';
+    
+    // Update button states
+    defaultBtn.classList.toggle('active', isDefaultMode);
+    customBtn.classList.toggle('active', !isDefaultMode);
+    
+    if (isDefaultMode) {
+        // Reset to default values
+        currentEncrypt = 'AES-256-GCM';
+        currentEncode = 'Base64';
+        
+        // Update menu items to reflect default
+        document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.encrypt === currentEncrypt) {
+                item.classList.add('active');
+            }
+        });
+        
+        document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
+            item.classList.remove('active');
+            if (item.dataset.encode === currentEncode) {
+                item.classList.add('active');
+            }
+        });
+    }
+    
+    updateSubtitle();
+}
+
+// Handle menu item clicks
 cipherMenu.addEventListener('click', (e) => {
-    const targetItem = e.target.closest('.menu-item'); // Check if a menu item DIV was clicked
-    if (!targetItem || targetItem.closest('.menu-mode-switch')) {
-        // Exit if click wasn't on a menu item OR if it was on Default/Custom buttons
-        return;
-    }
+    const menuItem = e.target.closest('.menu-item');
+    if (!menuItem) return;
 
-    e.stopPropagation(); // Prevent closing the menu immediately
+    e.stopPropagation();
 
-    let changed = false;
-    if (targetItem.dataset.encrypt) {
+    if (menuItem.dataset.encrypt) {
         // Encrypt option clicked
-        if (currentEncrypt !== targetItem.dataset.encrypt) {
-            currentEncrypt = targetItem.dataset.encrypt;
-            changed = true;
-        }
-    } else if (targetItem.dataset.encode) {
+        handleEncryptOptionClick(menuItem);
+    } else if (menuItem.dataset.encode) {
         // Encode option clicked
-        if (currentEncode !== targetItem.dataset.encode) {
-            currentEncode = targetItem.dataset.encode;
-            changed = true;
-        }
+        handleEncodeOptionClick(menuItem);
     }
 
-    if (changed) {
-        // If an option changed, switch to Custom mode automatically
-        isDefaultMode = false;
-        updateButtonActiveStates();
-        updateSubtitle();
-        // Optional: Close menu after selection
-        // cipherMenu.classList.remove('show');
-    }
+    updateSubtitle();
 });
+
+function handleEncryptOptionClick(menuItem) {
+    // Remove active class from all encryption items
+    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Add active class to clicked item
+    menuItem.classList.add('active');
+    
+    // Update encryption state
+    currentEncrypt = menuItem.dataset.encrypt;
+    
+    // Check if we should switch modes
+    updateCipherMode();
+}
+
+function handleEncodeOptionClick(menuItem) {
+    // Remove active class from all encoding items
+    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Add active class to clicked item
+    menuItem.classList.add('active');
+    
+    // Update encoding state
+    currentEncode = menuItem.dataset.encode;
+    
+    // Check if we should switch modes
+    updateCipherMode();
+}
+
+function updateCipherMode() {
+    const defaultEncrypt = defaultBtn.dataset.encrypt;
+    const defaultEncode = defaultBtn.dataset.encode;
+    
+    if (currentEncrypt === defaultEncrypt && currentEncode === defaultEncode) {
+        // If current selections match Default, activate Default mode
+        switchCipherMode('default');
+    } else {
+        // Otherwise, activate Custom mode
+        switchCipherMode('custom');
+    }
+}
 
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
     const target = e.target;
     
-    // Close dropdown if click is outside the subtitle container
+    // 只保留关闭下拉菜单的逻辑，不添加自动折叠文本框的逻辑
     if (!target.closest('.subtitle-container')) {
         cipherMenu.classList.remove('show');
     }
@@ -567,13 +624,13 @@ actionBtn.addEventListener('click', () => {
     }
 });
 
-// Initialize on page load (call the updated init function)
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
-    // updateSubtitle(); // Called within initializeMenuState now
+    updateSubtitle();
 });
 
-// Initialize main mode (encrypt/decrypt)
+// Initialize mode
 switchMode('encrypt');
 
 // Theme switching
