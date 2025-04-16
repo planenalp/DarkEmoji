@@ -788,24 +788,21 @@ function smoothScrollToCenter(element) {
 
     if (!visualViewport) return; // 需要 visualViewport API
 
-    // 判断是否为横屏模式
-    const isLandscape = window.innerWidth > window.innerHeight;
-    
     // 计算元素中心相对于视口顶部的距离
     const elementCenterRelativeToViewport = elementRect.top + element.offsetHeight / 2;
     
-    // 计算目标滚动位置
-    let scrollTargetY;
+    // 判断是否为横屏模式
+    const isLandscape = window.innerWidth > window.innerHeight;
     
-    if (isLandscape) {
-        // 横屏模式：将元素滚动到视口顶部附近，留出一些空间
-        const topMargin = 20; // 距离顶部20px的边距
-        scrollTargetY = window.scrollY + elementRect.top - topMargin;
-    } else {
-        // 竖屏模式：保持原有逻辑，滚动到视口中心
-        const viewportCenterY = visualViewport.height / 2;
-        scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY;
-    }
+    // 根据屏幕方向设置不同的目标位置
+    // 竖屏：居中显示
+    // 横屏：更靠上显示，避免被键盘遮挡
+    const viewportTargetY = isLandscape 
+        ? visualViewport.height * 0.3  // 横屏时定位到视口高度的 30% 处
+        : visualViewport.height / 2;   // 竖屏时保持居中
+
+    // 计算需要滚动的距离
+    const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportTargetY;
 
     // 平滑滚动到目标位置
     window.scrollTo({
