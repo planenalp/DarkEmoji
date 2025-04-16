@@ -42,6 +42,10 @@
 
 html {
     height: 100dvh; /* Use dynamic viewport height */
+    /* Add scroll behavior for smooth scrolling */
+    scroll-behavior: smooth;
+    /* Add scroll padding to ensure focused elements are not hidden by keyboard */
+    scroll-padding-bottom: 40vh;
 }
 
 * {
@@ -64,8 +68,39 @@ body {
     transition: background-color 0.3s ease;
     /* Ensure content doesn't overflow at the bottom */
     overflow-y: auto;
-    /* Add padding at the bottom for scrolling, helps with virtual keyboards */
-    scroll-padding-bottom: 250px; 
+    /* Add overscroll behavior to improve mobile scrolling */
+    overscroll-behavior-y: contain;
+    /* Improve touch scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Add new rule for fixing position when keyboard is open */
+@media (max-height: 600px) {
+    body {
+        /* On very small screens or when keyboard is open, reduce padding */
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 20px;
+        /* Allow container to scroll properly when keyboard is open */
+        overflow-y: auto;
+    }
+    
+    textarea:focus, input:focus {
+        /* Ensure focused elements are visible when keyboard is open */
+        position: relative;
+        z-index: 2;
+    }
+}
+
+/* Add specific iOS fix for focusing */
+@supports (-webkit-touch-callout: none) {
+    /* iOS specific styles */
+    textarea, input[type="password"] {
+        /* Prevent iOS zoom on focus */
+        font-size: 16px;
+    }
 }
 
 .title {

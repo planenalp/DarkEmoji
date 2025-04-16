@@ -624,10 +624,78 @@ actionBtn.addEventListener('click', () => {
     }
 });
 
+// Add keyboard handling for mobile devices
+function setupMobileKeyboardHandling() {
+    // Elements that can receive focus and open the keyboard
+    const inputs = [
+        inputText,
+        outputText,
+        password
+    ];
+    
+    // Helper function to ensure input is visible when focused
+    function ensureVisibleOnFocus(element) {
+        element.addEventListener('focus', () => {
+            // Delay the scroll slightly to allow keyboard to appear first
+            setTimeout(() => {
+                // Use scrollIntoView with options to prioritize visibility
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 300);
+        });
+        
+        // For iOS devices, add additional handling for when keyboard appears
+        element.addEventListener('click', () => {
+            // iOS sometimes needs a direct click handler
+            setTimeout(() => element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            }), 100);
+        });
+    }
+    
+    // Apply focus handling to all inputs
+    inputs.forEach(ensureVisibleOnFocus);
+    
+    // Handle landscape orientation on mobile
+    window.addEventListener('resize', () => {
+        // If an element has focus when orientation changes, ensure it's visible
+        const activeElement = document.activeElement;
+        if (inputs.includes(activeElement)) {
+            setTimeout(() => {
+                activeElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 100);
+        }
+    });
+    
+    // Detect virtual keyboard visibility change
+    // This uses a visual viewport API available in modern browsers
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            const activeElement = document.activeElement;
+            if (inputs.includes(activeElement)) {
+                // Keyboard likely changed visibility, ensure element is visible
+                setTimeout(() => {
+                    activeElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+            }
+        });
+    }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
+    setupMobileKeyboardHandling();
 });
 
 // Initialize mode
@@ -771,34 +839,4 @@ function setOutputText(text) {
     }
     // 重置复制按钮状态
     outputButtons.copy.classList.remove('is-success');
-}
-
-// Helper function to scroll input into view on mobile
-function scrollInputIntoView(element) {
-    // Basic check for touch devices (common proxy for mobile)
-    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    if (isMobile) {
-        // Wait a bit for the keyboard to likely appear
-        setTimeout(() => {
-            element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' // Try to center it above the keyboard
-            });
-        }, 300); // 300ms delay, adjust if needed
-    }
-}
-
-// Add focus listeners to relevant inputs
-inputText.addEventListener('focus', () => {
-    scrollInputIntoView(inputText);
-});
-
-password.addEventListener('focus', () => {
-    scrollInputIntoView(password);
-});
-
-// Output text area might not need this if primarily for display
-// outputText.addEventListener('focus', () => {
-//     scrollInputIntoView(outputText);
-// }); 
+} 
