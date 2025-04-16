@@ -808,26 +808,25 @@ function smoothScrollToTop(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const elementRect = element.getBoundingClientRect();
-    // visualViewport is not strictly needed here but good practice to check
     const visualViewport = window.visualViewport;
     if (!visualViewport) return;
 
-    // Calculate target scroll Y position so the element's top is near the top of the screen
-    const scrollMargin = 10; // Small space from the top edge
+    // 计算目标滚动位置，使元素顶部靠近屏幕顶部
+    const scrollMargin = 10; // 距离顶部的边距
     const scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
 
-    // Ensure we don't scroll beyond the document boundaries
-    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight; // Use layout viewport height
-    const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY)); // Clamp scroll value
+    // 确保不会滚动超出文档边界
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY));
 
     window.scrollTo({
         top: finalScrollY,
         behavior: 'smooth'
     });
 }
-// --- 结束：新增滚动函数 ---
 
 let scrollTimeoutId = null;
+let isKeyboardVisible = false;
 
 function handleMobileInputFocus(event) {
     if (!isMobileDevice()) {
@@ -839,59 +838,40 @@ function handleMobileInputFocus(event) {
 
     if (!visualViewport) return;
 
-    // 键盘弹出/收起时，visualViewport会resize
+    // 立即开始滚动，不等待键盘动画
+    if (window.innerWidth > window.innerHeight) {
+        // 横屏: 滚动到顶部附近
+        smoothScrollToTop(focusedElement);
+    } else {
+        // 竖屏: 滚动到中间
+        smoothScrollToCenter(focusedElement);
+    }
+
+    // 监听键盘状态变化
     const viewportResizeHandler = () => {
-        // 清除之前的延时滚动（如果在短时间内多次触发resize）
+        // 清除之前的延时滚动
         clearTimeout(scrollTimeoutId);
-        // 设置延时，等待键盘动画基本完成
+        
+        // 设置一个较短的延时，让键盘动画基本完成
         scrollTimeoutId = setTimeout(() => {
-            // 再次检查焦点，确保用户没有切换焦点
             if (document.activeElement === focusedElement) {
-                // --- 修改：根据屏幕方向选择滚动方式 ---
+                // 根据屏幕方向选择滚动方式
                 if (window.innerWidth > window.innerHeight) {
-                    // 横屏: 滚动到顶部附近
                     smoothScrollToTop(focusedElement);
                 } else {
-                    // 竖屏: 滚动到中间 (保持原逻辑)
                     smoothScrollToCenter(focusedElement);
                 }
-                // --- 结束：修改 ---
             }
-            // 移除监听器，避免重复执行 (listener is already removed by {once: true})
-            // if (visualViewport) {
-            //    visualViewport.removeEventListener('resize', viewportResizeHandler);
-            // }
-        }, 300); // 300ms 延迟，可根据测试调整
+        }, 100); // 减少延时到 100ms
     };
 
     // 添加一次性的 resize 监听器
     visualViewport.addEventListener('resize', viewportResizeHandler, { once: true });
-
-    // 作为后备：如果键盘已弹出或resize事件未触发，短时间后也尝试滚动
-    // (例如，在已弹出键盘的情况下切换输入框)
-    clearTimeout(scrollTimeoutId);
-    scrollTimeoutId = setTimeout(() => {
-        if (document.activeElement === focusedElement) {
-             // 在尝试滚动前移除可能已添加的监听器，避免重复 (Not needed due to {once:true})
-             // if (visualViewport) {
-             //    visualViewport.removeEventListener('resize', viewportResizeHandler);
-             // }
-             // --- 修改：根据屏幕方向选择滚动方式 ---
-             if (window.innerWidth > window.innerHeight) {
-                 // 横屏: 滚动到顶部附近
-                 smoothScrollToTop(focusedElement);
-             } else {
-                 // 竖屏: 滚动到中间 (保持原逻辑)
-                 smoothScrollToCenter(focusedElement);
-             }
-             // --- 结束：修改 ---
-        }
-    }, 400); // 稍长一点的延迟作为后备
 }
 
 // 为需要处理的文本输入框添加 focus 事件监听器
 inputText.addEventListener('focus', handleMobileInputFocus);
-outputText.addEventListener('focus', handleMobileInputFocus); // 如果Output可交互
+outputText.addEventListener('focus', handleMobileInputFocus);
 // password.addEventListener('focus', handleMobileInputFocus); // 移除密码框的监听器
 
 // --- 结束：移动设备输入框自动滚动 --- 
