@@ -819,7 +819,7 @@ function smoothScrollToTop(element) {
     const isMobile = window.innerWidth <= 768;
     
     // 距离顶部的边距，移动设备时增加额外边距
-    const scrollMargin = isMobile ? 30 : 10; // 移动设备时使用更大的边距
+    const scrollMargin = isMobile ? 20 : 10; // 移动设备时额外上移20px
     
     // 计算目标滚动位置，使元素顶部靠近屏幕顶部
     const scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
