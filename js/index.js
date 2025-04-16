@@ -776,8 +776,8 @@ function setOutputText(text) {
 // --- 新增：移动设备输入框自动滚动到视图中间 ---
 
 function isMobileDevice() {
-    // 简单的移动设备检测：触摸屏 + 较小宽度
-    return ('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 768;
+    // 修改：主要基于触摸支持判断，移除宽度限制，以支持横屏
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
 
 function smoothScrollToCenter(element) {
@@ -852,6 +852,6 @@ function handleMobileInputFocus(event) {
 // 为需要处理的文本输入框添加 focus 事件监听器
 inputText.addEventListener('focus', handleMobileInputFocus);
 outputText.addEventListener('focus', handleMobileInputFocus); // 如果Output可交互
-password.addEventListener('focus', handleMobileInputFocus);
+// password.addEventListener('focus', handleMobileInputFocus); // 移除密码框的监听器
 
 // --- 结束：移动设备输入框自动滚动 --- 
