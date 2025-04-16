@@ -773,114 +773,87 @@ function setOutputText(text) {
     outputButtons.copy.classList.remove('is-success');
 }
 
-// --- 新增：移动设备输入框自动滚动到视图中间 ---
+// --- Functions for scrolling ---
 
 function isMobileDevice() {
-    // 修改：主要基于触摸支持判断，移除宽度限制，以支持横屏
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
 
-function smoothScrollToCenter(element) {
+// New function to ensure the element is visible within the visual viewport
+function ensureElementVisibleAboveKeyboard(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
-    const elementRect = element.getBoundingClientRect();
     const visualViewport = window.visualViewport;
-
-    if (!visualViewport) return; // 需要 visualViewport API
-
-    const isMobile = window.innerWidth <= 768;
-    
-    // 计算元素中心相对于视口顶部的距离
-    const elementCenterRelativeToViewport = elementRect.top + element.offsetHeight / 2;
-    // 计算视口中心点
-    const viewportCenterY = visualViewport.height / 2;
-    
-    // 为移动设备添加额外的偏移量，补偿margin-bottom减少的空间
-    const mobileOffset = isMobile ? 20 : 0; // 移动设备时额外上移20px
-
-    // 计算需要滚动的距离 (当前滚动位置 + 元素中心点 - 视口中心点)
-    const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY - mobileOffset;
-
-    // 平滑滚动到目标位置
-    window.scrollTo({
-        top: scrollTargetY,
-        behavior: 'smooth'
-    });
-}
-
-// --- 新增：用于横屏的滚动函数 ---
-function smoothScrollToTop(element) {
-    if (!element || typeof element.getBoundingClientRect !== 'function') return;
+    if (!visualViewport) return; // Requires visualViewport API
 
     const elementRect = element.getBoundingClientRect();
-    const visualViewport = window.visualViewport;
-    if (!visualViewport) return;
+    const margin = 15; // Desired margin around the element within the viewport (pixels)
 
-    const isMobile = window.innerWidth <= 768;
-    
-    // 距离顶部的边距，移动设备时增加额外边距
-    const scrollMargin = isMobile ? 20 : 10; // 移动设备时额外上移20px
-    
-    // 计算目标滚动位置，使元素顶部靠近屏幕顶部
-    const scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
+    let scrollTargetY = window.scrollY;
+    let scrollAdjustment = 0;
 
-    // 确保不会滚动超出文档边界
+    // Check if element top is above the visible viewport top
+    if (elementRect.top < visualViewport.offsetTop + margin) {
+        scrollAdjustment = visualViewport.offsetTop + margin - elementRect.top;
+    }
+    // Check if element bottom is below the visible viewport bottom
+    else if (elementRect.bottom > visualViewport.offsetTop + visualViewport.height - margin) {
+        scrollAdjustment = elementRect.bottom - (visualViewport.offsetTop + visualViewport.height - margin);
+    }
+
+    scrollTargetY += scrollAdjustment;
+
+    // Ensure we don't scroll beyond the document boundaries
     const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
     const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY));
 
-    window.scrollTo({
-        top: finalScrollY,
-        behavior: 'smooth'
-    });
+    // Only scroll if necessary
+    if (Math.abs(window.scrollY - finalScrollY) > 1) { // Avoid tiny scrolls
+        window.scrollTo({
+            top: finalScrollY,
+            behavior: 'smooth'
+        });
+    }
 }
 
+// --- Focus handling for mobile ---
+
 let scrollTimeoutId = null;
-let isKeyboardVisible = false;
 
 function handleMobileInputFocus(event) {
     if (!isMobileDevice()) {
-        return; // 非移动设备则跳过
+        return; // Skip if not a mobile device
     }
 
     const focusedElement = event.target;
     const visualViewport = window.visualViewport;
 
-    if (!visualViewport) return;
+    if (!visualViewport) return; // Skip if visualViewport API is not available
 
-    // 立即开始滚动，不等待键盘动画
-    if (window.innerWidth > window.innerHeight) {
-        // 横屏: 滚动到顶部附近
-        smoothScrollToTop(focusedElement);
-    } else {
-        // 竖屏: 滚动到中间
-        smoothScrollToCenter(focusedElement);
-    }
-
-    // 监听键盘状态变化
-    const viewportResizeHandler = () => {
-        // 清除之前的延时滚动
+    // Function to handle the actual scrolling after viewport resize
+    const scrollOnResize = () => {
         clearTimeout(scrollTimeoutId);
-        
-        // 设置一个较短的延时，让键盘动画基本完成
         scrollTimeoutId = setTimeout(() => {
+            // Check if the element is still focused
             if (document.activeElement === focusedElement) {
-                // 根据屏幕方向选择滚动方式
-                if (window.innerWidth > window.innerHeight) {
-                    smoothScrollToTop(focusedElement);
-                } else {
-                    smoothScrollToCenter(focusedElement);
-                }
+                ensureElementVisibleAboveKeyboard(focusedElement);
             }
-        }, 100); // 减少延时到 100ms
+            // Clean up the listener (though {once: true} handles this)
+            // visualViewport.removeEventListener('resize', scrollOnResize);
+        }, 150); // Slightly increased delay to ensure layout stabilizes
     };
 
-    // 添加一次性的 resize 监听器
-    visualViewport.addEventListener('resize', viewportResizeHandler, { once: true });
+    // Listen for the viewport resize event (likely keyboard appearing)
+    visualViewport.addEventListener('resize', scrollOnResize, { once: true });
+
+    // --- Removed immediate scroll on focus --- 
+    // The scroll now happens only *after* the resize event
 }
 
-// 为需要处理的文本输入框添加 focus 事件监听器
+// Add focus listeners to input elements
 inputText.addEventListener('focus', handleMobileInputFocus);
 outputText.addEventListener('focus', handleMobileInputFocus);
-// password.addEventListener('focus', handleMobileInputFocus); // 移除密码框的监听器
+// Password field listener remains commented out as per previous request
+// password.addEventListener('focus', handleMobileInputFocus);
 
 // --- 结束：移动设备输入框自动滚动 --- 
