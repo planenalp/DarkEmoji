@@ -773,34 +773,68 @@ function setOutputText(text) {
     outputButtons.copy.classList.remove('is-success');
 }
 
-// --- 新增：移动设备输入框自动滚动 --- //
+// --- 新增：移动设备输入框自动滚动，使光标居中 ---
 
 function isMobileDevice() {
     // 主要基于触摸支持判断
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
 
-// 新函数：滚动元素至可视区域中央
-function scrollToCenterInViewport(element) {
+// 估算光标在 textarea 内的垂直偏移 (像素)
+function getCursorVerticalOffset(element) {
+    if (!element || typeof element.selectionStart === 'undefined') {
+        return 0;
+    }
+
+    const textBeforeCursor = element.value.substring(0, element.selectionStart);
+    const lineCount = (textBeforeCursor.match(/\n/g) || []).length;
+
+    // 尝试获取计算后的行高，如果失败则估算
+    let lineHeight = 20; // Default fallback
+    try {
+        const computedStyle = window.getComputedStyle(element);
+        const lineHeightString = computedStyle.lineHeight;
+        const fontSizeString = computedStyle.fontSize;
+        
+        if (lineHeightString && lineHeightString !== 'normal') {
+            lineHeight = parseFloat(lineHeightString);
+        } else if (fontSizeString) {
+            // 如果行高是 normal，根据字体大小估算 (常见比例 1.2 to 1.5)
+            lineHeight = parseFloat(fontSizeString) * 1.4;
+        }
+        // 确保行高是有效数字
+        if (isNaN(lineHeight) || lineHeight <= 0) {
+            lineHeight = 20; 
+        }
+    } catch (e) {
+        console.error("Error getting computed style for line height:", e);
+        lineHeight = 20; // Fallback on error
+    }
+    
+    // 估算偏移量 = 行数 * 行高
+    // 添加半行高，使光标行大致居中
+    return (lineCount * lineHeight) + (lineHeight / 2);
+}
+
+// 将包含光标的行滚动到可视区域中间
+function scrollCursorLineToCenter(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const visualViewport = window.visualViewport;
     if (!visualViewport) return; // 需要 visualViewport API
 
     const elementRect = element.getBoundingClientRect();
+    const cursorOffsetInTextarea = getCursorVerticalOffset(element);
 
-    // 计算元素中心点相对于文档顶部的距离
-    const elementCenterDocY = window.scrollY + elementRect.top + element.offsetHeight / 2;
+    // 光标相对于文档顶部的绝对位置
+    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea;
 
-    // 计算可视区域中心点相对于文档顶部的距离
-    const viewportCenterDocY = window.scrollY + visualViewport.offsetTop + visualViewport.height / 2;
-
-    // 计算需要滚动的目标位置
-    const scrollTargetY = elementCenterDocY - viewportCenterDocY + window.scrollY;
+    // 目标滚动位置：将光标置于可视区域的中间
+    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
 
     // 确保滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
-    const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY));
+    const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
     // 平滑滚动到目标位置
     window.scrollTo({
@@ -821,46 +855,48 @@ function handleMobileInputFocus(event) {
 
     if (!visualViewport) return;
 
-    // 移除立即滚动
-    // if (window.innerWidth > window.innerHeight) {
-    //     smoothScrollToTop(focusedElement);
-    // } else {
-    //     smoothScrollToCenter(focusedElement);
-    // }
-
-    // 监听键盘弹出/收起导致的 viewport resize 事件
+    // 监听 visualViewport 的 resize 事件 (键盘弹出/收起会触发)
     const viewportResizeHandler = () => {
-        // 清除之前的延时滚动，以防快速触发
+        // 清除之前的延时滚动，以处理快速的resize事件
         clearTimeout(scrollTimeoutId);
 
-        // 设置一个短暂延时，等待键盘动画和 viewport 尺寸稳定
+        // 设置一个短暂的延时，确保键盘动画完成且视口稳定
         scrollTimeoutId = setTimeout(() => {
-            // 再次检查焦点，确保用户没有切换
+            // 再次检查当前焦点元素是否还是之前的元素
             if (document.activeElement === focusedElement) {
-                // 调用新的滚动函数，将元素居中于当前可视区域
-                scrollToCenterInViewport(focusedElement);
+                 // 检查键盘是否真的弹出了 (视口高度显著减小)
+                 // 可以根据需要调整阈值
+                if (window.innerHeight > visualViewport.height + 50) { 
+                    scrollCursorLineToCenter(focusedElement);
+                }
             }
-            // 注意：监听器因 {once: true} 会自动移除，无需手动移除
-        }, 150); // 150ms 延时，可以根据效果微调
+            // 监听器已通过 { once: true } 自动移除，无需手动移除
+        }, 150); // 150ms 延时，可以根据测试效果调整
     };
 
     // 添加一次性的 resize 监听器
-    visualViewport.addEventListener('resize', viewportResizeHandler, { once: true });
+    visualViewport.addEventListener('resize', viewportResizeHandler, { once: true, passive: true });
 
-    // 可选：如果键盘已经弹出（例如切换输入框），也触发一次滚动检查
-    // （这部分逻辑可以根据实际测试效果决定是否需要）
-    // clearTimeout(scrollTimeoutId);
-    // scrollTimeoutId = setTimeout(() => {
-    //     if (document.activeElement === focusedElement) {
-    //         scrollToCenterInViewport(focusedElement);
-    //     }
-    // }, 200);
+    // --- 备用逻辑：如果键盘已弹出时切换焦点 --- 
+    // 如果视口高度已经小于窗口高度 (说明键盘可能已弹出), 立即尝试滚动
+    if (window.innerHeight > visualViewport.height + 50) {
+        // 使用一个稍长的延时，以防 resize 事件还未触发
+        clearTimeout(scrollTimeoutId); // 清除可能存在的 resize 触发的延时
+        scrollTimeoutId = setTimeout(() => {
+            if (document.activeElement === focusedElement) {
+                 // 再次检查键盘是否弹出
+                 if (window.innerHeight > visualViewport.height + 50) {
+                     scrollCursorLineToCenter(focusedElement);
+                 }
+            }
+        }, 200); // 200ms 延时
+    }
 }
 
 // 为需要处理的文本输入框添加 focus 事件监听器
 inputText.addEventListener('focus', handleMobileInputFocus);
-outputText.addEventListener('focus', handleMobileInputFocus);
-// 密码框保持默认行为
-// password.addEventListener('focus', handleMobileInputFocus);
+outputText.addEventListener('focus', handleMobileInputFocus); // Output 也可能需要
+// 密码框是单行，通常不需要特殊处理
+// password.addEventListener('focus', handleMobileInputFocus); 
 
 // --- 结束：移动设备输入框自动滚动 --- 
