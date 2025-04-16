@@ -309,7 +309,7 @@ body {
 
 .mode-switch {
     display: flex;
-    gap: 10px;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
@@ -964,6 +964,7 @@ input[type="password"]:focus {
 
     .mode-switch {
         margin-bottom: 10px;
+        gap: 10px;
     }
 
     .input-section, .output-section {
