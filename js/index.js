@@ -771,4 +771,34 @@ function setOutputText(text) {
     }
     // 重置复制按钮状态
     outputButtons.copy.classList.remove('is-success');
-} 
+}
+
+// Helper function to scroll input into view on mobile
+function scrollInputIntoView(element) {
+    // Basic check for touch devices (common proxy for mobile)
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    if (isMobile) {
+        // Wait a bit for the keyboard to likely appear
+        setTimeout(() => {
+            element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' // Try to center it above the keyboard
+            });
+        }, 300); // 300ms delay, adjust if needed
+    }
+}
+
+// Add focus listeners to relevant inputs
+inputText.addEventListener('focus', () => {
+    scrollInputIntoView(inputText);
+});
+
+password.addEventListener('focus', () => {
+    scrollInputIntoView(password);
+});
+
+// Output text area might not need this if primarily for display
+// outputText.addEventListener('focus', () => {
+//     scrollInputIntoView(outputText);
+// }); 
