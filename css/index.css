@@ -269,12 +269,13 @@ body {
     padding: 30px;
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    /* Change from auto to specific value to ensure space at bottom */
     margin-bottom: auto; 
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
     display: flex; /* Use flexbox for vertical distribution */
     flex-direction: column; /* Stack children vertically */
     flex-grow: 1; /* Allow container to grow and fill body */
+    /* Add min-height to ensure container is always tall enough for base layout */
+    min-height: 440px; 
     /* Add relative positioning for absolute positioning of expanded elements */
     position: relative; 
 }
@@ -449,7 +450,7 @@ textarea {
     border-top-right-radius: 6px;
     font-size: 16px;
     resize: none;
-    min-height: 140px; /* Restore fixed min-height */
+    min-height: 40px; /* Restore fixed min-height */
     height: 140px; /* Restore fixed height */
     flex-grow: 1; /* Allow textarea to grow vertically */
     background: var(--input-bg);
