@@ -776,13 +776,8 @@ function setOutputText(text) {
 // --- 新增：移动设备输入框自动滚动到视图中间 ---
 
 function isMobileDevice() {
-    // 主要基于触摸支持判断
+    // 修改：主要基于触摸支持判断，移除宽度限制，以支持横屏
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-}
-
-function isMobileView() {
-    // 检查是否应用了移动端 CSS (基于宽度)
-    return window.innerWidth <= 768;
 }
 
 function smoothScrollToCenter(element) {
@@ -791,29 +786,29 @@ function smoothScrollToCenter(element) {
     const elementRect = element.getBoundingClientRect();
     const visualViewport = window.visualViewport;
 
-    if (!visualViewport) return;
+    if (!visualViewport) return; // 需要 visualViewport API
 
+    const isMobile = window.innerWidth <= 768;
+    
+    // 计算元素中心相对于视口顶部的距离
     const elementCenterRelativeToViewport = elementRect.top + element.offsetHeight / 2;
+    // 计算视口中心点
     const viewportCenterY = visualViewport.height / 2;
+    
+    // 为移动设备添加额外的偏移量，补偿margin-bottom减少的空间
+    const mobileOffset = isMobile ? 20 : 0; // 移动设备时额外上移20px
 
-    let scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY;
+    // 计算需要滚动的距离 (当前滚动位置 + 元素中心点 - 视口中心点)
+    const scrollTargetY = window.scrollY + elementCenterRelativeToViewport - viewportCenterY - mobileOffset;
 
-    // --- 新增：移动端视图补偿 ---
-    if (isMobileView()) {
-        scrollTargetY -= 40; // 向上多滚动 40px 以补偿移动端减少的 margin
-    }
-    // --- 结束：移动端视图补偿 ---
-
-    // 确保不会滚动超出文档边界 (使用 visualViewport.height)
-    const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
-    const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY));
-
+    // 平滑滚动到目标位置
     window.scrollTo({
-        top: finalScrollY,
+        top: scrollTargetY,
         behavior: 'smooth'
     });
 }
 
+// --- 新增：用于横屏的滚动函数 ---
 function smoothScrollToTop(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
@@ -821,17 +816,16 @@ function smoothScrollToTop(element) {
     const visualViewport = window.visualViewport;
     if (!visualViewport) return;
 
-    const scrollMargin = 10;
-    let scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
+    const isMobile = window.innerWidth <= 768;
+    
+    // 距离顶部的边距，移动设备时增加额外边距
+    const scrollMargin = isMobile ? 30 : 10; // 移动设备时使用更大的边距
+    
+    // 计算目标滚动位置，使元素顶部靠近屏幕顶部
+    const scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
 
-    // --- 新增：移动端视图补偿 ---
-    if (isMobileView()) {
-        scrollTargetY -= 40; // 向上多滚动 40px 以补偿移动端减少的 margin
-    }
-    // --- 结束：移动端视图补偿 ---
-
-    // 确保不会滚动超出文档边界 (使用 visualViewport.height)
-    const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
+    // 确保不会滚动超出文档边界
+    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight;
     const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY));
 
     window.scrollTo({
@@ -841,10 +835,11 @@ function smoothScrollToTop(element) {
 }
 
 let scrollTimeoutId = null;
+let isKeyboardVisible = false;
 
 function handleMobileInputFocus(event) {
     if (!isMobileDevice()) {
-        return;
+        return; // 非移动设备则跳过
     }
 
     const focusedElement = event.target;
@@ -852,27 +847,34 @@ function handleMobileInputFocus(event) {
 
     if (!visualViewport) return;
 
-    // 立即开始滚动
+    // 立即开始滚动，不等待键盘动画
     if (window.innerWidth > window.innerHeight) {
+        // 横屏: 滚动到顶部附近
         smoothScrollToTop(focusedElement);
     } else {
+        // 竖屏: 滚动到中间
         smoothScrollToCenter(focusedElement);
     }
 
     // 监听键盘状态变化
     const viewportResizeHandler = () => {
+        // 清除之前的延时滚动
         clearTimeout(scrollTimeoutId);
+        
+        // 设置一个较短的延时，让键盘动画基本完成
         scrollTimeoutId = setTimeout(() => {
             if (document.activeElement === focusedElement) {
+                // 根据屏幕方向选择滚动方式
                 if (window.innerWidth > window.innerHeight) {
                     smoothScrollToTop(focusedElement);
                 } else {
                     smoothScrollToCenter(focusedElement);
                 }
             }
-        }, 100);
+        }, 100); // 减少延时到 100ms
     };
 
+    // 添加一次性的 resize 监听器
     visualViewport.addEventListener('resize', viewportResizeHandler, { once: true });
 }
 
