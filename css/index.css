@@ -251,6 +251,13 @@ body {
     outline: none !important; /* 解决按压边框闪烁 */
 }
 
+/* Style for smaller menu items */
+.menu-item.small-item {
+    padding: 3px 6px; /* Reduced padding */
+    font-size: 12px; /* Smaller font size */
+    margin: 0 3px; /* Slightly reduced margin */
+}
+
 .menu-item.active {
     background: var(--button-hover);
     color: #000;

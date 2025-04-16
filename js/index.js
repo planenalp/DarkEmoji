@@ -19,8 +19,8 @@ const defaultBtn = document.getElementById('defaultBtn');
 const customBtn = document.getElementById('customBtn');
 const title = document.querySelector('.title');
 const container = document.querySelector('.container'); // Get container element
-const encryptOptionsContainer = document.getElementById('encryptOptions');
-const encodeOptionsContainer = document.getElementById('encodeOptions');
+const encryptOptionsContainer = document.getElementById('optionCipher');
+const encodeOptionsContainer = document.getElementById('optionBase');
 
 // Button groups
 const inputButtons = {
@@ -65,7 +65,7 @@ const decryptState = { input: '', output: '', password: '' };
 // Update subtitle text (Restored)
 function updateSubtitle() {
     if (isDefaultMode) {
-        cipherSubtitle.textContent = 'Default';
+        cipherSubtitle.textContent = `${DEFAULT_ENCRYPT} & ${DEFAULT_ENCODE}`;
     } else {
         // Show selected custom options in subtitle
         cipherSubtitle.textContent = `${currentEncrypt} & ${currentEncode}`;
@@ -88,12 +88,12 @@ function updateButtonActiveStates() {
     defaultBtn.classList.toggle('active', isDefaultMode);
     customBtn.classList.toggle('active', !isDefaultMode);
 
-    // Update Encrypt option buttons
+    // Update Encrypt option items (divs)
     encryptOptionsContainer.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.toggle('active', item.dataset.encrypt === currentEncrypt);
     });
 
-    // Update Encode option buttons
+    // Update Encode option items (divs)
     encodeOptionsContainer.querySelectorAll('.menu-item[data-encode]').forEach(item => {
         item.classList.toggle('active', item.dataset.encode === currentEncode);
     });
@@ -132,22 +132,25 @@ customBtn.addEventListener('click', () => {
 
 // RE-ADD: Event listener for cipherMenu clicks (delegated)
 cipherMenu.addEventListener('click', (e) => {
-    const targetButton = e.target.closest('.menu-item'); // Check if a menu item button was clicked
-    if (!targetButton) return; // Exit if click wasn't on a menu item button
+    const targetItem = e.target.closest('.menu-item'); // Check if a menu item DIV was clicked
+    if (!targetItem || targetItem.closest('.menu-mode-switch')) {
+        // Exit if click wasn't on a menu item OR if it was on Default/Custom buttons
+        return;
+    }
 
     e.stopPropagation(); // Prevent closing the menu immediately
 
     let changed = false;
-    if (targetButton.dataset.encrypt) {
+    if (targetItem.dataset.encrypt) {
         // Encrypt option clicked
-        if (currentEncrypt !== targetButton.dataset.encrypt) {
-            currentEncrypt = targetButton.dataset.encrypt;
+        if (currentEncrypt !== targetItem.dataset.encrypt) {
+            currentEncrypt = targetItem.dataset.encrypt;
             changed = true;
         }
-    } else if (targetButton.dataset.encode) {
+    } else if (targetItem.dataset.encode) {
         // Encode option clicked
-        if (currentEncode !== targetButton.dataset.encode) {
-            currentEncode = targetButton.dataset.encode;
+        if (currentEncode !== targetItem.dataset.encode) {
+            currentEncode = targetItem.dataset.encode;
             changed = true;
         }
     }
