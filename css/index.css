@@ -918,6 +918,18 @@ input[type="password"]:focus {
         font-size: 12px;
     }
 
+    .mode-switch {
+        margin-bottom: 10px;
+    }
+
+    .input-section, .output-section {
+        margin-bottom: 10px;
+    }
+
+    .password-section {
+        margin-bottom: 10px;
+    }
+
     /* Remove specific mobile height for textarea */
     /*
     textarea {
