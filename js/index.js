@@ -803,30 +803,6 @@ function smoothScrollToCenter(element) {
     });
 }
 
-// --- 新增：用于横屏的滚动函数 ---
-function smoothScrollToTop(element) {
-    if (!element || typeof element.getBoundingClientRect !== 'function') return;
-
-    const elementRect = element.getBoundingClientRect();
-    // visualViewport is not strictly needed here but good practice to check
-    const visualViewport = window.visualViewport;
-    if (!visualViewport) return;
-
-    // Calculate target scroll Y position so the element's top is near the top of the screen
-    const scrollMargin = 10; // Small space from the top edge
-    const scrollTargetY = window.scrollY + elementRect.top - scrollMargin;
-
-    // Ensure we don't scroll beyond the document boundaries
-    const maxScrollY = document.documentElement.scrollHeight - window.innerHeight; // Use layout viewport height
-    const finalScrollY = Math.max(0, Math.min(scrollTargetY, maxScrollY)); // Clamp scroll value
-
-    window.scrollTo({
-        top: finalScrollY,
-        behavior: 'smooth'
-    });
-}
-// --- 结束：新增滚动函数 ---
-
 let scrollTimeoutId = null;
 
 function handleMobileInputFocus(event) {
@@ -847,20 +823,12 @@ function handleMobileInputFocus(event) {
         scrollTimeoutId = setTimeout(() => {
             // 再次检查焦点，确保用户没有切换焦点
             if (document.activeElement === focusedElement) {
-                // --- 修改：根据屏幕方向选择滚动方式 ---
-                if (window.innerWidth > window.innerHeight) {
-                    // 横屏: 滚动到顶部附近
-                    smoothScrollToTop(focusedElement);
-                } else {
-                    // 竖屏: 滚动到中间 (保持原逻辑)
-                    smoothScrollToCenter(focusedElement);
-                }
-                // --- 结束：修改 ---
+                smoothScrollToCenter(focusedElement);
             }
-            // 移除监听器，避免重复执行 (listener is already removed by {once: true})
-            // if (visualViewport) {
-            //    visualViewport.removeEventListener('resize', viewportResizeHandler);
-            // }
+            // 移除监听器，避免重复执行
+             if (visualViewport) {
+                visualViewport.removeEventListener('resize', viewportResizeHandler);
+            }
         }, 300); // 300ms 延迟，可根据测试调整
     };
 
@@ -872,19 +840,11 @@ function handleMobileInputFocus(event) {
     clearTimeout(scrollTimeoutId);
     scrollTimeoutId = setTimeout(() => {
         if (document.activeElement === focusedElement) {
-             // 在尝试滚动前移除可能已添加的监听器，避免重复 (Not needed due to {once:true})
-             // if (visualViewport) {
-             //    visualViewport.removeEventListener('resize', viewportResizeHandler);
-             // }
-             // --- 修改：根据屏幕方向选择滚动方式 ---
-             if (window.innerWidth > window.innerHeight) {
-                 // 横屏: 滚动到顶部附近
-                 smoothScrollToTop(focusedElement);
-             } else {
-                 // 竖屏: 滚动到中间 (保持原逻辑)
-                 smoothScrollToCenter(focusedElement);
-             }
-             // --- 结束：修改 ---
+             // 在尝试滚动前移除可能已添加的监听器，避免重复
+             if (visualViewport) {
+                visualViewport.removeEventListener('resize', viewportResizeHandler);
+            }
+            smoothScrollToCenter(focusedElement);
         }
     }, 400); // 稍长一点的延迟作为后备
 }
