@@ -1197,7 +1197,7 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交时刷新页面
+// 防止密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
 });
