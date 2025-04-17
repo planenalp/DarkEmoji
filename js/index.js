@@ -1196,3 +1196,8 @@ passwordButtons.generate.addEventListener('click', () => {
     updatePasswordVisibilityState();
     // ... existing code ...
 });
+
+// 防止密码表单提交时刷新页面
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+});
