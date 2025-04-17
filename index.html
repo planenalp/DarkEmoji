@@ -28,40 +28,21 @@
                     </button>
                 </div>
             </div>
-            
-            <div class="menu-section" id="optionKdf">
-                <div class="menu-header">KDF</div>
-                <div class="menu-row">
-                    <div class="menu-label">Iter:</div>
-                    <div class="menu-options">
-                        <span class="menu-item active" data-kdf-iter="100000">100k</span>
-                        <span class="menu-item" data-kdf-iter="200000">200k</span>
-                        <span class="menu-item" data-kdf-iter="500000">500k</span>
-                        <span class="menu-item" data-kdf-iter="1000000">1M</span>
-                    </div>
+            <div class="menu-section">
+                <div class="menu-header">Cipher Algorithm</div>
+                <div class="menu-mode-switch" id="optionCipher">
+                    <button class="mode-btn mode-btn-menu" data-value="AES-256-GCM"><span>AES-256-GCM</span></button>
+                    <button class="mode-btn mode-btn-menu" data-value="ChaCha20-Poly1305"><span>ChaCha20-Poly1305</span></button>
                 </div>
             </div>
-            
-            <div class="menu-section" id="optionCipher">
-                <div class="menu-header">Cipher</div>
-                <div class="menu-row">
-                    <div class="menu-options">
-                        <span class="menu-item active" data-encrypt="AES-256-GCM">AES-256-GCM</span>
-                        <span class="menu-item" data-encrypt="ChaCha20-Poly1305">ChaCha20-Poly1305</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="menu-section" id="optionBase">
+            <div class="menu-section">
                 <div class="menu-header">Base Encoding</div>
-                <div class="menu-row">
-                    <div class="menu-options">
-                        <span class="menu-item active" data-encode="Base64">Base64</span>
-                        <span class="menu-item" data-encode="Base128">Base128</span>
-                        <span class="menu-item" data-encode="Base256">Base256</span>
-                        <span class="menu-item" data-encode="Base512">Base512</span>
-                        <span class="menu-item" data-encode="Base1024">Base1024</span>
-                    </div>
+                <div class="menu-mode-switch" id="optionBase">
+                    <button class="mode-btn mode-btn-menu" data-value="Base64"><span>Base64</span></button>
+                    <button class="mode-btn mode-btn-menu" data-value="Base128"><span>Base128</span></button>
+                    <button class="mode-btn mode-btn-menu" data-value="Base256"><span>Base256</span></button>
+                    <button class="mode-btn mode-btn-menu" data-value="Base512"><span>Base512</span></button>
+                    <button class="mode-btn mode-btn-menu" data-value="Base1024"><span>Base1024</span></button>
                 </div>
             </div>
         </div>

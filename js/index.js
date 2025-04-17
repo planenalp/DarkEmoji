@@ -20,6 +20,10 @@ const customBtn = document.getElementById('customBtn');
 const title = document.querySelector('.title');
 const container = document.querySelector('.container'); // Get container element
 
+// New Option Groups
+const optionCipherContainer = document.getElementById('optionCipher');
+const optionBaseContainer = document.getElementById('optionBase');
+
 // Button groups
 const inputButtons = {
     expand: document.getElementById('inputExpand'),
@@ -230,94 +234,78 @@ function switchCipherMode(mode) {
     defaultBtn.classList.toggle('active', isDefaultMode);
     customBtn.classList.toggle('active', !isDefaultMode);
     
+    // Update custom option visibility based on mode
+    // (Add logic here if custom options should be hidden/disabled in default mode)
+    // For now, we assume they remain visible/enabled
+    
     if (isDefaultMode) {
         // Reset to default values
         currentEncrypt = 'AES-256-GCM';
         currentEncode = 'Base64';
         
-        // Update menu items to reflect default
-        /*
-        document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.encrypt === currentEncrypt) {
-                item.classList.add('active');
-            }
-        });
-        
-        document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.encode === currentEncode) {
-                item.classList.add('active');
-            }
-        });
-        */
+        // Select the default options visually in the custom sections
+        setActiveOption(optionCipherContainer, 'AES-256-GCM');
+        setActiveOption(optionBaseContainer, 'Base64');
+    } else {
+        // When switching to custom, ensure the current selections are visually active
+        setActiveOption(optionCipherContainer, currentEncrypt);
+        setActiveOption(optionBaseContainer, currentEncode);
     }
-    
+        
     updateSubtitle();
 }
 
-// Handle menu item clicks
-cipherMenu.addEventListener('click', (e) => {
-    const menuItem = e.target.closest('.menu-item');
-    if (!menuItem) return;
+// Helper function to set the active button in an option group
+function setActiveOption(container, value) {
+    if (!container) return;
+    const buttons = container.querySelectorAll('.mode-btn-menu');
+    buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.value === value);
+    });
+}
 
-    e.stopPropagation();
+// Helper function to set up option group behavior
+function setupOptionGroup(container, callback) {
+    if (!container) return;
+    container.addEventListener('click', (e) => {
+        const targetButton = e.target.closest('.mode-btn-menu');
+        if (!targetButton) return;
 
-    if (menuItem.dataset.encrypt) {
-        // Encrypt option clicked
-        handleEncryptOptionClick(menuItem);
-    } else if (menuItem.dataset.encode) {
-        // Encode option clicked
-        handleEncodeOptionClick(menuItem);
-    }
+        const value = targetButton.dataset.value;
+        if (!value) return;
 
-    updateSubtitle();
+        // Update active state within the group
+        setActiveOption(container, value);
+
+        // Call the callback with the selected value
+        if (callback) {
+            callback(value);
+        }
+        
+        // If a custom option is clicked, ensure custom mode is active
+        if (!isDefaultMode) {
+             // No need to switch again if already in custom
+        } else {
+             switchCipherMode('custom'); // Switch to custom if default was active
+        }
+        updateSubtitle(); // Update subtitle after any option change
+    });
+}
+
+// --- Event Listeners ---
+
+// Event listeners for new option groups
+setupOptionGroup(optionCipherContainer, (value) => {
+    currentEncrypt = value;
+    // If custom mode isn't active, switch to it
+    if (isDefaultMode) switchCipherMode('custom'); 
 });
 
-function handleEncryptOptionClick(menuItem) {
-    // Remove active class from all encryption items
-    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Add active class to clicked item
-    menuItem.classList.add('active');
-    
-    // Update encryption state
-    currentEncrypt = menuItem.dataset.encrypt;
-    
-    // Check if we should switch modes
-    updateCipherMode();
-}
-
-function handleEncodeOptionClick(menuItem) {
-    // Remove active class from all encoding items
-    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Add active class to clicked item
-    menuItem.classList.add('active');
-    
-    // Update encoding state
-    currentEncode = menuItem.dataset.encode;
-    
-    // Check if we should switch modes
-    updateCipherMode();
-}
-
-function updateCipherMode() {
-    const defaultEncrypt = defaultBtn.dataset.encrypt;
-    const defaultEncode = defaultBtn.dataset.encode;
-    
-    if (currentEncrypt === defaultEncrypt && currentEncode === defaultEncode) {
-        // If current selections match Default, activate Default mode
-        switchCipherMode('default');
-    } else {
-        // Otherwise, activate Custom mode
-        switchCipherMode('custom');
-    }
-}
+setupOptionGroup(optionBaseContainer, (value) => {
+    currentEncode = value;
+    // If custom mode isn't active, switch to it
+    if (isDefaultMode) switchCipherMode('custom');
+});
 
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {

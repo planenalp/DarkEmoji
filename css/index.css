@@ -1068,27 +1068,4 @@ input[type="text"]:focus {
 .action-btn.is-query .btn-text.query {
     opacity: 1;
     pointer-events: auto; /* Allow interaction */
-}
-
-/* Add margin below the KDF section */
-#optionKdf {
-    margin-bottom: 15px;
-}
-
-/* Smaller font and padding for Cipher and Base options */
-#optionCipher .menu-item,
-#optionBase .menu-item {
-    font-size: 12px;
-    padding: 4px 8px;
-}
-
-.menu-item.active {
-    background: var(--button-hover);
-    color: #000;
-}
-
-.menu-item:active {
-    transform: scale(0.95);
-    background-color: #e9b54d; /* Add active background color */
-    color: #000;              /* Add active text color */
 } 
