@@ -189,6 +189,11 @@ body {
     margin-bottom: 10px;
 }
 
+/* Add margin specifically to the section with Default/Custom buttons */
+.dropdown-menu > .menu-section:first-child {
+    margin-bottom: 15px; /* Increased margin */
+}
+
 .menu-section:last-child {
     margin-bottom: 0;
 }
@@ -260,6 +265,13 @@ body {
     transform: scale(0.95);
     background-color: #e9b54d; /* Add active background color */
     color: #000;              /* Add active text color */
+}
+
+/* Styles for the smaller menu items in the new rows */
+#optionCipher .menu-item,
+#optionBase .menu-item {
+    font-size: 13px; /* Slightly smaller font */
+    padding: 4px 8px; /* Slightly smaller padding */
 }
 
 .container {
