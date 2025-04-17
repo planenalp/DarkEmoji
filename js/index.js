@@ -56,6 +56,97 @@ let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark 
 const encryptState = { input: '', output: '', password: '' };
 const decryptState = { input: '', output: '', password: '' };
 
+// Get references to the new spans in the combined button
+const inputPasteBtn = document.getElementById('inputPaste');
+const pasteTextSpan = inputPasteBtn.querySelector('.paste-text');
+const copyTextSpan = inputPasteBtn.querySelector('.copy-text');
+const pastedTextSpan = inputPasteBtn.querySelector('.pasted-text');
+const copiedTextSpan = inputPasteBtn.querySelector('.copied-text');
+
+// --- References for Password Combined Button ---
+const passwordPasteBtn = document.getElementById('passwordPaste');
+const pwdPasteTextSpan = passwordPasteBtn.querySelector('.paste-text');
+const pwdCopyTextSpan = passwordPasteBtn.querySelector('.copy-text');
+const pwdPastedTextSpan = passwordPasteBtn.querySelector('.pasted-text');
+const pwdCopiedTextSpan = passwordPasteBtn.querySelector('.copied-text');
+
+// --- References for Password Visibility Button ---
+const passwordCopyBtn = document.getElementById('passwordCopy');
+const emptyTextSpan = passwordCopyBtn.querySelector('.empty-text');
+const showTextSpan = passwordCopyBtn.querySelector('.show-text');
+const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
+
+// Function to update the combined input button state (Paste/Copy)
+function updateInputButtonState() {
+    const isEmpty = inputText.value.trim() === '';
+    
+    // Set default state visibility
+    pasteTextSpan.style.opacity = isEmpty ? '1' : '0';
+    pasteTextSpan.style.pointerEvents = isEmpty ? 'auto' : 'none';
+    copyTextSpan.style.opacity = isEmpty ? '0' : '1';
+    copyTextSpan.style.pointerEvents = isEmpty ? 'none' : 'auto';
+
+    // Ensure success states are hidden
+    pastedTextSpan.style.opacity = '0';
+    pastedTextSpan.style.pointerEvents = 'none';
+    copiedTextSpan.style.opacity = '0';
+    copiedTextSpan.style.pointerEvents = 'none';
+    
+    // Remove overall success class if present
+    inputPasteBtn.classList.remove('is-success'); 
+}
+
+// Function to update the combined password button state (Paste/Copy)
+function updatePasswordButtonState() {
+    const isEmpty = password.value.trim() === '';
+
+    // Set default state visibility
+    pwdPasteTextSpan.style.opacity = isEmpty ? '1' : '0';
+    pwdPasteTextSpan.style.pointerEvents = isEmpty ? 'auto' : 'none';
+    pwdCopyTextSpan.style.opacity = isEmpty ? '0' : '1';
+    pwdCopyTextSpan.style.pointerEvents = isEmpty ? 'none' : 'auto';
+
+    // Ensure success states are hidden
+    pwdPastedTextSpan.style.opacity = '0';
+    pwdPastedTextSpan.style.pointerEvents = 'none';
+    pwdCopiedTextSpan.style.opacity = '0';
+    pwdCopiedTextSpan.style.pointerEvents = 'none';
+
+    // Remove overall success class if present
+    passwordPasteBtn.classList.remove('is-success');
+    
+    // Also reset the original Copy button (button 1)
+    passwordButtons.copy.classList.remove('is-success'); 
+}
+
+// Function to update the password visibility button state
+function updatePasswordVisibilityState() {
+    const isEmpty = password.value.trim() === '';
+    const isVisible = password.type === 'text';
+
+    // Reset all states
+    emptyTextSpan.style.opacity = '0';
+    emptyTextSpan.style.pointerEvents = 'none';
+    showTextSpan.style.opacity = '0';
+    showTextSpan.style.pointerEvents = 'none';
+    hideTextSpan.style.opacity = '0';
+    hideTextSpan.style.pointerEvents = 'none';
+
+    if (isEmpty) {
+        // Show Empty state
+        emptyTextSpan.style.opacity = '1';
+        emptyTextSpan.style.pointerEvents = 'auto';
+    } else if (isVisible) {
+        // Show Hide state
+        hideTextSpan.style.opacity = '1';
+        hideTextSpan.style.pointerEvents = 'auto';
+    } else {
+        // Show Show state
+        showTextSpan.style.opacity = '1';
+        showTextSpan.style.pointerEvents = 'auto';
+    }
+}
+
 // Update subtitle text
 function updateSubtitle() {
     cipherSubtitle.textContent = `${currentEncrypt} & ${currentEncode}`;
@@ -277,6 +368,8 @@ function switchMode(mode) {
     passwordButtons.copy.classList.remove('is-success');
     passwordButtons.paste.classList.remove('is-success');
     passwordButtons.generate.classList.remove('is-success');
+
+    updatePasswordVisibilityState();
 }
 
 // Helper function to collapse any expanded textareas
@@ -332,31 +425,39 @@ decryptBtn.addEventListener('click', () => {
     }
 });
 
-// Copy text to clipboard
-function copyToClipboard(textarea) {
-    if (!textarea.value) return; // Do nothing if textarea is empty
+// Copy text to clipboard (Adapted for Input)
+async function copyInputToClipboard() {
+    if (!inputText.value) return false; // Indicate failure if empty
 
-    navigator.clipboard.writeText(textarea.value).then(() => {
-        // Add success class
-        outputButtons.copy.classList.add('is-success');
-    }).catch(err => {
-        console.error('Failed to copy text: ', err);
+    try {
+        await navigator.clipboard.writeText(inputText.value);
+        return true; // Indicate success
+    } catch (err) {
+        console.error('Failed to copy input text: ', err);
         alert('Failed to copy text.');
-    });
+        return false; // Indicate failure
+    }
 }
 
-// Paste text from clipboard
+// Paste text from clipboard (Return success indicator)
 async function pasteFromClipboard(textarea) {
     try {
         const text = await navigator.clipboard.readText();
+        // Check if text was actually read (clipboard might be empty or denied)
+        if (typeof text === 'string') { 
         textarea.value = text;
-        // Add success class
-        inputButtons.paste.classList.add('is-success');
-        // Trigger input event manually to reset button state if user doesn't type
-        // inputText.dispatchEvent(new Event('input')); 
+            // Manually trigger input event AFTER changing value
+            textarea.dispatchEvent(new Event('input', { bubbles: true })); 
+            return true; // Indicate success
+        }
+        return false; // Indicate failure (no text read)
     } catch (err) {
         console.error('Failed to paste text: ', err);
-        alert('Failed to paste text. Browser permissions might be needed.');
+        // Avoid alert if it's just a lack of text/permission denied gracefully
+        if (!err.message.includes('permission')) { 
+           alert('Failed to paste text.'); 
+        }
+        return false; // Indicate failure
     }
 }
 
@@ -372,8 +473,11 @@ function clearTextarea(textarea) {
         // Reset copy button state for output
         outputButtons.copy.classList.remove('is-success');
     } else if (textarea === inputText) {
-        // Reset paste button state for input
-        inputButtons.paste.classList.remove('is-success');
+        // Reset paste button state for input - NOW handled by updateInputButtonState
+        // inputButtons.paste.classList.remove('is-success'); 
+        // --- ADDED: Update the combined button state --- 
+        updateInputButtonState();
+        // --- END ADDED ---
     }
     
     if (wasEmpty) {
@@ -421,7 +525,7 @@ inputButtons.expand.addEventListener('click', (e) => {
     inputText.classList.toggle('expanded');
     inputButtons.expand.classList.toggle('is-success');
     container.classList.toggle('input-expanded', isExpanding);
-
+    
     if (isExpanding) {
         // inputText.focus(); // Removed focus call
     } else {
@@ -429,11 +533,52 @@ inputButtons.expand.addEventListener('click', (e) => {
     }
 });
 
-inputButtons.paste.addEventListener('click', async () => {
-    await pasteFromClipboard(inputText);
-    
-    // 自动设置焦点到输入框
-    // inputText.focus(); // Removed focus call
+// Combined Input Button (Paste/Copy) click listener
+inputPasteBtn.addEventListener('click', async () => {
+    const isEmpty = inputText.value.trim() === '';
+    let success = false;
+
+    if (isEmpty) {
+        // --- PASTE LOGIC ---
+        success = await pasteFromClipboard(inputText);
+        if (success) {
+            // Show 'Pasted' temporarily
+            pasteTextSpan.style.opacity = '0';
+            copyTextSpan.style.opacity = '0';
+            pastedTextSpan.style.opacity = '1';
+            copiedTextSpan.style.opacity = '0';
+            pastedTextSpan.style.pointerEvents = 'auto';
+            
+            inputPasteBtn.classList.add('is-success'); // Add success class
+
+            // After 0.5s, revert based on current content
+            setTimeout(() => {
+                updateInputButtonState(); // This will show Copy if content exists now
+            }, 500);
+        } else {
+           // Handle paste failure? (Optional: show an error state?)
+           // For now, just ensure it stays in Paste mode
+           updateInputButtonState();
+        }
+    } else {
+        // --- COPY LOGIC ---
+        success = await copyInputToClipboard();
+        if (success) {
+            // Show 'Copied' temporarily
+            pasteTextSpan.style.opacity = '0';
+            copyTextSpan.style.opacity = '0';
+            pastedTextSpan.style.opacity = '0';
+            copiedTextSpan.style.opacity = '1';
+            copiedTextSpan.style.pointerEvents = 'auto';
+            
+            inputPasteBtn.classList.add('is-success'); // Add success class
+
+            // After 0.5s, revert to Copy state
+            setTimeout(() => {
+                 updateInputButtonState();
+            }, 500);
+        }
+    }
 });
 
 inputButtons.clear.addEventListener('click', () => {
@@ -463,7 +608,7 @@ outputButtons.expand.addEventListener('click', (e) => {
     outputText.classList.toggle('expanded');
     outputButtons.expand.classList.toggle('is-success');
     container.classList.toggle('output-expanded', isExpanding);
-
+    
     if (isExpanding) {
         // outputText.focus(); // Removed focus call
     } else {
@@ -491,11 +636,10 @@ outputButtons.clear.addEventListener('click', () => {
 
 // Add input listeners to reset button state
 inputText.addEventListener('input', () => {
-    inputButtons.paste.classList.remove('is-success');
-});
-
-outputText.addEventListener('input', () => {
-    outputButtons.copy.classList.remove('is-success');
+    // Update the Paste/Copy button state whenever input changes
+    updateInputButtonState(); 
+    // Original logic for resetting other buttons (if any) can remain
+    // inputButtons.paste.classList.remove('is-success'); // This line is now handled by updateInputButtonState
 });
 
 // Ensure all button clicks prevent default behavior and focus loss
@@ -651,6 +795,9 @@ actionBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
+    updateInputButtonState(); // Initialize the Paste/Copy button
+    updatePasswordButtonState(); // Initialize the Password Paste/Copy button
+    updatePasswordVisibilityState(); // Initialize the Password Visibility button
 });
 
 // Initialize mode
@@ -666,85 +813,97 @@ title.addEventListener('click', () => {
 // Initialize theme
 document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
-// 密码按钮功能实现
-// Copy 密码
-passwordButtons.copy.addEventListener('click', () => {
-    // 如果密码框为空，不执行操作
-    if (!password.value) return;
-
-    navigator.clipboard.writeText(password.value).then(() => {
-        // 添加 success 类显示 Copied
-        passwordButtons.copy.classList.add('is-success');
-        
-        // 自动设置焦点到密码框
-        // password.focus(); // Removed focus call
-    }).catch(err => {
-        console.error('复制密码失败: ', err);
-        alert('复制密码失败');
-    });
-});
-
-// Paste 粘贴密码
-passwordButtons.paste.addEventListener('click', async () => {
+// --- New Function: Copy Password ---
+async function copyPasswordToClipboard() {
+    if (!password.value) return false; // Indicate failure if empty
     try {
-        const text = await navigator.clipboard.readText();
-        password.value = text;
-        
-        // 添加 success 类显示 Pasted
-        passwordButtons.paste.classList.add('is-success');
-        
-        // 重置 Generate 按钮状态
+        await navigator.clipboard.writeText(password.value);
+        return true; // Indicate success
+    } catch (err) {
+        console.error('Failed to copy password: ', err);
+        alert('Failed to copy password.');
+        return false; // Indicate failure
+    }
+}
+
+// Combined Password Button (Button 2 - Paste/Copy) click listener
+passwordPasteBtn.addEventListener('click', async () => {
+    const isEmpty = password.value.trim() === '';
+    let success = false;
+
+    if (isEmpty) {
+        // --- PASTE LOGIC ---
+        success = await pasteFromClipboard(password);
+        if (success) {
+            // Show 'Pasted' temporarily
+            pwdPasteTextSpan.style.opacity = '0';
+            pwdCopyTextSpan.style.opacity = '0';
+            pwdPastedTextSpan.style.opacity = '1';
+            pwdCopiedTextSpan.style.opacity = '0';
+            pwdPastedTextSpan.style.pointerEvents = 'auto';
+            passwordPasteBtn.classList.add('is-success');
+
+            setTimeout(() => {
+                updatePasswordButtonState(); // Shows 'Copy' if content exists
+            }, 500);
+        } else {
+            updatePasswordButtonState(); // Stay in 'Paste' on failure
+        }
+    } else {
+        // --- COPY LOGIC ---
+        success = await copyPasswordToClipboard(); 
+        if (success) {
+            // Show 'Copied' temporarily
+            pwdPasteTextSpan.style.opacity = '0';
+            pwdCopyTextSpan.style.opacity = '0';
+            pwdPastedTextSpan.style.opacity = '0';
+            pwdCopiedTextSpan.style.opacity = '1';
+            pwdCopiedTextSpan.style.pointerEvents = 'auto';
+            passwordPasteBtn.classList.add('is-success');
+            
+            // Also reset the original copy button's success state
+            passwordButtons.copy.classList.remove('is-success');
+
+            setTimeout(() => {
+                updatePasswordButtonState(); // Revert to 'Copy'
+            }, 500);
+        }
+    }
+    // Reset Generate button state if paste/copy occurred
+    if (success) {
         passwordButtons.generate.classList.remove('is-success');
-        
-        // 保存密码到当前模式状态
+        // Save password to current mode state
         if (isEncryptMode) {
             encryptState.password = password.value;
         } else {
             decryptState.password = password.value;
         }
-        
-        // 自动设置焦点到密码框
-        // password.focus(); // Removed focus call
-    } catch (err) {
-        console.error('粘贴密码失败: ', err);
-        alert('粘贴密码失败。可能需要浏览器权限。');
     }
 });
 
 // Clear 清除密码
 passwordButtons.clear.addEventListener('click', () => {
-    // 检查密码框是否为空
     const wasEmpty = password.value.trim() === '';
-    
-    // 无论是否为空，都清空密码框
     password.value = '';
-    // 清空当前模式状态中的密码
     if (isEncryptMode) {
         encryptState.password = '';
     } else {
         decryptState.password = '';
     }
     
+    // Update combined button state AFTER clearing
+    updatePasswordButtonState(); 
+    
     if (wasEmpty) {
-        // 如果原来就是空的，显示 ?????
         passwordButtons.clear.classList.add('is-query');
-        setTimeout(() => {
-            passwordButtons.clear.classList.remove('is-query');
-        }, 500); // 0.5秒后移除
+        setTimeout(() => passwordButtons.clear.classList.remove('is-query'), 500);
     } else {
-        // 如果有内容，显示 Cleared
         passwordButtons.clear.classList.add('is-success');
-        setTimeout(() => {
-            passwordButtons.clear.classList.remove('is-success');
-        }, 500); // 0.5秒后移除
+        setTimeout(() => passwordButtons.clear.classList.remove('is-success'), 500);
     }
     
-    // 重置 Copy, Paste 和 Generate 按钮状态
-    passwordButtons.copy.classList.remove('is-success');
-    passwordButtons.paste.classList.remove('is-success');
+    // Reset Generate button state
     passwordButtons.generate.classList.remove('is-success');
-    
-    // 取消密码框焦点
     password.blur();
 });
 
@@ -754,47 +913,41 @@ passwordButtons.generate.addEventListener('click', () => {
     const length = 16;
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?';
     let generatedPassword = '';
-    
-    // 使用加密安全的随机数生成器
     const randomValues = new Uint32Array(length);
     window.crypto.getRandomValues(randomValues);
-    
     for (let i = 0; i < length; i++) {
         generatedPassword += charset[randomValues[i] % charset.length];
     }
-    
-    // 设置密码值
     password.value = generatedPassword;
-    // 保存密码到当前模式状态
     if (isEncryptMode) {
         encryptState.password = password.value;
     } else {
         decryptState.password = password.value;
     }
-    
-    // 添加 success 类显示 Generated
     passwordButtons.generate.classList.add('is-success');
     
-    // 重置 Copy 和 Paste 按钮状态
-    passwordButtons.copy.classList.remove('is-success');
-    passwordButtons.paste.classList.remove('is-success');
+    // Update combined button state AFTER generating
+    updatePasswordButtonState(); 
     
-    // 自动设置焦点到密码框
-    // password.focus(); // Removed focus call
+    // 0.5秒后恢复到Generate状态
+    setTimeout(() => {
+        passwordButtons.generate.classList.remove('is-success');
+    }, 500);
 });
 
-// 用于设置输出框内容的辅助函数，确保重置复制状态并保存到状态对象
-function setOutputText(text) {
-    outputText.value = text;
-    // 更新当前模式的状态
+// Password input listener
+password.addEventListener('input', () => {
+    // Update the Paste/Copy button state whenever input changes
+    updatePasswordButtonState(); 
+    // Reset Generate button state
+    passwordButtons.generate.classList.remove('is-success');
+    // Save password to current mode state
     if (isEncryptMode) {
-        encryptState.output = text;
+        encryptState.password = password.value;
     } else {
-        decryptState.output = text;
+        decryptState.password = password.value;
     }
-    // 重置复制按钮状态
-    outputButtons.copy.classList.remove('is-success');
-}
+});
 
 // --- 新增：移动设备输入框自动滚动，使光标居中 ---
 
@@ -923,3 +1076,77 @@ outputText.addEventListener('focus', handleMobileInputFocus); // Output 也可�
 // password.addEventListener('focus', handleMobileInputFocus); 
 
 // --- 结束：移动设备输入框自动滚动 --- 
+
+// Password visibility toggle button click handler
+passwordCopyBtn.addEventListener('click', () => {
+    const isEmpty = password.value.trim() === '';
+    if (isEmpty) return; // Do nothing if empty
+
+    const isVisible = password.type === 'text';
+    const cursorPosition = password.selectionStart;
+    const scrollPosition = password.scrollLeft;
+    
+    // 使用 requestAnimationFrame 来确保在下一帧执行
+    requestAnimationFrame(() => {
+        password.type = isVisible ? 'password' : 'text';
+        // 在下一帧恢复光标位置和滚动位置
+        requestAnimationFrame(() => {
+            password.setSelectionRange(cursorPosition, cursorPosition);
+            password.scrollLeft = scrollPosition;
+        });
+    });
+    
+    // Update button state with transition
+    if (isVisible) {
+        // Switching to hidden (Show state)
+        hideTextSpan.style.opacity = '0';
+        hideTextSpan.style.pointerEvents = 'none';
+        showTextSpan.style.opacity = '1';
+        showTextSpan.style.pointerEvents = 'auto';
+    } else {
+        // Switching to visible (Hide state)
+        showTextSpan.style.opacity = '0';
+        showTextSpan.style.pointerEvents = 'none';
+        hideTextSpan.style.opacity = '1';
+        hideTextSpan.style.pointerEvents = 'auto';
+    }
+});
+
+// Update password visibility state when password changes
+password.addEventListener('input', () => {
+    updatePasswordVisibilityState();
+    // Also update the Paste/Copy button state
+    updatePasswordButtonState();
+    // Reset Generate button state
+    passwordButtons.generate.classList.remove('is-success');
+    // Save password to current mode state
+    if (isEncryptMode) {
+        encryptState.password = password.value;
+    } else {
+        decryptState.password = password.value;
+    }
+});
+
+// Initialize password visibility state
+updatePasswordVisibilityState();
+
+// Update password visibility state when mode changes
+function switchMode(mode) {
+    // ... existing code ...
+    updatePasswordVisibilityState();
+    // ... existing code ...
+}
+
+// Update password visibility state when clearing
+passwordButtons.clear.addEventListener('click', () => {
+    // ... existing code ...
+    updatePasswordVisibilityState();
+    // ... existing code ...
+});
+
+// Update password visibility state when generating
+passwordButtons.generate.addEventListener('click', () => {
+    // ... existing code ...
+    updatePasswordVisibilityState();
+    // ... existing code ...
+});

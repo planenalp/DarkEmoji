@@ -65,8 +65,10 @@
                     <span class="btn-text success">Collapse</span>
                 </button>
                 <button class="action-btn" id="inputPaste">
-                    <span class="btn-text default">Paste</span>
-                    <span class="btn-text success">Pasted</span>
+                    <span class="btn-text default paste-text">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;">Copied</span>
                 </button>
                 <button class="action-btn" id="inputClear">
                     <span class="btn-text default">Clear</span>
@@ -84,12 +86,15 @@
             <input type="password" id="password" placeholder="Password (optional)">
             <div class="button-group">
                 <button class="action-btn" id="passwordCopy">
-                    <span class="btn-text default">Copy</span>
-                    <span class="btn-text success">Copied</span>
+                    <span class="btn-text default empty-text">Empty</span>
+                    <span class="btn-text default show-text" style="opacity: 0; pointer-events: none;">Show</span>
+                    <span class="btn-text default hide-text" style="opacity: 0; pointer-events: none;">Hide</span>
                 </button>
                 <button class="action-btn" id="passwordPaste">
-                    <span class="btn-text default">Paste</span>
-                    <span class="btn-text success">Pasted</span>
+                    <span class="btn-text default paste-text">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;">Copied</span>
                 </button>
                 <button class="action-btn" id="passwordClear">
                     <span class="btn-text default">Clear</span>

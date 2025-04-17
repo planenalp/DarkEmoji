@@ -509,7 +509,8 @@ textarea.expanded {
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
-input[type="password"] {
+input[type="password"],
+input[type="text"] {
     width: 100%;
     border: 1px solid var(--input-border);
     border-bottom: none;
@@ -524,19 +525,27 @@ input[type="password"] {
     color: var(--text-color);
     background: var(--input-bg);
     transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
-    -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
-    -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
-    -webkit-user-select: text; /* 允许 iOS Safari 文本选择，因为这是输入框 */
-    -moz-user-select: text; /* 适用于 Firefox */
-    -ms-user-select: text; /* 适用于 IE10+ 和 Edge */
-    user-select: text; /* 标准语法 */
-    outline: none !important; /* 解决按压边框闪烁 */
-    touch-action: manipulation; /* 提高触摸设备响应性能 */
-    transform: none; /* Override scaling effect */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    outline: none !important;
+    touch-action: manipulation;
+    transform: none;
+    /* 添加以下属性来防止闪烁 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 textarea:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="text"]:focus {
     outline: none;
     border-color: var(--button-hover);
 }
