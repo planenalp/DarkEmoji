@@ -543,13 +543,6 @@ input[type="text"] {
     -moz-osx-font-smoothing: grayscale;
 }
 
-textarea:focus,
-input[type="password"]:focus,
-input[type="text"]:focus {
-    outline: none;
-    border-color: var(--button-hover);
-}
-
 /* Handle button-group border color when parent section is focused */
 .input-section.focused .button-group,
 .output-section.focused .button-group,
@@ -564,6 +557,18 @@ input[type="text"]:focus {
 .output-section.focused .button-group > *:not(:last-child),
 .password-section.focused .button-group > *:not(:last-child) {
     border-right-color: var(--button-hover);
+}
+
+/* 修改为只对输入框本身应用焦点样式 */
+input[type="password"]:focus,
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--button-hover);
+}
+
+/* 移除整个section的焦点样式 */
+.password-section.focused {
+    border-color: var(--input-border);
 }
 
 .button-group {
