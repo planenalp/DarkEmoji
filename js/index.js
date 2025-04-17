@@ -786,6 +786,9 @@ function getCursorVerticalOffset(element) {
         return 0;
     }
 
+    // 获取 textarea 的当前滚动位置
+    const scrollTop = element.scrollTop || 0;
+    
     const textBeforeCursor = element.value.substring(0, element.selectionStart);
     const lineCount = (textBeforeCursor.match(/\n/g) || []).length;
 
@@ -811,9 +814,12 @@ function getCursorVerticalOffset(element) {
         lineHeight = 20; // Fallback on error
     }
     
-    // 估算偏移量 = 行数 * 行高
+    // 估算偏移量 = 行数 * 行高，并减去已滚动的距离
     // 添加半行高，使光标行大致居中
-    return (lineCount * lineHeight) + (lineHeight / 2);
+    const rawOffset = (lineCount * lineHeight) + (lineHeight / 2);
+    
+    // 返回相对于可见文本框顶部的偏移量，确保不会小于0
+    return Math.max(0, rawOffset - scrollTop);
 }
 
 // 将包含光标的行滚动到可视区域中间
@@ -823,27 +829,30 @@ function scrollCursorLineToCenter(element) {
     const visualViewport = window.visualViewport;
     if (!visualViewport) return; // 需要 visualViewport API
 
-    // 保存当前的滚动位置
-    const originalScrollTop = element.scrollTop;
-    
-    // 临时将滚动位置重置为顶部，以获取未滚动状态下的位置
-    element.scrollTop = 0;
-    
     const elementRect = element.getBoundingClientRect();
+    
+    // 相对于可见文本框的偏移量
     const cursorOffsetInTextarea = getCursorVerticalOffset(element);
+    
+    // 如果光标在文本框的可见区域内（上部20%~80%），就不滚动页面
+    // 这防止了点击文本框上部时的不必要滚动
+    const visibleTextareaHeight = elementRect.height;
+    if (cursorOffsetInTextarea > visibleTextareaHeight * 0.2 && 
+        cursorOffsetInTextarea < visibleTextareaHeight * 0.8) {
+        // 光标已经在合理的可见区域内，无需滚动
+        return;
+    }
 
-    // 光标相对于文档顶部的绝对位置（基于未滚动状态）
+    // 光标相对于文档顶部的绝对位置
     const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea;
 
-    // 目标滚动位置：将光标置于可视区域的中间
-    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
+    // 目标滚动位置：将光标置于可视区域的中间或略靠上
+    // 使用可视窗口高度的40%位置，而不是50%，这样光标稍微靠上一些
+    const targetScrollY = cursorAbsoluteTop - (visualViewport.height * 0.4);
 
     // 确保滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
     const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
-
-    // 恢复输入框的原始滚动位置
-    element.scrollTop = originalScrollTop;
 
     // 平滑滚动到目标位置
     window.scrollTo({
