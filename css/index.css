@@ -543,7 +543,11 @@ input[type="text"] {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Combined rule: Highlight input/textarea if it has :focus OR its parent section has .focused class */
+.input-section.focused textarea,
 textarea:focus,
+.password-section.focused input[type="password"],
+.password-section.focused input[type="text"], /* Ensure text type is also covered when parent is focused */
 input[type="password"]:focus,
 input[type="text"]:focus {
     outline: none;
