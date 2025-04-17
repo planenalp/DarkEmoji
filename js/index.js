@@ -160,8 +160,8 @@ function initializeMenuState() {
     isDefaultMode = true;
     
     // Set AES-256-GCM and Base64 as active
-    document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
-    document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
+    // document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
+    // document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
 }
 
 // Toggle dropdown menu
@@ -178,6 +178,7 @@ defaultBtn.addEventListener('click', () => {
     switchCipherMode('default');
     
     // Update menu items
+    /*
     document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.remove('active');
         if (item.dataset.encrypt === 'AES-256-GCM') {
@@ -191,6 +192,7 @@ defaultBtn.addEventListener('click', () => {
             item.classList.add('active');
         }
     });
+    */
         
     updateSubtitle();
 });
@@ -202,6 +204,7 @@ customBtn.addEventListener('click', () => {
     switchCipherMode('custom');
     
     // Update menu items
+    /*
     document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.remove('active');
         if (item.dataset.encrypt === 'AES-256-GCM') {
@@ -215,6 +218,7 @@ customBtn.addEventListener('click', () => {
             item.classList.add('active');
         }
     });
+    */
     
     updateSubtitle();
 });
@@ -232,6 +236,7 @@ function switchCipherMode(mode) {
         currentEncode = 'Base64';
         
         // Update menu items to reflect default
+        /*
         document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
             item.classList.remove('active');
             if (item.dataset.encrypt === currentEncrypt) {
@@ -245,6 +250,7 @@ function switchCipherMode(mode) {
                 item.classList.add('active');
             }
         });
+        */
     }
     
     updateSubtitle();
