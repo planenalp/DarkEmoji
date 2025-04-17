@@ -817,25 +817,26 @@ function getCursorVerticalOffset(element) {
 }
 
 // 将包含光标的行滚动到可视区域中间
-function scrollCursorLineToCenter(element) {
-    if (!element || typeof element.getBoundingClientRect !== 'function' || typeof element.scrollTop === 'undefined') return;
+// 参数 scrollTop: 元素聚焦时的内部滚动位置
+function scrollCursorLineToCenter(element, scrollTop) {
+    if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const visualViewport = window.visualViewport;
     if (!visualViewport) return; // 需要 visualViewport API
 
     const elementRect = element.getBoundingClientRect();
+    // cursorOffsetInTextarea 仍然是光标距离文本顶部的偏移
     const cursorOffsetInTextarea = getCursorVerticalOffset(element);
-    const internalScrollTop = element.scrollTop; // 获取 textarea 内部的滚动偏移
 
-    // 光标相对于文档顶部的绝对位置 (考虑内部滚动)
-    // window.scrollY: 页面已滚动的距离
-    // elementRect.top: textarea 顶部相对于视口的位置
-    // cursorOffsetInTextarea: 光标相对于 textarea 内容顶部的位置
-    // internalScrollTop: textarea 内容已向上滚动的距离
-    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea - internalScrollTop;
+    // 计算光标在【当前可见区域】内的偏移
+    // (如果 scrollTop 为 0 或未提供，效果不变)
+    const cursorOffsetRelativeToVisibleTop = cursorOffsetInTextarea - (scrollTop || 0);
 
-    // 目标滚动位置：将光标置于可视区域的中间
-    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
+    // 计算光标在【当前可见区域】的绝对位置
+    const visibleCursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetRelativeToVisibleTop;
+
+    // 目标滚动位置：将【可见光标】置于可视区域的中间
+    const targetScrollY = visibleCursorAbsoluteTop - (visualViewport.height / 2);
 
     // 确保滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
@@ -860,6 +861,9 @@ function handleMobileInputFocus(event) {
 
     if (!visualViewport) return;
 
+    // 记录聚焦时的 scrollTop
+    const initialScrollTop = focusedElement.scrollTop || 0;
+
     // 监听 visualViewport 的 resize 事件 (键盘弹出/收起会触发)
     const viewportResizeHandler = () => {
         // 清除之前的延时滚动，以处理快速的resize事件
@@ -870,28 +874,25 @@ function handleMobileInputFocus(event) {
             // 再次检查当前焦点元素是否还是之前的元素
             if (document.activeElement === focusedElement) {
                  // 检查键盘是否真的弹出了 (视口高度显著减小)
-                 // 可以根据需要调整阈值
-                if (window.innerHeight > visualViewport.height + 50) { 
-                    scrollCursorLineToCenter(focusedElement);
-                }
+                 if (window.innerHeight > visualViewport.height + 50) { 
+                     // 传入聚焦时的 scrollTop
+                     scrollCursorLineToCenter(focusedElement, initialScrollTop);
+                 }
             }
-            // 监听器已通过 { once: true } 自动移除，无需手动移除
-        }, 150); // 150ms 延时，可以根据测试效果调整
+        }, 150); // 150ms 延时
     };
 
     // 添加一次性的 resize 监听器
     visualViewport.addEventListener('resize', viewportResizeHandler, { once: true, passive: true });
 
     // --- 备用逻辑：如果键盘已弹出时切换焦点 --- 
-    // 如果视口高度已经小于窗口高度 (说明键盘可能已弹出), 立即尝试滚动
     if (window.innerHeight > visualViewport.height + 50) {
-        // 使用一个稍长的延时，以防 resize 事件还未触发
-        clearTimeout(scrollTimeoutId); // 清除可能存在的 resize 触发的延时
+        clearTimeout(scrollTimeoutId);
         scrollTimeoutId = setTimeout(() => {
             if (document.activeElement === focusedElement) {
-                 // 再次检查键盘是否弹出
                  if (window.innerHeight > visualViewport.height + 50) {
-                     scrollCursorLineToCenter(focusedElement);
+                     // 传入聚焦时的 scrollTop
+                     scrollCursorLineToCenter(focusedElement, initialScrollTop);
                  }
             }
         }, 200); // 200ms 延时
