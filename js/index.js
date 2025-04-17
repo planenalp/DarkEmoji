@@ -279,17 +279,35 @@ function switchMode(mode) {
     passwordButtons.generate.classList.remove('is-success');
 }
 
+// Helper function to collapse any expanded textareas
+function collapseAllTextareas() {
+    if (inputText.classList.contains('expanded')) {
+        inputText.classList.remove('expanded');
+        inputButtons.expand.classList.remove('is-success');
+        container.classList.remove('input-expanded');
+        inputText.blur(); // Optional: remove focus
+    }
+    if (outputText.classList.contains('expanded')) {
+        outputText.classList.remove('expanded');
+        outputButtons.expand.classList.remove('is-success');
+        container.classList.remove('output-expanded');
+        outputText.blur(); // Optional: remove focus
+    }
+}
+
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        // If already in encrypt mode, perform the same action as action button
+        // If already in encrypt mode, collapse textareas and perform action
+        collapseAllTextareas(); 
+        
         if (!inputText.value.trim()) {
             alert('Please enter some text in the input field.');
             return;
         }
         
         // TODO: Add encryption logic here
-        outputText.value = inputText.value;
+        setOutputText(inputText.value); // Use helper function
     } else {
         // Switch to encrypt mode
         switchMode('encrypt');
@@ -298,14 +316,16 @@ encryptBtn.addEventListener('click', () => {
 
 decryptBtn.addEventListener('click', () => {
     if (!isEncryptMode) {
-        // If already in decrypt mode, perform the same action as action button
+        // If already in decrypt mode, collapse textareas and perform action
+        collapseAllTextareas();
+        
         if (!inputText.value.trim()) {
             alert('Please enter some text in the input field.');
             return;
         }
         
         // TODO: Add decryption logic here
-        outputText.value = inputText.value;
+        setOutputText(inputText.value); // Use helper function
     } else {
         // Switch to decrypt mode
         switchMode('decrypt');
@@ -609,6 +629,9 @@ saveFileArea.addEventListener('click', () => {
 
 // Action button click handler
 actionBtn.addEventListener('click', () => {
+    // Always collapse textareas first when action button is clicked
+    collapseAllTextareas();
+    
     if (!inputText.value.trim()) {
         alert('Please enter some text in the input field.');
         return;
@@ -824,35 +847,23 @@ function scrollCursorLineToCenter(element) {
     if (!visualViewport) return; // 需要 visualViewport API
 
     const elementRect = element.getBoundingClientRect();
-    const cursorOffsetInTextarea = getCursorVerticalOffset(element); // 光标距 textarea 内容顶部的偏移
+    const cursorOffsetInTextarea = getCursorVerticalOffset(element);
 
-    // 计算光标当前位置相对于 visualViewport 顶部的距离
-    // elementRect.top: textarea 顶部相对于 viewport 的位置
-    // cursorOffsetInTextarea: 光标相对于 textarea 内容顶部的位置
-    // element.scrollTop: textarea 内部已滚动的距离
-    const cursorRelativeToViewportTop = elementRect.top + cursorOffsetInTextarea - element.scrollTop;
+    // 光标相对于文档顶部的绝对位置
+    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea;
 
-    // 计算需要滚动页面的距离，以使光标行位于 viewport 的中心
-    // 目标位置 = viewport 高度的一半
-    // 当前位置 = cursorRelativeToViewportTop
-    // 需要滚动的距离 = 当前位置 - 目标位置
-    const scrollAmountNeeded = cursorRelativeToViewportTop - (visualViewport.height / 2);
+    // 目标滚动位置：将光标置于可视区域的中间
+    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
 
-    // 计算最终的页面滚动目标 Y 坐标
-    const targetScrollY = window.scrollY + scrollAmountNeeded;
-
-    // 确保滚动位置在文档的有效范围内
-    // 注意：最大滚动距离应基于 visualViewport 的高度，因为这是实际可见区域
+    // 确保滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
     const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
-    // 只有在需要滚动超过 1 像素时才执行滚动，避免无效操作
-    if (Math.abs(window.scrollY - finalScrollY) > 1) {
-        window.scrollTo({
-            top: finalScrollY,
-            behavior: 'smooth'
-        });
-    }
+    // 平滑滚动到目标位置
+    window.scrollTo({
+        top: finalScrollY,
+        behavior: 'smooth'
+    });
 }
 
 let scrollTimeoutId = null;
