@@ -76,6 +76,9 @@ const emptyTextSpan = passwordCopyBtn.querySelector('.empty-text');
 const showTextSpan = passwordCopyBtn.querySelector('.show-text');
 const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 
+// Flag to prevent focus side-effect during visibility toggle
+let isTogglingPasswordVisibility = false;
+
 // Function to update the combined input button state (Paste/Copy)
 function updateInputButtonState() {
     const isEmpty = inputText.value.trim() === '';
@@ -705,6 +708,8 @@ outputText.addEventListener('blur', () => {
 
 // 为密码框添加焦点事件处理（与输入/输出框保持一致）
 password.addEventListener('focus', () => {
+    // 如果是因切换可见性触发的焦点，则忽略
+    if (isTogglingPasswordVisibility) return; 
     // 密码框获得焦点时，添加高亮
     password.closest('.password-section').classList.add('focused');
 });
@@ -1113,6 +1118,9 @@ passwordCopyBtn.addEventListener('click', () => {
     const isEmpty = password.value.trim() === '';
     if (isEmpty) return; // Do nothing if empty
 
+    // Set flag to prevent focus side-effect
+    isTogglingPasswordVisibility = true;
+
     const isVisible = password.type === 'text';
     const cursorPosition = password.selectionStart;
     const scrollPosition = password.scrollLeft;
@@ -1122,8 +1130,14 @@ passwordCopyBtn.addEventListener('click', () => {
         password.type = isVisible ? 'password' : 'text';
         // 在下一帧恢复光标位置和滚动位置
         requestAnimationFrame(() => {
-            password.setSelectionRange(cursorPosition, cursorPosition);
-            password.scrollLeft = scrollPosition;
+            try {
+                password.setSelectionRange(cursorPosition, cursorPosition);
+                password.scrollLeft = scrollPosition;
+            } catch (e) {
+                console.warn("Could not restore selection/scroll after type change:", e);
+            }
+            // Clear the flag AFTER selection is restored
+            isTogglingPasswordVisibility = false; 
         });
     });
     
