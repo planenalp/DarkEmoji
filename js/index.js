@@ -786,9 +786,6 @@ function getCursorVerticalOffset(element) {
         return 0;
     }
 
-    // 获取 textarea 的当前滚动位置
-    const scrollTop = element.scrollTop || 0;
-    
     const textBeforeCursor = element.value.substring(0, element.selectionStart);
     const lineCount = (textBeforeCursor.match(/\n/g) || []).length;
 
@@ -814,41 +811,31 @@ function getCursorVerticalOffset(element) {
         lineHeight = 20; // Fallback on error
     }
     
-    // 估算偏移量 = 行数 * 行高，并减去已滚动的距离
+    // 估算偏移量 = 行数 * 行高
     // 添加半行高，使光标行大致居中
-    const rawOffset = (lineCount * lineHeight) + (lineHeight / 2);
-    
-    // 返回相对于可见文本框顶部的偏移量，确保不会小于0
-    return Math.max(0, rawOffset - scrollTop);
+    return (lineCount * lineHeight) + (lineHeight / 2);
 }
 
 // 将包含光标的行滚动到可视区域中间
 function scrollCursorLineToCenter(element) {
-    if (!element || typeof element.getBoundingClientRect !== 'function') return;
+    if (!element || typeof element.getBoundingClientRect !== 'function' || typeof element.scrollTop === 'undefined') return;
 
     const visualViewport = window.visualViewport;
     if (!visualViewport) return; // 需要 visualViewport API
 
     const elementRect = element.getBoundingClientRect();
-    
-    // 相对于可见文本框的偏移量
     const cursorOffsetInTextarea = getCursorVerticalOffset(element);
-    
-    // 如果光标在文本框的可见区域内（上部20%~80%），就不滚动页面
-    // 这防止了点击文本框上部时的不必要滚动
-    const visibleTextareaHeight = elementRect.height;
-    if (cursorOffsetInTextarea > visibleTextareaHeight * 0.2 && 
-        cursorOffsetInTextarea < visibleTextareaHeight * 0.8) {
-        // 光标已经在合理的可见区域内，无需滚动
-        return;
-    }
+    const internalScrollTop = element.scrollTop; // 获取 textarea 内部的滚动偏移
 
-    // 光标相对于文档顶部的绝对位置
-    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea;
+    // 光标相对于文档顶部的绝对位置 (考虑内部滚动)
+    // window.scrollY: 页面已滚动的距离
+    // elementRect.top: textarea 顶部相对于视口的位置
+    // cursorOffsetInTextarea: 光标相对于 textarea 内容顶部的位置
+    // internalScrollTop: textarea 内容已向上滚动的距离
+    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea - internalScrollTop;
 
-    // 目标滚动位置：将光标置于可视区域的中间或略靠上
-    // 使用可视窗口高度的40%位置，而不是50%，这样光标稍微靠上一些
-    const targetScrollY = cursorAbsoluteTop - (visualViewport.height * 0.4);
+    // 目标滚动位置：将光标置于可视区域的中间
+    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
 
     // 确保滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
