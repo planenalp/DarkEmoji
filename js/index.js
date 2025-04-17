@@ -159,9 +159,9 @@ function initializeMenuState() {
     customBtn.classList.remove('active');
     isDefaultMode = true;
     
-    // Remove setting active state for specific menu items as they are gone
-    // document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
-    // document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
+    // Set AES-256-GCM and Base64 as active
+    document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
+    document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
 }
 
 // Toggle dropdown menu
@@ -177,8 +177,7 @@ defaultBtn.addEventListener('click', () => {
     currentEncode = 'Base64';
     switchCipherMode('default');
     
-    // Remove menu item updates as they don't exist anymore
-    /*
+    // Update menu items
     document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.remove('active');
         if (item.dataset.encrypt === 'AES-256-GCM') {
@@ -192,35 +191,30 @@ defaultBtn.addEventListener('click', () => {
             item.classList.add('active');
         }
     });
-    */
         
     updateSubtitle();
 });
 
 customBtn.addEventListener('click', () => {
-    // Set custom mode values (example: keep AES, maybe change encoding if needed later)
-    // For now, let's just use the default as a placeholder,
-    // as there are no custom options to select from.
-    currentEncrypt = 'AES-256-GCM'; // Or maybe something else if needed
-    currentEncode = 'Base64'; // Or maybe something else if needed
+    // Always switch to custom mode and set AES-256-GCM and Base1024
+    currentEncrypt = 'AES-256-GCM';
+    currentEncode = 'Base1024';
     switchCipherMode('custom');
     
-    // Remove menu item updates as they don't exist anymore
-    /*
+    // Update menu items
     document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.remove('active');
-        if (item.dataset.encrypt === 'AES-256-GCM') { // Update if custom default changes
+        if (item.dataset.encrypt === 'AES-256-GCM') {
             item.classList.add('active');
         }
     });
     
     document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
         item.classList.remove('active');
-        if (item.dataset.encode === 'Base64') { // Update if custom default changes
+        if (item.dataset.encode === 'Base1024') {
             item.classList.add('active');
         }
     });
-    */
     
     updateSubtitle();
 });
@@ -233,12 +227,11 @@ function switchCipherMode(mode) {
     customBtn.classList.toggle('active', !isDefaultMode);
     
     if (isDefaultMode) {
-        // Reset to default values if switching back to default
+        // Reset to default values
         currentEncrypt = 'AES-256-GCM';
         currentEncode = 'Base64';
         
-        // Remove menu item updates
-        /*
+        // Update menu items to reflect default
         document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
             item.classList.remove('active');
             if (item.dataset.encrypt === currentEncrypt) {
@@ -252,80 +245,73 @@ function switchCipherMode(mode) {
                 item.classList.add('active');
             }
         });
-        */
-    } else {
-        // If switching to custom, perhaps set different defaults?
-        // For now, Custom mode doesn't change the cipher/encode values
-        // unless specific options are added back later.
-        // Let's keep the currentEncrypt/currentEncode as they were,
-        // or set specific custom defaults if desired.
-        // Example: Set custom defaults (if you uncomment this, adjust customBtn listener too)
-        // currentEncrypt = 'ChaCha20-Poly1305';
-        // currentEncode = 'Base1024';
     }
     
     updateSubtitle();
 }
 
-// Handle clicks on menu options (Remove as options are gone)
-/*
+// Handle menu item clicks
 cipherMenu.addEventListener('click', (e) => {
     const menuItem = e.target.closest('.menu-item');
-    if (!menuItem || !customBtn.classList.contains('active')) return; // Only allow clicks in custom mode
+    if (!menuItem) return;
 
-    const encryptOption = menuItem.closest('#optionCipher');
-    const encodeOption = menuItem.closest('#optionBase');
+    e.stopPropagation();
 
-    if (encryptOption) {
+    if (menuItem.dataset.encrypt) {
+        // Encrypt option clicked
         handleEncryptOptionClick(menuItem);
-    } else if (encodeOption) {
+    } else if (menuItem.dataset.encode) {
+        // Encode option clicked
         handleEncodeOptionClick(menuItem);
     }
+
+    updateSubtitle();
 });
 
-// Remove these handlers
 function handleEncryptOptionClick(menuItem) {
-    // Remove active class from all encrypt items
+    // Remove active class from all encryption items
     document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
         item.classList.remove('active');
     });
-    // Add active class to the clicked item
+    
+    // Add active class to clicked item
     menuItem.classList.add('active');
-    // Update current encrypt value
+    
+    // Update encryption state
     currentEncrypt = menuItem.dataset.encrypt;
+    
+    // Check if we should switch modes
     updateCipherMode();
 }
 
 function handleEncodeOptionClick(menuItem) {
-    // Remove active class from all encode items
+    // Remove active class from all encoding items
     document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
         item.classList.remove('active');
     });
-    // Add active class to the clicked item
+    
+    // Add active class to clicked item
     menuItem.classList.add('active');
-    // Update current encode value
+    
+    // Update encoding state
     currentEncode = menuItem.dataset.encode;
+    
+    // Check if we should switch modes
     updateCipherMode();
 }
 
-// Update mode based on selected options
 function updateCipherMode() {
-    // Check if the current selection matches the default
-    const isCurrentDefault = currentEncrypt === 'AES-256-GCM' && currentEncode === 'Base64';
+    const defaultEncrypt = defaultBtn.dataset.encrypt;
+    const defaultEncode = defaultBtn.dataset.encode;
     
-    // If in custom mode and selection matches default, switch to default mode
-    if (!isDefaultMode && isCurrentDefault) {
+    if (currentEncrypt === defaultEncrypt && currentEncode === defaultEncode) {
+        // If current selections match Default, activate Default mode
         switchCipherMode('default');
-    } 
-    // If in default mode and selection doesn't match default, switch to custom mode
-    // This case shouldn't happen anymore since options are gone, but keep for structure?
-    else if (isDefaultMode && !isCurrentDefault) {
-        // switchCipherMode('custom'); // Maybe remove this line too
+    } else {
+        // Otherwise, activate Custom mode
+        switchCipherMode('custom');
     }
-    
-    updateSubtitle();
 }
-*/
 
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {

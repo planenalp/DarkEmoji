@@ -203,13 +203,21 @@ body {
     transition: color 0.3s ease, border-bottom-color 0.3s ease;
 }
 
-/* Remove styles for .menu-row and .menu-options */
-/*
 .menu-row {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 5px 0;
+}
+
+.menu-label {
+    color: var(--menu-text);
+    font-size: 14px;
+    padding: 5px 10px;
+    flex-shrink: 0;
+    width: 60px;
+    font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .menu-options {
@@ -222,7 +230,6 @@ body {
     border-radius: 6px;
     transition: background-color 0.3s ease;
 }
-*/
 
 .menu-item {
     padding: 5px 10px;
