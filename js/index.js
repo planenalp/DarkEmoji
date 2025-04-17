@@ -816,7 +816,7 @@ function getCursorVerticalOffset(element) {
     return (lineCount * lineHeight) + (lineHeight / 2);
 }
 
-// 将包含光标的行滚动到可视区域中间
+// 将包含光标的行滚动到可视区域中间，并确保元素底部可见
 function scrollCursorLineToCenter(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
@@ -829,21 +829,30 @@ function scrollCursorLineToCenter(element) {
 
     // 1. 光标相对于 textarea 可见区域顶部的 Y 坐标
     const cursorRelativeTop = cursorOffsetInTextarea - textareaScrollTop;
-
     // 2. 光标相对于视口顶部的当前 Y 坐标
     const cursorViewportY = elementRect.top + cursorRelativeTop;
-
     // 3. 视口的目标 Y 坐标 (中心点)
     const targetViewportY = visualViewport.height / 2;
+    // 4. 基于光标居中计算的理想滚动差值
+    const scrollDeltaForCursorCenter = cursorViewportY - targetViewportY;
+    // 5. 基于光标居中计算的理想页面滚动位置
+    let targetScrollY = window.scrollY + scrollDeltaForCursorCenter;
 
-    // 4. 需要滚动的差值
-    const scrollDelta = cursorViewportY - targetViewportY;
+    // --- 新增：检查并调整滚动以确保元素底部可见 ---
+    // 计算按 targetScrollY 滚动后，元素底部相对于视口顶部的位置
+    const elementBottomRelativeToDoc = window.scrollY + elementRect.bottom;
+    const predictedElementBottomViewportY = elementBottomRelativeToDoc - targetScrollY;
 
-    // 5. 计算最终页面滚动位置
-    const targetScrollY = window.scrollY + scrollDelta;
+    // 如果元素底部会被键盘遮挡 (低于视口高度)
+    if (predictedElementBottomViewportY > visualViewport.height) {
+        // 计算需要将元素底部滚动到视口底部的滚动位置
+        const scrollNeededToShowBottom = elementBottomRelativeToDoc - visualViewport.height;
+        // 添加一点小边距，防止紧贴底部
+        targetScrollY = scrollNeededToShowBottom + 5;
+    }
+    // --- 结束：新增检查 --- 
 
-    // 确保滚动位置在有效范围内
-    // 使用 visualViewport.height for max scroll calculation when keyboard is likely visible
+    // 确保最终滚动位置在有效范围内
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
     const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
