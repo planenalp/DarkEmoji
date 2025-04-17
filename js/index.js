@@ -817,36 +817,42 @@ function getCursorVerticalOffset(element) {
 }
 
 // 将包含光标的行滚动到可视区域中间
-// 参数 scrollTop: 元素聚焦时的内部滚动位置
-function scrollCursorLineToCenter(element, scrollTop) {
+function scrollCursorLineToCenter(element) {
     if (!element || typeof element.getBoundingClientRect !== 'function') return;
 
     const visualViewport = window.visualViewport;
     if (!visualViewport) return; // 需要 visualViewport API
 
     const elementRect = element.getBoundingClientRect();
-    // cursorOffsetInTextarea 仍然是光标距离文本顶部的偏移
-    const cursorOffsetInTextarea = getCursorVerticalOffset(element);
+    const cursorOffsetInTextarea = getCursorVerticalOffset(element); // 光标距 textarea 内容顶部的偏移
 
-    // 计算光标在【当前可见区域】内的偏移
-    // (如果 scrollTop 为 0 或未提供，效果不变)
-    const cursorOffsetRelativeToVisibleTop = cursorOffsetInTextarea - (scrollTop || 0);
+    // 计算光标当前位置相对于 visualViewport 顶部的距离
+    // elementRect.top: textarea 顶部相对于 viewport 的位置
+    // cursorOffsetInTextarea: 光标相对于 textarea 内容顶部的位置
+    // element.scrollTop: textarea 内部已滚动的距离
+    const cursorRelativeToViewportTop = elementRect.top + cursorOffsetInTextarea - element.scrollTop;
 
-    // 计算光标在【当前可见区域】的绝对位置
-    const visibleCursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetRelativeToVisibleTop;
+    // 计算需要滚动页面的距离，以使光标行位于 viewport 的中心
+    // 目标位置 = viewport 高度的一半
+    // 当前位置 = cursorRelativeToViewportTop
+    // 需要滚动的距离 = 当前位置 - 目标位置
+    const scrollAmountNeeded = cursorRelativeToViewportTop - (visualViewport.height / 2);
 
-    // 目标滚动位置：将【可见光标】置于可视区域的中间
-    const targetScrollY = visibleCursorAbsoluteTop - (visualViewport.height / 2);
+    // 计算最终的页面滚动目标 Y 坐标
+    const targetScrollY = window.scrollY + scrollAmountNeeded;
 
-    // 确保滚动位置在有效范围内
+    // 确保滚动位置在文档的有效范围内
+    // 注意：最大滚动距离应基于 visualViewport 的高度，因为这是实际可见区域
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
     const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
-    // 平滑滚动到目标位置
-    window.scrollTo({
-        top: finalScrollY,
-        behavior: 'smooth'
-    });
+    // 只有在需要滚动超过 1 像素时才执行滚动，避免无效操作
+    if (Math.abs(window.scrollY - finalScrollY) > 1) {
+        window.scrollTo({
+            top: finalScrollY,
+            behavior: 'smooth'
+        });
+    }
 }
 
 let scrollTimeoutId = null;
@@ -861,9 +867,6 @@ function handleMobileInputFocus(event) {
 
     if (!visualViewport) return;
 
-    // 记录聚焦时的 scrollTop
-    const initialScrollTop = focusedElement.scrollTop || 0;
-
     // 监听 visualViewport 的 resize 事件 (键盘弹出/收起会触发)
     const viewportResizeHandler = () => {
         // 清除之前的延时滚动，以处理快速的resize事件
@@ -874,25 +877,28 @@ function handleMobileInputFocus(event) {
             // 再次检查当前焦点元素是否还是之前的元素
             if (document.activeElement === focusedElement) {
                  // 检查键盘是否真的弹出了 (视口高度显著减小)
-                 if (window.innerHeight > visualViewport.height + 50) { 
-                     // 传入聚焦时的 scrollTop
-                     scrollCursorLineToCenter(focusedElement, initialScrollTop);
-                 }
+                 // 可以根据需要调整阈值
+                if (window.innerHeight > visualViewport.height + 50) { 
+                    scrollCursorLineToCenter(focusedElement);
+                }
             }
-        }, 150); // 150ms 延时
+            // 监听器已通过 { once: true } 自动移除，无需手动移除
+        }, 150); // 150ms 延时，可以根据测试效果调整
     };
 
     // 添加一次性的 resize 监听器
     visualViewport.addEventListener('resize', viewportResizeHandler, { once: true, passive: true });
 
     // --- 备用逻辑：如果键盘已弹出时切换焦点 --- 
+    // 如果视口高度已经小于窗口高度 (说明键盘可能已弹出), 立即尝试滚动
     if (window.innerHeight > visualViewport.height + 50) {
-        clearTimeout(scrollTimeoutId);
+        // 使用一个稍长的延时，以防 resize 事件还未触发
+        clearTimeout(scrollTimeoutId); // 清除可能存在的 resize 触发的延时
         scrollTimeoutId = setTimeout(() => {
             if (document.activeElement === focusedElement) {
+                 // 再次检查键盘是否弹出
                  if (window.innerHeight > visualViewport.height + 50) {
-                     // 传入聚焦时的 scrollTop
-                     scrollCursorLineToCenter(focusedElement, initialScrollTop);
+                     scrollCursorLineToCenter(focusedElement);
                  }
             }
         }, 200); // 200ms 延时
