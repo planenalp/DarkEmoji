@@ -363,12 +363,17 @@ function switchMode(mode) {
     }
     
     // 重置所有按钮状态 (除了密码框内容)
-    inputButtons.paste.classList.remove('is-success');
-    outputButtons.copy.classList.remove('is-success');
-    passwordButtons.copy.classList.remove('is-success');
-    passwordButtons.paste.classList.remove('is-success');
+    // inputButtons.paste.classList.remove('is-success'); // Handled by updateInputButtonState
+    outputButtons.copy.classList.remove('is-success'); // Keep this reset for output copy
+    // passwordButtons.copy.classList.remove('is-success'); // Handled by updatePasswordVisibilityState indirectly
+    // passwordButtons.paste.classList.remove('is-success'); // Handled by updatePasswordButtonState
     passwordButtons.generate.classList.remove('is-success');
+    passwordButtons.clear.classList.remove('is-success', 'is-query'); // Also reset clear
+    inputButtons.clear.classList.remove('is-success', 'is-query'); // Also reset clear
 
+    // --- ADD CALLS TO UPDATE BUTTON STATES --- 
+    updateInputButtonState();
+    updatePasswordButtonState();
     updatePasswordVisibilityState();
 }
 
@@ -400,7 +405,7 @@ encryptBtn.addEventListener('click', () => {
         }
         
         // TODO: Add encryption logic here
-        setOutputText(inputText.value); // Use helper function
+        outputText.value = inputText.value; // Directly assign value for now
     } else {
         // Switch to encrypt mode
         switchMode('encrypt');
@@ -418,7 +423,7 @@ decryptBtn.addEventListener('click', () => {
         }
         
         // TODO: Add decryption logic here
-        setOutputText(inputText.value); // Use helper function
+        outputText.value = inputText.value; // Directly assign value for now
     } else {
         // Switch to decrypt mode
         switchMode('decrypt');
@@ -457,6 +462,29 @@ async function pasteFromClipboard(textarea) {
         if (!err.message.includes('permission')) { 
            alert('Failed to paste text.'); 
         }
+        return false; // Indicate failure
+    }
+}
+
+// --- NEW: Generic Copy to Clipboard Function ---
+async function copyToClipboard(textareaElement, buttonElement) {
+    const textToCopy = textareaElement.value;
+    
+    if (!textToCopy.trim()) { // If empty or only whitespace
+        buttonElement.classList.add('is-query');
+        setTimeout(() => buttonElement.classList.remove('is-query'), 500);
+        return false; // Indicate failure (nothing to copy)
+    }
+
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        buttonElement.classList.add('is-success');
+        setTimeout(() => buttonElement.classList.remove('is-success'), 500);
+        return true; // Indicate success
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text.');
+        // Optionally add an 'is-error' class here if needed
         return false; // Indicate failure
     }
 }
@@ -616,10 +644,8 @@ outputButtons.expand.addEventListener('click', (e) => {
     }
 });
 
-outputButtons.copy.addEventListener('click', () => {
-    copyToClipboard(outputText);
-    
-    // 自动设置焦点到输出框
+outputButtons.copy.addEventListener('click', async () => {
+    await copyToClipboard(outputText, outputButtons.copy);
     // outputText.focus(); // Removed focus call
 });
 
@@ -784,10 +810,10 @@ actionBtn.addEventListener('click', () => {
     // TODO: Add encryption/decryption logic here
     if (isEncryptMode) {
         // Hide logic
-        setOutputText(inputText.value);
+        outputText.value = inputText.value;
     } else {
         // Show logic
-        setOutputText(inputText.value);
+        outputText.value = inputText.value;
     }
 });
 
@@ -919,6 +945,9 @@ passwordButtons.generate.addEventListener('click', () => {
         generatedPassword += charset[randomValues[i] % charset.length];
     }
     password.value = generatedPassword;
+    // 强制设置为密码类型（隐藏）
+    password.type = 'password'; 
+    
     if (isEncryptMode) {
         encryptState.password = password.value;
     } else {
@@ -928,6 +957,8 @@ passwordButtons.generate.addEventListener('click', () => {
     
     // Update combined button state AFTER generating
     updatePasswordButtonState(); 
+    // 更新可见性按钮状态
+    updatePasswordVisibilityState(); 
     
     // 0.5秒后恢复到Generate状态
     setTimeout(() => {
@@ -1130,12 +1161,14 @@ password.addEventListener('input', () => {
 // Initialize password visibility state
 updatePasswordVisibilityState();
 
-// Update password visibility state when mode changes
+// Update password visibility state when mode changes -- REMOVING DUPLICATE FUNCTION
+/*
 function switchMode(mode) {
     // ... existing code ...
     updatePasswordVisibilityState();
     // ... existing code ...
 }
+*/
 
 // Update password visibility state when clearing
 passwordButtons.clear.addEventListener('click', () => {
