@@ -1068,4 +1068,33 @@ input[type="text"]:focus {
 .action-btn.is-query .btn-text.query {
     opacity: 1;
     pointer-events: auto; /* Allow interaction */
+}
+
+/* Visually hide elements while keeping them accessible */
+.visually-hidden-username {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    border: 0;
+    padding: 0;
+    margin: -1px;
+}
+
+/* Ensure container adjusts for expanded textareas */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: padding 0.3s ease, min-height 0.3s ease;
+    min-height: 340px; /* Minimum height for expanded sections */
 } 

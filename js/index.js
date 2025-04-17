@@ -393,16 +393,6 @@ function collapseAllTextareas() {
     }
 }
 
-// 检查是否应该保存密码
-function checkPasswordSave() {
-    if (password.value.trim() && !password.dataset.saved) {
-        if (confirm('Do you want to save this password?')) {
-            password.dataset.saved = 'true';
-            // 这里可以添加额外的密码保存逻辑
-        }
-    }
-}
-
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
@@ -413,9 +403,6 @@ encryptBtn.addEventListener('click', () => {
             alert('Please enter some text in the input field.');
             return;
         }
-        
-        // 检查是否保存密码
-        checkPasswordSave();
         
         // TODO: Add encryption logic here
         outputText.value = inputText.value; // Directly assign value for now
@@ -434,9 +421,6 @@ decryptBtn.addEventListener('click', () => {
             alert('Please enter some text in the input field.');
             return;
         }
-        
-        // 检查是否保存密码
-        checkPasswordSave();
         
         // TODO: Add decryption logic here
         outputText.value = inputText.value; // Directly assign value for now
@@ -822,9 +806,6 @@ actionBtn.addEventListener('click', () => {
         alert('Please enter some text in the input field.');
         return;
     }
-    
-    // 检查是否保存密码
-    checkPasswordSave();
     
     // TODO: Add encryption/decryption logic here
     if (isEncryptMode) {
