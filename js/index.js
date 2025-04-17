@@ -825,14 +825,25 @@ function scrollCursorLineToCenter(element) {
 
     const elementRect = element.getBoundingClientRect();
     const cursorOffsetInTextarea = getCursorVerticalOffset(element);
+    const textareaScrollTop = element.scrollTop;
 
-    // 光标相对于文档顶部的绝对位置
-    const cursorAbsoluteTop = window.scrollY + elementRect.top + cursorOffsetInTextarea;
+    // 1. 光标相对于 textarea 可见区域顶部的 Y 坐标
+    const cursorRelativeTop = cursorOffsetInTextarea - textareaScrollTop;
 
-    // 目标滚动位置：将光标置于可视区域的中间
-    const targetScrollY = cursorAbsoluteTop - (visualViewport.height / 2);
+    // 2. 光标相对于视口顶部的当前 Y 坐标
+    const cursorViewportY = elementRect.top + cursorRelativeTop;
+
+    // 3. 视口的目标 Y 坐标 (中心点)
+    const targetViewportY = visualViewport.height / 2;
+
+    // 4. 需要滚动的差值
+    const scrollDelta = cursorViewportY - targetViewportY;
+
+    // 5. 计算最终页面滚动位置
+    const targetScrollY = window.scrollY + scrollDelta;
 
     // 确保滚动位置在有效范围内
+    // 使用 visualViewport.height for max scroll calculation when keyboard is likely visible
     const maxScrollY = document.documentElement.scrollHeight - visualViewport.height;
     const finalScrollY = Math.max(0, Math.min(targetScrollY, maxScrollY));
 
