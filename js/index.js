@@ -841,6 +841,47 @@ document.addEventListener('DOMContentLoaded', () => {
     updateInputButtonState(); // Initialize the Paste/Copy button
     updatePasswordButtonState(); // Initialize the Password Paste/Copy button
     updatePasswordVisibilityState(); // Initialize the Password Visibility button
+
+    // Language Selector Logic
+    const languageLink = document.getElementById('languageLink');
+    const languageDropdown = document.getElementById('languageDropdown');
+    const languageOptions = document.querySelectorAll('.language-option');
+
+    if (languageLink && languageDropdown && languageOptions.length > 0) {
+        languageLink.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            languageDropdown.classList.toggle('show');
+        });
+
+        languageOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const selectedLanguageText = option.textContent;
+                languageLink.textContent = selectedLanguageText;
+                languageDropdown.classList.remove('show');
+                // Add code here to actually change the site language if needed
+                // e.g., load different text resources based on option.dataset.lang
+            });
+        });
+
+        // Close dropdown if clicked outside
+        window.addEventListener('click', (event) => {
+            if (!languageLink.contains(event.target) && !languageDropdown.contains(event.target)) {
+                if (languageDropdown.classList.contains('show')) {
+                    languageDropdown.classList.remove('show');
+                }
+            }
+        });
+    }
+
+    // Initial setup (e.g., load saved language preference if any)
+    // const savedLang = localStorage.getItem('language');
+    // if (savedLang) {
+    //     const matchingOption = Array.from(languageOptions).find(opt => opt.dataset.lang === savedLang);
+    //     if (matchingOption) {
+    //         languageLink.textContent = matchingOption.textContent;
+    //         // Add code here to apply the saved language
+    //     }
+    // }
 });
 
 // Initialize mode

@@ -1095,3 +1095,87 @@ input[type="text"]:focus {
     pointer-events: auto; /* Allow interaction */
 }
 
+/* Language Selector Styles */
+.language-selector {
+    position: relative;
+    display: inline-block; /* Or adjust as needed */
+}
+
+#languageLink {
+    cursor: pointer;
+    /* Inherit styles from .footer a */
+}
+
+.language-dropdown {
+    /* display: none; */ /* Hidden by default - REMOVED for transition */
+    position: absolute;
+    bottom: 100%; /* Position above the link */
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    transform-origin: bottom center; /* Change origin for upward animation */
+    background: var(--menu-bg);
+    border-radius: 6px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    padding: 10px; /* Match dropdown-menu padding */
+    z-index: 1000; /* Match dropdown-menu z-index */
+    opacity: 0;
+    pointer-events: none;
+    min-width: 100px; /* Adjust as needed */
+    max-width: calc(100vw - 40px); /* Match dropdown-menu */
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    margin-bottom: 5px; /* Space between link and dropdown */
+}
+
+.language-dropdown.show {
+    /* display: block; */ /* Show when active - REMOVED for transition */
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+    pointer-events: auto;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Full width within dropdown */
+    margin-bottom: 10px; /* Add spacing between options */
+    height: 30px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--button-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--button-text);
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    outline: none !important;
+}
+
+.language-option:last-child {
+    margin-bottom: 0; /* Remove margin from last option */
+}
+
+.language-option:hover {
+    /* Match hover from @media (any-hover: hover) */
+    background: var(--button-hover-bg);
+    color: var(--button-hover-color);
+}
+
+.language-option:active {
+     /* Match active state */
+    background-color: var(--button-active-hover-bg);
+    color: var(--button-active-hover-color);
+    transform: scale(0.95);
+}
+
+/* Optional: Add active state indication if needed */
+/* .language-option.active { ... } */
+
