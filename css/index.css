@@ -917,7 +917,6 @@ input[type="text"]:focus {
     
     .subtitle {
         font-size: 15px;
-        padding: 0 5px;
     }
 
     .footer {
@@ -927,7 +926,6 @@ input[type="text"]:focus {
     /* Add matching responsive styles for footer link */
     .footer a {
         font-size: 15px;
-        padding: 0 5px;
     }
     
     .container {
