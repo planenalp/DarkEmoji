@@ -159,7 +159,7 @@ body {
     background: var(--menu-bg);
     border-radius: 6px;
     box-shadow: 0 4px 6px var(--shadow-color);
-    padding: 10px;
+    padding: 20px;
     z-index: 1000;
     /* Restore opacity/pointer-events for transition */
     opacity: 0;
@@ -171,11 +171,9 @@ body {
     /* Remove margin-top */
     /* margin-top: 5px; */
     transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Center inline-block/inline-flex children */
+    text-align: center;
 }
-
-/* Remove pointer-events from base style if using display none/block */
-/* opacity: 0; */
-/* pointer-events: none; */
 
 .dropdown-menu.show {
     /* Remove display: block */
@@ -185,22 +183,19 @@ body {
     pointer-events: auto;
 }
 
-.menu-section {
+/* Add margin below the first switch */
+#defaultCustomSwitch {
+    background: none;
+    padding: 0;
+    margin-bottom: 20px;
+    gap: 20px;
+    /* Ensure it still behaves like a block-level flex container */
+    display: flex; 
+}
+
+/* Add margin below other switches */
+#optionCipher {
     margin-bottom: 10px;
-}
-
-.menu-section:last-child {
-    margin-bottom: 0;
-}
-
-.menu-header {
-    font-weight: bold;
-    color: var(--menu-text);
-    padding: 5px 10px;
-    border-bottom: 1px solid var(--menu-border);
-    margin-bottom: 5px;
-    text-align: center;
-    transition: color 0.3s ease, border-bottom-color 0.3s ease;
 }
 
 .menu-row {
@@ -745,18 +740,49 @@ input[type="text"]:focus {
 }
 
 .menu-mode-switch {
-    margin: 5px 0 15px;
+    /* margin: 5px 0 15px; */
     justify-content: center;
-    display: flex; /* Ensure it behaves like a block for background */
-    background: var(--button-bg); /* Change background to button background variable */
-    padding: 5px; /* Add some padding to mimic menu-options spacing */
-    border-radius: 6px; /* Add border-radius like menu-options */
+    display: inline-flex; /* Change to inline-flex to shrink-wrap content */
+    background: var(--button-bg); /* Base background for Cipher/Base rows */
+    padding: 5px; /* Base padding for Cipher/Base rows */
+    border-radius: 6px; /* Base border-radius for Cipher/Base rows */
+    /* Add gap for spacing between buttons in Cipher/Base rows */
+    gap: 5px;
+}
+
+/* NEW: Apply no background/padding to the first switch via ID */
+#defaultCustomSwitch {
+    background: none;
+    padding: 0;
+    margin-bottom: 20px;
+    gap: 20px;
+    /* Override gap from .menu-mode-switch for this specific element */
+    /* Ensure it still behaves like a block-level flex container */
+    display: flex; 
+}
+
+/* Add margin below other switches */
+#optionCipher {
+    margin-bottom: 10px;
 }
 
 .mode-btn-menu {
     height: 30px;
     padding: 5px 10px;
     font-size: 14px;
+    /* Inherit flex: 1 from .mode-btn by default */
+}
+
+/* NEW: Prevent stretching and reduce padding for #optionCipher buttons */
+#optionCipher .mode-btn-menu {
+    flex: initial; /* Don't grow/shrink, use natural width */
+    padding: 5px 5px; /* Reduce horizontal padding */
+}
+
+/* NEW: Remove border from Cipher and Base buttons via IDs */
+#optionCipher .mode-btn-menu,
+#optionBase .mode-btn-menu {
+    border: none;
 }
 
 .mode-btn-menu span {
@@ -950,7 +976,12 @@ input[type="text"]:focus {
     .dropdown-menu {
         /* Override min-width to allow shrinking */
         min-width: auto;
-        padding: 8px;
+        padding: 10px;
+    }
+
+    #defaultCustomSwitch {
+    margin-bottom: 15px;
+    gap: 10px;
     }
 
     .menu-item {
@@ -958,11 +989,6 @@ input[type="text"]:focus {
         padding: 4px 8px;
         /* Slightly reduce margin for better fit */
         margin: 0 2px;
-    }
-
-    .menu-mode-switch {
-        margin: 5px 0 10px;
-        gap: 5px;
     }
 
     .mode-btn-menu {
