@@ -887,8 +887,7 @@ input[type="text"]:focus {
 @media (max-width: 768px) {
     body {
         padding: 10px;
-        /* Add padding for safe area at the bottom */
-        padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+        min-height: -webkit-fill-available; /* 使用实际可用高度 */
     }
     
     .title {
@@ -906,7 +905,8 @@ input[type="text"]:focus {
     }
 
     .footer {
-        margin-top: 10px; /* Add some space above the footer */
+        margin-top: 10px;
+        margin-bottom: env(safe-area-inset-bottom, 10px); /* 考虑底部安全区域 */
     }
 
     /* Add matching responsive styles for footer link */
@@ -917,10 +917,9 @@ input[type="text"]:focus {
     
     .container {
         padding: 10px;
-        margin-bottom: 0; /* Prevent extra space at bottom on mobile */
-        /* min-height: 360px; */
-        /* body padding 10px + Title 64px + Subtitle 26px+ Subtitle bottom 10px + container bottom 10px = 120px */
-        min-height: calc(100dvh - 120px);
+        margin-bottom: 0;
+        /* 使用更精确的高度计算 */
+        min-height: calc(100dvh - 120px - env(safe-area-inset-bottom, 0px));
     }
 
     /* 调整 Expand 状态下的样式以利用额外空间 */
@@ -928,10 +927,10 @@ input[type="text"]:focus {
     .container.output-expanded .output-section {
         flex-grow: 1;
         opacity: 1;
-        max-height: none; /* 移除 max-height 限制 */
-        min-height: 80px; /* 保持最小高度 */
+        max-height: none;
+        min-height: 80px;
         padding-bottom: 40px;
-        margin-bottom: 10px; /* 使用移动端的 margin */
+        margin-bottom: 10px;
         pointer-events: auto;
     }
 
@@ -955,8 +954,8 @@ input[type="text"]:focus {
     /* 调整 textarea 在移动端的样式 */
     textarea {
         min-height: 40px;
-        height: auto; /* 允许高度自适应 */
-        flex-grow: 1; /* 允许填充可用空间 */
+        height: auto;
+        flex-grow: 1;
     }
 
     /* 调整 expanded textarea 的样式 */
@@ -967,7 +966,6 @@ input[type="text"]:focus {
     }
 
     .dropdown-menu {
-        /* Override min-width to allow shrinking */
         min-width: auto;
         padding: 10px;
     }
