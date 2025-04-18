@@ -855,9 +855,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         languageOptions.forEach(option => {
             option.addEventListener('click', () => {
+                // Remove active class from all options first
+                languageOptions.forEach(opt => opt.classList.remove('active'));
+                // Add active class to the clicked option
+                option.classList.add('active');
+
                 const selectedLanguageText = option.textContent;
                 languageLink.textContent = selectedLanguageText;
-                languageDropdown.classList.remove('show');
+                // languageDropdown.classList.remove('show'); // REMOVED: Don't close immediately
                 // Add code here to actually change the site language if needed
                 // e.g., load different text resources based on option.dataset.lang
             });

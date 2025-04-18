@@ -1177,5 +1177,14 @@ input[type="text"]:focus {
 }
 
 /* Optional: Add active state indication if needed */
-/* .language-option.active { ... } */
+.language-option.active {
+    /* Match .mode-btn.active */
+    background: var(--button-hover);
+    color: var(--button-active-hover-color);
+}
+
+.language-option.active:hover {
+     /* Match .mode-btn.active:hover */
+     background: var(--button-active-hover-bg);
+}
 
