@@ -820,6 +820,165 @@ input[type="text"]:focus {
     filter: none;
 }
 
+/* Remove scaling and change color for active state inside button-group */
+.button-group > .action-btn:active,
+.button-group > .file-drop-area:active,
+#saveFileArea:active { /* Add specific ID for higher specificity */
+    background-color: var(--button-active-hover-bg); /* Use var */
+    color: var(--button-active-hover-color); /* Use var */
+    transform: none; /* Override scaling effect */
+}
+
+/* Ensure file-msg color changes too */
+.button-group > .file-drop-area:active .file-msg,
+#saveFileArea:active .file-msg { /* Add specific ID */
+    color: var(--button-active-hover-color); /* Use var */
+}
+
+/* General active state outside button-group (if needed elsewhere) */
+.action-btn:active,
+.file-drop-area:active {
+    /* Keep or remove based on whether scaling is desired elsewhere */
+    transform: scale(0.95);
+}
+
+/* Styles for Action Button Text (Copy/Paste/Clear/etc.) */
+.action-btn#inputPaste,
+.action-btn#outputCopy,
+.action-btn#inputClear,
+.action-btn#outputClear,
+.action-btn#inputExpand, /* Re-add expand buttons */
+.action-btn#outputExpand,
+.action-btn#passwordCopy,
+.action-btn#passwordPaste,
+.action-btn#passwordClear,
+.action-btn#passwordGenerate {
+    position: relative;
+    overflow: hidden; /* Hide overflowing text if needed */
+}
+
+/* Restore original button text styles */
+.action-btn .btn-text {
+    display: flex; /* Use flex to center content */
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Prevent interacting with the hidden span */
+}
+
+.action-btn .btn-text.default {
+    opacity: 1;
+    pointer-events: auto; /* Allow interaction */
+}
+
+.action-btn .btn-text.success,
+.action-btn .btn-text.query {
+    opacity: 0;
+    pointer-events: none; /* Prevent interacting with the hidden span */
+}
+
+/* Specific rules for buttons that DO have changing text */
+.action-btn.is-success .btn-text.default,
+.action-btn.is-success .btn-text.query,
+.action-btn.is-query .btn-text.default,
+.action-btn.is-query .btn-text.success {
+    opacity: 0;
+    pointer-events: none; /* Prevent interaction */
+}
+
+.action-btn.is-success .btn-text.success,
+.action-btn.is-query .btn-text.query {
+    opacity: 1;
+    pointer-events: auto; /* Allow interaction */
+}
+
+/* Language Selector Styles */
+.language-selector {
+    position: relative;
+    display: inline-block; /* Or adjust as needed */
+}
+
+#languageLink {
+    cursor: pointer;
+    /* Inherit styles from .footer a */
+}
+
+.language-dropdown {
+    /* display: none; */ /* Hidden by default - REMOVED for transition */
+    position: absolute;
+    bottom: 100%; /* Position above the link */
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    transform-origin: bottom center; /* Change origin for upward animation */
+    background: var(--menu-bg);
+    border-radius: 6px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    padding: 10px; /* Match dropdown-menu padding */
+    z-index: 1000; /* Match dropdown-menu z-index */
+    opacity: 0;
+    pointer-events: none;
+    min-width: 100px; /* Adjust as needed */
+    max-width: calc(100vw - 40px); /* Match dropdown-menu */
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    margin-bottom: 5px; /* Space between link and dropdown */
+}
+
+.language-dropdown.show {
+    /* display: block; */ /* Show when active - REMOVED for transition */
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+    pointer-events: auto;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Full width within dropdown */
+    margin-bottom: 10px; /* Add spacing between options */
+    height: 30px;
+    font-size: 14px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--button-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--button-text);
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    outline: none !important;
+}
+
+.language-option:last-child {
+    margin-bottom: 0; /* Remove margin from last option */
+}
+
+.language-option:active {
+     /* Match active state */
+    background-color: var(--button-active-hover-bg);
+    color: var(--button-active-hover-color);
+    transform: scale(0.95);
+}
+
+/* Optional: Add active state indication if needed */
+.language-option.active {
+    /* Match .mode-btn.active */
+    background: var(--button-hover);
+    color: var(--button-active-hover-color);
+}
+
 /* 处理所有悬停效果，仅在支持悬停的设备上应用 */
 @media (any-hover: hover) {
     .title:hover,
@@ -1028,164 +1187,3 @@ input[type="text"]:focus {
         font-size: 12px;
     }
 }
-
-/* Remove scaling and change color for active state inside button-group */
-.button-group > .action-btn:active,
-.button-group > .file-drop-area:active,
-#saveFileArea:active { /* Add specific ID for higher specificity */
-    background-color: var(--button-active-hover-bg); /* Use var */
-    color: var(--button-active-hover-color); /* Use var */
-    transform: none; /* Override scaling effect */
-}
-
-/* Ensure file-msg color changes too */
-.button-group > .file-drop-area:active .file-msg,
-#saveFileArea:active .file-msg { /* Add specific ID */
-    color: var(--button-active-hover-color); /* Use var */
-}
-
-/* General active state outside button-group (if needed elsewhere) */
-.action-btn:active,
-.file-drop-area:active {
-    /* Keep or remove based on whether scaling is desired elsewhere */
-    transform: scale(0.95);
-}
-
-/* Styles for Action Button Text (Copy/Paste/Clear/etc.) */
-.action-btn#inputPaste,
-.action-btn#outputCopy,
-.action-btn#inputClear,
-.action-btn#outputClear,
-.action-btn#inputExpand, /* Re-add expand buttons */
-.action-btn#outputExpand,
-.action-btn#passwordCopy,
-.action-btn#passwordPaste,
-.action-btn#passwordClear,
-.action-btn#passwordGenerate {
-    position: relative;
-    overflow: hidden; /* Hide overflowing text if needed */
-}
-
-/* Restore original button text styles */
-.action-btn .btn-text {
-    display: flex; /* Use flex to center content */
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transition: opacity 0.3s ease;
-    pointer-events: none; /* Prevent interacting with the hidden span */
-}
-
-.action-btn .btn-text.default {
-    opacity: 1;
-    pointer-events: auto; /* Allow interaction */
-}
-
-.action-btn .btn-text.success,
-.action-btn .btn-text.query {
-    opacity: 0;
-    pointer-events: none; /* Prevent interacting with the hidden span */
-}
-
-/* Specific rules for buttons that DO have changing text */
-.action-btn.is-success .btn-text.default,
-.action-btn.is-success .btn-text.query,
-.action-btn.is-query .btn-text.default,
-.action-btn.is-query .btn-text.success {
-    opacity: 0;
-    pointer-events: none; /* Prevent interaction */
-}
-
-.action-btn.is-success .btn-text.success,
-.action-btn.is-query .btn-text.query {
-    opacity: 1;
-    pointer-events: auto; /* Allow interaction */
-}
-
-/* Language Selector Styles */
-.language-selector {
-    position: relative;
-    display: inline-block; /* Or adjust as needed */
-}
-
-#languageLink {
-    cursor: pointer;
-    /* Inherit styles from .footer a */
-}
-
-.language-dropdown {
-    /* display: none; */ /* Hidden by default - REMOVED for transition */
-    position: absolute;
-    bottom: 100%; /* Position above the link */
-    left: 50%;
-    transform: translateX(-50%) scale(0.8);
-    transform-origin: bottom center; /* Change origin for upward animation */
-    background: var(--menu-bg);
-    border-radius: 6px;
-    box-shadow: 0 4px 6px var(--shadow-color);
-    padding: 10px; /* Match dropdown-menu padding */
-    z-index: 1000; /* Match dropdown-menu z-index */
-    opacity: 0;
-    pointer-events: none;
-    min-width: 100px; /* Adjust as needed */
-    max-width: calc(100vw - 40px); /* Match dropdown-menu */
-    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-    margin-bottom: 5px; /* Space between link and dropdown */
-}
-
-.language-dropdown.show {
-    /* display: block; */ /* Show when active - REMOVED for transition */
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-    pointer-events: auto;
-}
-
-.language-option {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%; /* Full width within dropdown */
-    margin-bottom: 10px; /* Add spacing between options */
-    height: 30px;
-    font-size: 14px;
-    border: 1px solid var(--input-border);
-    border-radius: 6px;
-    background: var(--button-bg);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--button-text);
-    text-align: center;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    outline: none !important;
-}
-
-.language-option:last-child {
-    margin-bottom: 0; /* Remove margin from last option */
-}
-
-.language-option:active {
-     /* Match active state */
-    background-color: var(--button-active-hover-bg);
-    color: var(--button-active-hover-color);
-    transform: scale(0.95);
-}
-
-/* Optional: Add active state indication if needed */
-.language-option.active {
-    /* Match .mode-btn.active */
-    background: var(--button-hover);
-    color: var(--button-active-hover-color);
-}
-
-

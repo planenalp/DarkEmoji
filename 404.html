@@ -19,8 +19,8 @@
             
             /* 缩放效果 */
             img {
-                width: 30vmin;
-                height: 30vmin;
+                width: 20vmin;  /* Default size for mobile */
+                height: 20vmin; /* Default size for mobile */
                 transition: 
                     transform 0.3s ease, /* 缩放动画 */
                     opacity 0.3s ease;  /* 淡入效果 */
@@ -32,13 +32,7 @@
                 user-select: none; /* 标准语法 */
                 outline: none;
             }
-            
-            @media (any-hover: hover) {
-                img:hover {
-                    transform: scale(1.1);
-                }
-            }
-            
+     
             img:active {
                 transform: scale(0.9);
             }
@@ -66,7 +60,7 @@
             }
 
             h1 {
-                font-size: 4em; /* 可根据需要调整 */
+                font-size: 60px; /* 可根据需要调整 */
                 font-family:
                     "PingFang SC",     /* 苹方（macOS/iOS） */
                     "Microsoft YaHei", /* 微软雅黑（Windows） */
@@ -75,12 +69,33 @@
             }
 
             p {
-                font-size: 1.5em; /* 可根据需要调整 */
+                font-size: 30px; /* 可根据需要调整 */
                 font-family:
                     "PingFang SC",     /* 苹方（macOS/iOS） */
                     "Microsoft YaHei", /* 微软雅黑（Windows） */
                     "Noto Sans SC",    /* 思源黑体（Linux/Android） */
                     sans-serif;        /* 最终回退到无衬线字体 */
+            }
+
+            @media (any-hover: hover) {
+                img:hover {
+                    transform: scale(1.1);
+                }
+            }
+            
+            @media (max-width: 768px) { /* Apply styles for screens 768px and wider */
+                img {
+                    width: 30vmin;
+                    height: 30vmin;
+                }
+
+                h1 {
+                    font-size: 50px;
+                }
+
+                p {
+                    font-size: 20px;
+                }
             }
         </style>
     </head>
