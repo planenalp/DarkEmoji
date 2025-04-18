@@ -20,6 +20,14 @@
     --menu-border: #eaecef; /* Slightly lighter menu border */
     --shadow-color: rgba(140, 149, 159, 0.2);
     --subtitle-color: #666;
+
+    /* Hover Colors */
+    --interactive-hover-bg: var(--title-color); /* #000000 */
+    --interactive-hover-color: var(--bg-color);   /* #face64 */
+    --button-hover-bg: var(--button-hover);       /* #face64 */
+    --button-hover-color: #000000;                /* Black text on yellow bg */
+    --button-active-hover-bg: #e9b54d;           /* Specific active/hover yellow */
+    --button-active-hover-color: #000000;         /* Black text for active/hover yellow */
 }
 
 [data-theme="dark"] {
@@ -40,6 +48,14 @@
     --menu-border: #21262d; /* Darker menu border */
     --shadow-color: rgba(0, 0, 0, 0.4);
     --subtitle-color: #666;
+
+    /* Hover Colors */
+    --interactive-hover-bg: var(--title-color); /* #face64 */
+    --interactive-hover-color: var(--bg-color);   /* #000000 */
+    --button-hover-bg: var(--button-hover);       /* #face64 */
+    --button-hover-color: #000000;                /* Black text on yellow bg */
+    --button-active-hover-bg: #e9b54d;           /* Specific active/hover yellow */
+    --button-active-hover-color: #000000;         /* Black text for active/hover yellow */
 }
 
 html {
@@ -230,6 +246,50 @@ body {
     position: relative; 
 }
 
+/* Footer styles */
+.footer {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    margin-top: 20px; /* Add some space above the footer */
+}
+
+.footer a {
+    /* Match subtitle styles */
+    display: inline-block; /* Needed for padding/background */
+    color: var(--subtitle-color);
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Keep this */
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    outline: none !important;
+}
+
+/* Match subtitle active state */
+.footer a:active {
+    transform: scale(0.95);
+}
+
+[data-theme="light"] .footer a:active {
+    background: var(--title-color); /* Use variable */
+    color: var(--bg-color);   /* Use variable */
+}
+
+[data-theme="dark"] .footer a:active {
+    background: var(--title-color); /* Use variable */
+    color: var(--bg-color);   /* Use variable */
+}
+
 /* When input is expanded, let it grow */
 .container.input-expanded .input-section {
     flex-grow: 1;
@@ -277,7 +337,7 @@ body {
 
 .mode-btn.active {
     background: var(--button-hover);
-    color: #000;
+    color: var(--button-active-hover-color); /* Use var */
 }
 
 .mode-btn span {
@@ -301,8 +361,8 @@ body {
 
 .mode-btn:active {
     transform: scale(0.95);
-    background-color: #e9b54d; /* Add active background color */
-    color: #000;              /* Add active text color */
+    background-color: var(--button-active-hover-bg); /* Use var */
+    color: var(--button-active-hover-color); /* Use var */
 }
 
 .input-section,
@@ -584,7 +644,7 @@ input[type="text"]:focus {
     border: 1px solid var(--input-border);
     border-radius: 6px;
     background: var(--button-hover);
-    color: #000;
+    color: var(--button-active-hover-color); /* Use var */
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -601,8 +661,8 @@ input[type="text"]:focus {
 
 .main-btn:active {
     transform: scale(0.95);
-    background-color: #e9b54d; /* Add active background color */
-    color: #000;              /* Add active text color */
+    background-color: var(--button-active-hover-bg); /* Use var */
+    color: var(--button-active-hover-color); /* Use var */
 }
 
 .main-btn span {
@@ -746,8 +806,8 @@ input[type="text"]:focus {
 #optionBase .mode-btn-menu:active {
     transform: none; /* Override scaling effect */
     /* Ensure active background/color is still applied if needed */
-    background-color: #e9b54d; 
-    color: #000;
+    background-color: var(--button-active-hover-bg); /* Use var */
+    color: var(--button-active-hover-color); /* Use var */
 }
 
 .mode-btn-menu span {
@@ -762,63 +822,41 @@ input[type="text"]:focus {
 
 /* 处理所有悬停效果，仅在支持悬停的设备上应用 */
 @media (any-hover: hover) {
-    .title:hover {
-        background: var(--bg-color);
-        color: var(--title-color);
-    }
-    
-    [data-theme="light"] .title:hover {
-        background: #000000;
-        color: #face64;
-    }
-    
-    [data-theme="dark"] .title:hover {
-        background: #face64;
-        color: #000000;
-    }
-    
-    .subtitle:hover {
-        background: var(--bg-color);
-        color: var(--title-color);
-    }
-    
-    [data-theme="light"] .subtitle:hover {
-        background: #000000;
-        color: #face64;
-    }
-    
-    [data-theme="dark"] .subtitle:hover {
-        background: #face64;
-        color: #000000;
+    .title:hover,
+    .subtitle:hover,
+    .footer a:hover {
+        background: var(--interactive-hover-bg);
+        color: var(--interactive-hover-color);
     }
     
     .menu-item:hover {
-        background: var(--button-hover);
-        color: #000;
+        background: var(--button-hover-bg);
+        color: var(--button-hover-color);
     }
     
     /* Ensure :active state takes precedence over :hover within the media query */
     .menu-item:active {
-        background-color: #e9b54d; 
-        color: #000;
+        background-color: var(--button-active-hover-bg); /* Use var */
+        color: var(--button-active-hover-color); /* Use var */
         transform: scale(0.95); /* Re-apply transform if needed */
     }
     
-    .mode-btn:hover {
-        background: var(--button-hover);
-        color: #000;
+    .mode-btn:hover,
+    .action-btn:hover {
+        background: var(--button-hover-bg);
+        color: var(--button-hover-color);
     }
     
     /* Ensure .mode-btn:active takes precedence over :hover */
     .mode-btn:active,
     .mode-btn-menu:active {
-        background-color: #e9b54d !important; 
-        color: #000;
+        background-color: var(--button-active-hover-bg) !important; /* Use var */
+        color: var(--button-active-hover-color); /* Use var */
         transform: scale(0.95);
     }
     
     .mode-btn.active:hover {
-        background: #e9b54d;
+        background: var(--button-active-hover-bg); /* Use var */
     }
     
     .mode-btn.active span {
@@ -829,43 +867,32 @@ input[type="text"]:focus {
         fill: currentColor;
     }
     
-    .action-btn:hover {
-        background: var(--button-hover);
-        color: #000;
-    }
-    
     .main-btn:hover {
-        background: #e9b54d;
+        background: var(--button-active-hover-bg); /* Use var */
     }
     
     .main-btn:hover span {
         filter: brightness(0);
     }
 
-    .file-drop-area:hover {
-        background: var(--button-hover);
-    }
-    
-    .file-drop-area:hover .file-msg {
-        color: #000;
-    }
-
+    .file-drop-area:hover,
     #saveFileArea:hover {
-        background: var(--button-hover);
+        background: var(--button-hover-bg);
     }
     
+    .file-drop-area:hover .file-msg,
     #saveFileArea:hover .file-msg {
-        color: #000;
+        color: var(--button-hover-color);
     }
     
     /* 添加滚动条悬停效果 */
     textarea::-webkit-scrollbar-thumb:hover {
-        background-color: var(--button-hover); /* 统一使用主题色变量 */
+        background-color: var(--button-hover-bg); /* Use var */
     }
 
     .menu-item.active:hover {
-        background-color: #e9b54d; /* Lighter yellow on hover for active item */
-        color: #000;
+        background-color: var(--button-active-hover-bg); /* Use var */
+        color: var(--button-active-hover-color); /* Use var */
     }
 }
 
@@ -885,6 +912,16 @@ input[type="text"]:focus {
     }
     
     .subtitle {
+        font-size: 14px;
+        padding: 3px 8px;
+    }
+
+    .footer {
+        margin-top: 10px; /* Add some space above the footer */
+    }
+
+    /* Add matching responsive styles for footer link */
+    .footer a {
         font-size: 14px;
         padding: 3px 8px;
     }
@@ -981,15 +1018,15 @@ input[type="text"]:focus {
 .button-group > .action-btn:active,
 .button-group > .file-drop-area:active,
 #saveFileArea:active { /* Add specific ID for higher specificity */
-    background-color: #e9b54d;
-    color: #000; /* Ensure text is readable */
+    background-color: var(--button-active-hover-bg); /* Use var */
+    color: var(--button-active-hover-color); /* Use var */
     transform: none; /* Override scaling effect */
 }
 
 /* Ensure file-msg color changes too */
 .button-group > .file-drop-area:active .file-msg,
 #saveFileArea:active .file-msg { /* Add specific ID */
-    color: #000;
+    color: var(--button-active-hover-color); /* Use var */
 }
 
 /* General active state outside button-group (if needed elsewhere) */
