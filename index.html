@@ -15,17 +15,17 @@
 </head>
 <body>
     <div class="title-container">
-        <h1 class="title">DarkEmoji</h1>
+        <h1 class="title" data-translate-key="mainTitle">DarkEmoji</h1>
     </div>
     <div class="subtitle-container">
         <h2 class="subtitle" id="cipherSubtitle">AES-256-GCM & Base64</h2>
         <div class="dropdown-menu" id="cipherMenu">
             <div class="menu-mode-switch" id="defaultCustomSwitch">
                 <button id="defaultBtn" class="mode-btn mode-btn-menu active" data-encrypt="AES-256-GCM" data-encode="Base64">
-                    <span>Default</span>
+                    <span data-translate-key="defaultBtnText">Default</span>
                 </button>
                 <button id="customBtn" class="mode-btn mode-btn-menu">
-                    <span>Custom</span>
+                    <span data-translate-key="customBtnText">Custom</span>
                 </button>
             </div>
             <div class="menu-mode-switch" id="optionCipher">
@@ -52,25 +52,25 @@
         </div>
 
         <div class="input-section">
-            <textarea id="inputText" placeholder="Input"></textarea>
+            <textarea id="inputText" placeholder="Input" data-translate-key="inputPlaceholderEncrypt"></textarea>
             <div class="button-group">
                 <button class="action-btn" id="inputExpand">
-                    <span class="btn-text default">Expand</span>
-                    <span class="btn-text success">Collapse</span>
+                    <span class="btn-text default" data-translate-key="expandBtnText">Expand</span>
+                    <span class="btn-text success" data-translate-key="collapseBtnText">Collapse</span>
                 </button>
                 <button class="action-btn" id="inputPaste">
-                    <span class="btn-text default paste-text">Paste</span>
-                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;">Copy</span>
-                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;">Pasted</span>
-                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;">Copied</span>
+                    <span class="btn-text default paste-text" data-translate-key="pasteBtnText">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;" data-translate-key="pastedBtnText">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;" data-translate-key="copiedBtnText">Copied</span>
                 </button>
                 <button class="action-btn" id="inputClear">
-                    <span class="btn-text default">Clear</span>
-                    <span class="btn-text success">Cleared</span>
-                    <span class="btn-text query">Empty</span>
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
                 </button>
                 <div class="file-drop-area" id="fileDropArea">
-                    <span class="file-msg">Select or Drop</span>
+                    <span class="file-msg" data-translate-key="selectOrDropText">Select or Drop</span>
                     <input type="file" id="fileInput" class="file-input">
                 </div>
             </div>
@@ -78,53 +78,53 @@
 
         <div class="password-section">
             <form id="passwordForm" autocomplete="on">
-                <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password">
+                <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
                 <input type="submit" style="display: none;">
             </form>
             <div class="button-group">
                 <button class="action-btn" id="passwordCopy">
-                    <span class="btn-text default empty-text">Empty</span>
-                    <span class="btn-text default show-text" style="opacity: 0; pointer-events: none;">Show</span>
-                    <span class="btn-text default hide-text" style="opacity: 0; pointer-events: none;">Hide</span>
+                    <span class="btn-text default empty-text" data-translate-key="emptyBtnText">Empty</span>
+                    <span class="btn-text default show-text" style="opacity: 0; pointer-events: none;" data-translate-key="showBtnText">Show</span>
+                    <span class="btn-text default hide-text" style="opacity: 0; pointer-events: none;" data-translate-key="hideBtnText">Hide</span>
                 </button>
                 <button class="action-btn" id="passwordPaste">
-                    <span class="btn-text default paste-text">Paste</span>
-                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;">Copy</span>
-                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;">Pasted</span>
-                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;">Copied</span>
+                    <span class="btn-text default paste-text" data-translate-key="pasteBtnText">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;" data-translate-key="pastedBtnText">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;" data-translate-key="copiedBtnText">Copied</span>
                 </button>
                 <button class="action-btn" id="passwordClear">
-                    <span class="btn-text default">Clear</span>
-                    <span class="btn-text success">Cleared</span>
-                    <span class="btn-text query">Empty</span>
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
                 </button>
                 <button class="action-btn" id="passwordGenerate">
-                    <span class="btn-text default">Generate</span>
-                    <span class="btn-text success">Generated</span>
-                    <span class="btn-text query" style="opacity: 0; pointer-events: none;">Empty</span>
+                    <span class="btn-text default" data-translate-key="generateBtnText">Generate</span>
+                    <span class="btn-text success" data-translate-key="generatedBtnText">Generated</span>
+                    <span class="btn-text query" style="opacity: 0; pointer-events: none;" data-translate-key="emptyBtnText">Empty</span>
                 </button>
             </div>
         </div>
 
         <div class="output-section">
-            <textarea id="outputText" placeholder="Output" readonly></textarea>
+            <textarea id="outputText" placeholder="Output" readonly data-translate-key="outputPlaceholderEncrypt"></textarea>
             <div class="button-group">
                 <button class="action-btn" id="outputExpand">
-                    <span class="btn-text default">Expand</span>
-                    <span class="btn-text success">Collapse</span>
+                    <span class="btn-text default" data-translate-key="expandBtnText">Expand</span>
+                    <span class="btn-text success" data-translate-key="collapseBtnText">Collapse</span>
                 </button>
                 <button class="action-btn" id="outputCopy">
-                    <span class="btn-text default">Copy</span>
-                    <span class="btn-text success">Copied</span>
-                    <span class="btn-text query" style="opacity: 0; pointer-events: none;">Empty</span>
+                    <span class="btn-text default" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success" data-translate-key="copiedBtnText">Copied</span>
+                    <span class="btn-text query" style="opacity: 0; pointer-events: none;" data-translate-key="emptyBtnText">Empty</span>
                 </button>
                 <button class="action-btn" id="outputClear">
-                    <span class="btn-text default">Clear</span>
-                    <span class="btn-text success">Cleared</span>
-                    <span class="btn-text query">Empty</span>
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
                 </button>
-                <div class="file-drop-area" id="saveFileArea">
-                    <span class="file-msg">Save as...</span>
+                <div class="file-drop-area" id="downloadFileArea">
+                    <span class="file-msg" data-translate-key="downloadText">Download</span>
                     <input type="file" id="saveFileInput" class="file-input" style="display: none;">
                 </div>
             </div>
@@ -134,13 +134,16 @@
     </div>
 
     <footer class="footer">
-        <a href="https://github.com/planenalp/DarkEmoji/blob/main/README.md">About</a>
-        <a href="https://github.com/planenalp/DarkEmoji">GitHub</a>
+        <a href="https://github.com/planenalp/DarkEmoji/blob/main/README.md" data-translate-key="aboutLinkText">About</a>
+        <a href="https://github.com/planenalp/DarkEmoji" data-translate-key="githubLinkText">GitHub</a>
         <div class="language-selector">
             <a href="#" id="languageLink">English</a>
             <div class="language-dropdown" id="languageDropdown">
                 <button class="language-option active" data-lang="en">English</button>
-                <button class="language-option" data-lang="zh">中文</button>
+                <button class="language-option" data-lang="zh-Hans">Chinese (Simplified)</button>
+                <button class="language-option" data-lang="zh-Hant">Chinese (Traditional)</button>
+                <button class="language-option" data-lang="ja">Japanese</button>
+                <button class="language-option" data-lang="ko">Korean</button>
             </div>
         </div>
     </footer>

@@ -714,7 +714,7 @@ input[type="text"]:focus {
     line-height: 1.2; /* 确保行高与按钮一致 */
 }
 
-#saveFileArea {
+#downloadFileArea {
     cursor: pointer;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
@@ -823,7 +823,7 @@ input[type="text"]:focus {
 /* Remove scaling and change color for active state inside button-group */
 .button-group > .action-btn:active,
 .button-group > .file-drop-area:active,
-#saveFileArea:active { /* Add specific ID for higher specificity */
+#downloadFileArea:active { /* Add specific ID for higher specificity */
     background-color: var(--button-active-hover-bg); /* Use var */
     color: var(--button-active-hover-color); /* Use var */
     transform: none; /* Override scaling effect */
@@ -831,7 +831,7 @@ input[type="text"]:focus {
 
 /* Ensure file-msg color changes too */
 .button-group > .file-drop-area:active .file-msg,
-#saveFileArea:active .file-msg { /* Add specific ID */
+#downloadFileArea:active .file-msg { /* Add specific ID */
     color: var(--button-active-hover-color); /* Use var */
 }
 
@@ -922,8 +922,9 @@ input[type="text"]:focus {
     z-index: 1000; /* Match dropdown-menu z-index */
     opacity: 0;
     pointer-events: none;
-    min-width: 100px; /* Adjust as needed */
-    max-width: calc(100vw - 40px); /* Match dropdown-menu */
+    white-space: nowrap; /* Prevent text wrapping */
+    width: fit-content; /* Make width fit content */
+    min-width: auto; /* Remove fixed min-width */
     transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
     margin-bottom: 5px; /* Space between link and dropdown */
@@ -942,6 +943,7 @@ input[type="text"]:focus {
     justify-content: center;
     width: 100%; /* Full width within dropdown */
     margin-bottom: 10px; /* Add spacing between options */
+    padding: 5px;
     height: 30px;
     font-size: 14px;
     border: 1px solid var(--input-border);
@@ -1035,12 +1037,12 @@ input[type="text"]:focus {
     }
 
     .file-drop-area:hover,
-    #saveFileArea:hover {
+    #downloadFileArea:hover {
         background: var(--button-hover-bg);
     }
     
     .file-drop-area:hover .file-msg,
-    #saveFileArea:hover .file-msg {
+    #downloadFileArea:hover .file-msg {
         color: var(--button-hover-color);
     }
     

@@ -11,7 +11,7 @@ const outputText = document.getElementById('outputText');
 const actionBtn = document.getElementById('actionBtn');
 const fileDropArea = document.getElementById('fileDropArea');
 const fileInput = document.getElementById('fileInput');
-const saveFileArea = document.getElementById('saveFileArea');
+const downloadFileArea = document.getElementById('downloadFileArea');
 const password = document.getElementById('password');
 const cipherSubtitle = document.getElementById('cipherSubtitle');
 const cipherMenu = document.getElementById('cipherMenu');
@@ -55,6 +55,7 @@ let currentEncode = 'Base64';
 
 // Theme state
 let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark unless explicitly light
+let currentLanguage = localStorage.getItem('language') || 'en'; // Default to English
 
 // State for preserving content across modes
 const encryptState = { input: '', output: '', password: '' };
@@ -79,6 +80,203 @@ const passwordCopyBtn = document.getElementById('passwordCopy');
 const emptyTextSpan = passwordCopyBtn.querySelector('.empty-text');
 const showTextSpan = passwordCopyBtn.querySelector('.show-text');
 const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
+
+// Language Elements
+const languageLink = document.getElementById('languageLink');
+const languageDropdown = document.getElementById('languageDropdown');
+const languageOptions = languageDropdown.querySelectorAll('.language-option');
+
+// Translations
+const translations = {
+    en: {
+        mainTitle: 'DarkEmoji',
+        defaultBtnText: 'Default',
+        customBtnText: 'Custom',
+        inputPlaceholderEncrypt: 'Input',
+        inputPlaceholderDecrypt: 'Encrypted Input',
+        expandBtnText: 'Expand',
+        collapseBtnText: 'Collapse',
+        pasteBtnText: 'Paste',
+        copyBtnText: 'Copy',
+        pastedBtnText: 'Pasted',
+        copiedBtnText: 'Copied',
+        clearBtnText: 'Clear',
+        clearedBtnText: 'Cleared',
+        emptyBtnText: 'Empty',
+        selectOrDropText: 'Select or Drop',
+        passwordPlaceholder: 'Password (optional)',
+        showBtnText: 'Show',
+        hideBtnText: 'Hide',
+        generateBtnText: 'Generate',
+        generatedBtnText: 'Generated',
+        outputPlaceholderEncrypt: 'Output',
+        outputPlaceholderDecrypt: 'Decrypted Output',
+        downloadText: 'Download',
+        aboutLinkText: 'About',
+        githubLinkText: 'GitHub',
+        alertNoInput: 'No text or files were entered.'
+    },
+    'zh-Hans': {
+        mainTitle: '暗表情',
+        defaultBtnText: '默认',
+        customBtnText: '自定义',
+        inputPlaceholderEncrypt: '输入',
+        inputPlaceholderDecrypt: '加密输入',
+        expandBtnText: '展开',
+        collapseBtnText: '折叠',
+        pasteBtnText: '粘贴',
+        copyBtnText: '复制',
+        pastedBtnText: '已粘贴',
+        copiedBtnText: '已复制',
+        clearBtnText: '清除',
+        clearedBtnText: '已清除',
+        emptyBtnText: '空',
+        selectOrDropText: '选择或拖放',
+        passwordPlaceholder: '密码（可选）',
+        showBtnText: '显示',
+        hideBtnText: '隐藏',
+        generateBtnText: '生成',
+        generatedBtnText: '已生成',
+        outputPlaceholderEncrypt: '输出',
+        outputPlaceholderDecrypt: '解密输出',
+        downloadText: '下载',
+        aboutLinkText: '关于',
+        githubLinkText: 'GitHub', // Keep English for GitHub
+        alertNoInput: '未输入任何文本或文件。'
+    },
+    'zh-Hant': {
+        mainTitle: '暗表情',
+        defaultBtnText: '預設',
+        customBtnText: '自訂',
+        inputPlaceholderEncrypt: '輸入',
+        inputPlaceholderDecrypt: '加密輸入',
+        expandBtnText: '展開',
+        collapseBtnText: '折疊',
+        pasteBtnText: '貼上',
+        copyBtnText: '複製',
+        pastedBtnText: '已貼上',
+        copiedBtnText: '已複製',
+        clearBtnText: '清除',
+        clearedBtnText: '已清除',
+        emptyBtnText: '空',
+        selectOrDropText: '選取或拖放',
+        passwordPlaceholder: '密碼（可選）',
+        showBtnText: '顯示',
+        hideBtnText: '隱藏',
+        generateBtnText: '產生',
+        generatedBtnText: '已產生',
+        outputPlaceholderEncrypt: '輸出',
+        outputPlaceholderDecrypt: '解密輸出',
+        downloadText: '下載',
+        aboutLinkText: '關於',
+        githubLinkText: 'GitHub', // Keep English for GitHub
+        alertNoInput: '未輸入任何文字或檔案。'
+    },
+    ja: {
+        mainTitle: 'ダーク絵文字',
+        defaultBtnText: 'デフォルト',
+        customBtnText: 'カスタム',
+        inputPlaceholderEncrypt: '入力',
+        inputPlaceholderDecrypt: '暗号化された入力',
+        expandBtnText: '展開',
+        collapseBtnText: '折りたたむ',
+        pasteBtnText: '貼り付け',
+        copyBtnText: 'コピー',
+        pastedBtnText: '貼り付けました',
+        copiedBtnText: 'コピーしました',
+        clearBtnText: 'クリア',
+        clearedBtnText: 'クリアしました',
+        emptyBtnText: '空',
+        selectOrDropText: '選択またはドロップ',
+        passwordPlaceholder: 'パスワード（任意）',
+        showBtnText: '表示',
+        hideBtnText: '非表示',
+        generateBtnText: '生成',
+        generatedBtnText: '生成されました',
+        outputPlaceholderEncrypt: '出力',
+        outputPlaceholderDecrypt: '復号された出力',
+        downloadText: 'ダウンロード',
+        aboutLinkText: '情報',
+        githubLinkText: 'GitHub',
+        alertNoInput: 'テキストまたはファイルが入力されていません。'
+    },
+    ko: {
+        mainTitle: '다크이모지',
+        defaultBtnText: '기본값',
+        customBtnText: '사용자 정의',
+        inputPlaceholderEncrypt: '입력',
+        inputPlaceholderDecrypt: '암호화된 입력',
+        expandBtnText: '펼치기',
+        collapseBtnText: '접기',
+        pasteBtnText: '붙여넣기',
+        copyBtnText: '복사',
+        pastedBtnText: '붙여넣기 완료',
+        copiedBtnText: '복사됨',
+        clearBtnText: '지우기',
+        clearedBtnText: '지워졌습니다',
+        emptyBtnText: '비어 있음',
+        selectOrDropText: '선택 또는 드롭',
+        passwordPlaceholder: '비밀번호 (선택 사항)',
+        showBtnText: '표시',
+        hideBtnText: '숨기기',
+        generateBtnText: '생성',
+        generatedBtnText: '생성됨',
+        outputPlaceholderEncrypt: '출력',
+        outputPlaceholderDecrypt: '복호화된 출력',
+        downloadText: '다운로드',
+        aboutLinkText: '정보',
+        githubLinkText: 'GitHub',
+        alertNoInput: '텍스트나 파일이 입력되지 않았습니다。'
+    }
+};
+
+// Helper function to get translation with fallback
+function getTranslation(key, lang = currentLanguage) {
+    return translations[lang]?.[key] || translations['en']?.[key] || key; // Fallback to English then the key itself
+}
+
+// Function to set the language
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('language', lang);
+
+    document.documentElement.lang = lang; // Update html lang attribute
+    languageLink.textContent = languageDropdown.querySelector(`[data-lang="${lang}"]`).textContent;
+
+    // Update active state for language buttons
+    languageOptions.forEach(option => {
+        option.classList.toggle('active', option.dataset.lang === lang);
+    });
+
+    // Update elements with data-translate-key attribute
+    document.querySelectorAll('[data-translate-key]').forEach(element => {
+        const key = element.dataset.translateKey;
+        // Check if it's a placeholder
+        if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+            // Handle placeholders based on current mode (defer placeholder update to switchMode/initial load)
+            if (key === 'inputPlaceholderEncrypt' || key === 'outputPlaceholderEncrypt' || key === 'passwordPlaceholder') {
+                 element.placeholder = getTranslation(key, lang);
+            }
+            // We will update input/output placeholders dynamically in switchMode
+        } else {
+            // Update textContent for other elements
+            element.textContent = getTranslation(key, lang);
+        }
+    });
+
+    // Apply mode-specific translations (like placeholders)
+    switchMode(isEncryptMode ? 'encrypt' : 'decrypt', false); // Update placeholders without saving state
+}
+
+// Function to toggle language dropdown
+function toggleLanguageDropdown(e) {
+    e.stopPropagation();
+    languageDropdown.classList.toggle('show');
+    // Close cipher menu if open
+    if (cipherMenu.classList.contains('show')) {
+        cipherMenu.classList.remove('show');
+    }
+}
 
 // Function to update the combined input button state (Paste/Copy)
 function updateInputButtonState() {
@@ -311,18 +509,19 @@ document.addEventListener('click', (e) => {
 });
 
 // Mode switch functionality
-function switchMode(mode) {
-    const previousMode = isEncryptMode ? 'encrypt' : 'decrypt';
-    
-    // 保存当前模式的内容 (包括密码)
-    if (previousMode === 'encrypt') {
-        encryptState.input = inputText.value;
-        encryptState.output = outputText.value;
-        encryptState.password = password.value;
-    } else {
-        decryptState.input = inputText.value;
-        decryptState.output = outputText.value;
-        decryptState.password = password.value;
+function switchMode(mode, saveState = true) { // Add saveState flag
+    if (saveState) {
+        const previousMode = isEncryptMode ? 'encrypt' : 'decrypt';
+        // 保存当前模式的内容 (包括密码)
+        if (previousMode === 'encrypt') {
+            encryptState.input = inputText.value;
+            encryptState.output = outputText.value;
+            encryptState.password = password.value;
+        } else {
+            decryptState.input = inputText.value;
+            decryptState.output = outputText.value;
+            decryptState.password = password.value;
+        }
     }
     
     isEncryptMode = mode === 'encrypt';
@@ -334,34 +533,35 @@ function switchMode(mode) {
     // Update action button text with emoji
     actionBtn.innerHTML = isEncryptMode ? '<span>🔒</span>' : '<span>🔓</span>';
     
-    // Update placeholders
-    inputText.placeholder = isEncryptMode ? 'Input' : 'Encrypted Input';
-    outputText.placeholder = isEncryptMode ? 'Output' : 'Decrypted Output';
+    // Update placeholders using translations
+    inputText.placeholder = getTranslation(isEncryptMode ? 'inputPlaceholderEncrypt' : 'inputPlaceholderDecrypt');
+    outputText.placeholder = getTranslation(isEncryptMode ? 'outputPlaceholderEncrypt' : 'outputPlaceholderDecrypt');
 
-    // 恢复新模式的内容 (包括密码)
-    if (isEncryptMode) {
-        inputText.value = encryptState.input;
-        outputText.value = encryptState.output;
-        password.value = encryptState.password;
-    } else {
-        inputText.value = decryptState.input;
-        outputText.value = decryptState.output;
-        password.value = decryptState.password;
+    if (saveState) {
+        // 恢复新模式的内容 (包括密码)
+        if (isEncryptMode) {
+            inputText.value = encryptState.input;
+            outputText.value = encryptState.output;
+            password.value = encryptState.password;
+        } else {
+            inputText.value = decryptState.input;
+            outputText.value = decryptState.output;
+            password.value = decryptState.password;
+        }
     }
     
-    // 重置所有按钮状态 (除了密码框内容)
-    // inputButtons.paste.classList.remove('is-success'); // Handled by updateInputButtonState
-    outputButtons.copy.classList.remove('is-success'); // Keep this reset for output copy
-    // passwordButtons.copy.classList.remove('is-success'); // Handled by updatePasswordVisibilityState indirectly
-    // passwordButtons.paste.classList.remove('is-success'); // Handled by updatePasswordButtonState
-    passwordButtons.generate.classList.remove('is-success');
-    passwordButtons.clear.classList.remove('is-success', 'is-query'); // Also reset clear
-    inputButtons.clear.classList.remove('is-success', 'is-query'); // Also reset clear
+    if (saveState) {
+        // 重置所有按钮状态 (除了密码框内容)
+        outputButtons.copy.classList.remove('is-success');
+        passwordButtons.generate.classList.remove('is-success');
+        passwordButtons.clear.classList.remove('is-success', 'is-query');
+        inputButtons.clear.classList.remove('is-success', 'is-query');
 
-    // --- ADD CALLS TO UPDATE BUTTON STATES --- 
-    updateInputButtonState();
-    updatePasswordButtonState();
-    updatePasswordVisibilityState();
+        // Update button visibility states
+        updateInputButtonState();
+        updatePasswordButtonState();
+        updatePasswordVisibilityState();
+    }
 }
 
 // Helper function to collapse any expanded textareas
@@ -383,36 +583,26 @@ function collapseAllTextareas() {
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        // If already in encrypt mode, collapse textareas and perform action
         collapseAllTextareas(); 
-        
         if (!inputText.value.trim()) {
-            alert('Please enter some text in the input field.');
+            alert(getTranslation('alertNoInput')); // Use translation
             return;
         }
-        
-        // TODO: Add encryption logic here
-        outputText.value = inputText.value; // Directly assign value for now
+        outputText.value = inputText.value; // Placeholder logic
     } else {
-        // Switch to encrypt mode
         switchMode('encrypt');
     }
 });
 
 decryptBtn.addEventListener('click', () => {
     if (!isEncryptMode) {
-        // If already in decrypt mode, collapse textareas and perform action
         collapseAllTextareas();
-        
         if (!inputText.value.trim()) {
-            alert('Please enter some text in the input field.');
+            alert(getTranslation('alertNoInput')); // Use translation
             return;
         }
-        
-        // TODO: Add decryption logic here
-        outputText.value = inputText.value; // Directly assign value for now
+        outputText.value = inputText.value; // Placeholder logic
     } else {
-        // Switch to decrypt mode
         switchMode('decrypt');
     }
 });
@@ -803,9 +993,10 @@ fileDropArea.addEventListener('click', () => {
 });
 
 // Save file functionality
-saveFileArea.addEventListener('click', () => {
+downloadFileArea.addEventListener('click', () => {
     if (!outputText.value) {
-        alert('No content to save.');
+        // Optional: Translate this alert too if needed
+        alert('No content to save.'); 
         return;
     }
 
@@ -825,21 +1016,15 @@ saveFileArea.addEventListener('click', () => {
 
 // Action button click handler
 actionBtn.addEventListener('click', () => {
-    // Always collapse textareas first when action button is clicked
     collapseAllTextareas();
-    
     if (!inputText.value.trim()) {
-        alert('Please enter some text in the input field.');
+        alert(getTranslation('alertNoInput')); // Use translation
         return;
     }
-    
-    // TODO: Add encryption/decryption logic here
     if (isEncryptMode) {
-        // Hide logic
-        outputText.value = inputText.value;
+        outputText.value = inputText.value; // Placeholder logic
     } else {
-        // Show logic
-        outputText.value = inputText.value;
+        outputText.value = inputText.value; // Placeholder logic
     }
 });
 
@@ -847,68 +1032,28 @@ actionBtn.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     initializeMenuState();
     updateSubtitle();
-    updateInputButtonState(); // Initialize the Paste/Copy button
-    updatePasswordButtonState(); // Initialize the Password Paste/Copy button
-    updatePasswordVisibilityState(); // Initialize the Password Visibility button
+    // No need to call update button states here, setLanguage will trigger switchMode which does it.
+    // updateInputButtonState(); 
+    // updatePasswordButtonState(); 
+    // updatePasswordVisibilityState(); 
+
+    // Apply initial language setting (this will also set initial placeholders via switchMode)
+    setLanguage(currentLanguage);
 
     // Language Selector Logic
-    const languageLink = document.getElementById('languageLink');
-    const languageDropdown = document.getElementById('languageDropdown');
-    const languageOptions = document.querySelectorAll('.language-option');
-
     if (languageLink && languageDropdown && languageOptions.length > 0) {
-        languageLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent default link behavior
-            event.stopPropagation(); // Prevent triggering the document click listener immediately
-            languageDropdown.classList.toggle('show');
-            // Close cipher menu if open
-            if (cipherMenu.classList.contains('show')) {
-                cipherMenu.classList.remove('show');
-            }
-        });
-
+        languageLink.addEventListener('click', toggleLanguageDropdown);
         languageOptions.forEach(option => {
             option.addEventListener('click', () => {
-                // Remove active class from all options first
-                languageOptions.forEach(opt => opt.classList.remove('active'));
-                // Add active class to the clicked option
-                option.classList.add('active');
-
-                const selectedLanguageText = option.textContent;
-                const selectedLangCode = option.dataset.lang; // Get language code
-                languageLink.textContent = selectedLanguageText;
-
-                // Save the selected language to localStorage
-                localStorage.setItem('language', selectedLangCode);
-
-                // languageDropdown.classList.remove('show'); // REMOVED: Don't close immediately
-                // Add code here to actually change the site language if needed
-                // e.g., load different text resources based on selectedLangCode
-                console.log(`Language changed to: ${selectedLangCode}`); // Placeholder
+                setLanguage(option.dataset.lang);
             });
         });
-
-        // Load saved language preference on page load
-        const savedLang = localStorage.getItem('language');
-        if (savedLang) {
-            const matchingOption = Array.from(languageOptions).find(opt => opt.dataset.lang === savedLang);
-            if (matchingOption) {
-                languageLink.textContent = matchingOption.textContent;
-                // Ensure correct button is active
-                languageOptions.forEach(opt => opt.classList.remove('active'));
-                matchingOption.classList.add('active');
-                // Add code here to apply the saved language
-                console.log(`Loaded saved language: ${savedLang}`); // Placeholder
-            }
-        } else {
-            // Optional: Set default if nothing is saved (already handled by HTML default)
-            // localStorage.setItem('language', 'en');
-        }
+        // Removed redundant language loading logic here, setLanguage handles it.
     }
 });
 
-// Initialize mode
-switchMode('encrypt');
+// Initialize mode (setLanguage will call this with the correct mode)
+// switchMode('encrypt'); // REMOVED - Handled by setLanguage call in DOMContentLoaded
 
 // Theme switching
 title.addEventListener('click', () => {
