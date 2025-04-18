@@ -900,6 +900,11 @@ input[type="text"]:focus {
         background: var(--button-hover-bg);
         color: var(--button-hover-color);
     }
+
+    .language-option.active:hover {
+        /* Match .mode-btn.active:hover */
+        background: var(--button-active-hover-bg);
+    }
 }
 
 /* 移动设备适配 */
@@ -1183,8 +1188,4 @@ input[type="text"]:focus {
     color: var(--button-active-hover-color);
 }
 
-.language-option.active:hover {
-     /* Match .mode-btn.active:hover */
-     background: var(--button-active-hover-bg);
-}
 
