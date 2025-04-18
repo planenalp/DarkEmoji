@@ -904,7 +904,7 @@ input[type="text"]:focus {
     }
 
     .title-container {
-        height: 65px;
+        height: 60px;
     } 
     
     .title {
@@ -935,8 +935,8 @@ input[type="text"]:focus {
         padding: 10px;
         margin-bottom: 0; /* Prevent extra space at bottom on mobile */
         /* min-height: 360px; */
-        /* body padding 10px + Title 65px + Subtitle 30px+ Subtitle bottom 10px + container bottom 10px = 120px */
-        min-height: calc(100dvh - 125px);
+        /* body padding 10px + Title 60px + Subtitle 30px+ Subtitle bottom 10px + container bottom 10px = 120px */
+        min-height: calc(100dvh - 120px);
     }
 
     /* 调整 Expand 状态下的样式以利用额外空间 */
