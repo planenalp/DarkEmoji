@@ -19,6 +19,7 @@
     --menu-text: #24292f;
     --menu-border: #eaecef; /* Slightly lighter menu border */
     --shadow-color: rgba(140, 149, 159, 0.2);
+    --subtitle-color: #666;
 }
 
 [data-theme="dark"] {
@@ -38,6 +39,7 @@
     --menu-text: #c9d1d9;
     --menu-border: #21262d; /* Darker menu border */
     --shadow-color: rgba(0, 0, 0, 0.4);
+    --subtitle-color: #666;
 }
 
 html {
@@ -112,7 +114,7 @@ body {
 }
 
 .subtitle {
-    color: var(--menu-text); /* Default color (used by dark theme) */
+    color: var(--subtitle-color); /* Use the unified variable */
     font-size: 20px;
     font-weight: 500;
     text-align: center;
@@ -128,11 +130,6 @@ body {
     -moz-user-select: none; /* 适用于 Firefox */
     -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
     outline: none !important; /* 解决按压边框闪烁 */
-}
-
-/* Override subtitle color specifically for light theme */
-[data-theme="light"] .subtitle {
-    color: #666; /* Original approximate light theme text color */
 }
 
 .subtitle:active {
@@ -183,7 +180,7 @@ body {
     pointer-events: auto;
 }
 
-/* Add margin below the first switch */
+/* NEW: Apply no background/padding to the first switch via ID */
 #defaultCustomSwitch {
     background: none;
     padding: 0;
@@ -191,6 +188,8 @@ body {
     gap: 15px;
     /* Ensure it still behaves like a block-level flex container */
     display: flex; 
+    /* Align buttons to the start */
+    justify-content: flex-start;
 }
 
 /* Add margin below other switches */
@@ -230,19 +229,6 @@ body {
     /* Add relative positioning for absolute positioning of expanded elements */
     position: relative; 
 }
-
-/* Remove display:none rules */
-/*
-.container.input-expanded .password-section,
-.container.input-expanded .output-section {
-    display: none;
-}
-
-.container.output-expanded .password-section,
-.container.output-expanded .input-section {
-    display: none;
-}
-*/
 
 /* When input is expanded, let it grow */
 .container.input-expanded .input-section {
@@ -446,11 +432,6 @@ textarea::-webkit-scrollbar-thumb {
     
     cursor: pointer; /* 滚动条把手使用指针光标 */
 }
-
-/* 移除这里的悬停效果，改为放在媒体查询中 */
-/* textarea::-webkit-scrollbar-thumb:hover {
-    background-color: #a0a0a0;
-} */
 
 /* Restore original expanded textarea style */
 textarea.expanded {
@@ -696,37 +677,77 @@ input[type="text"]:focus {
 }
 
 .menu-mode-switch {
-    /* margin: 5px 0 15px; */
+    /* Styles for the container of button groups */
     justify-content: center;
-    display: inline-flex; /* Change to inline-flex to shrink-wrap content */
-    background: var(--button-bg); /* Base background for Cipher/Base rows */
-    padding: 7px; /* Base padding for Cipher/Base rows */
-    border-radius: 6px; /* Base border-radius for Cipher/Base rows */
-    /* Add gap for spacing between buttons in Cipher/Base rows */
-    gap: 5px;
-    /* Make Cipher/Base rows scrollable horizontally if needed */
-    /* max-width needs to be applied specifically, not here */
-    /* overflow-x: auto; */
-    /* white-space: nowrap; */
-    /* padding-bottom: 5px; */
+    display: inline-flex; /* Shrink-wrap content */
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    /* Add margin-bottom here, applied to both */
+    margin-bottom: 10px;
+}
+
+/* Style Cipher/Base rows like button groups */
+#optionCipher,
+#optionBase {
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    padding: 0; /* Remove internal padding */
+    background: none; /* Remove background */
+    gap: 0; /* Ensure buttons touch */
+}
+
+/* Reset margin for the last element (#optionBase) */
+#optionBase {
+    margin-bottom: 0;
 }
 
 .mode-btn-menu {
+    /* Base style for menu buttons (used by all rows initially) */
     height: 30px;
     padding: 5px 10px;
     font-size: 14px;
-    /* Inherit flex: 1 from .mode-btn by default */
+    /* Default border and radius for first row */
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
 }
 
-/* NEW: Prevent stretching and reduce padding for #optionCipher buttons */
-#optionCipher .mode-btn-menu {
-    flex: initial; /* Don't grow/shrink, use natural width */
-}
-
-/* NEW: Remove border from Cipher and Base buttons via IDs */
+/* Specific styles for buttons INSIDE Cipher/Base rows */
 #optionCipher .mode-btn-menu,
 #optionBase .mode-btn-menu {
-    border: none;
+    flex: 1; /* Make these buttons fill their container */
+    border: none; /* Remove individual borders */
+    border-radius: 0; /* Remove individual radius */
+    border-right: 1px solid var(--input-border); /* Add dividing lines */
+}
+
+/* Remove right border from the last button in Cipher/Base groups */
+#optionCipher .mode-btn-menu:last-child,
+#optionBase .mode-btn-menu:last-child {
+    border-right: none;
+}
+
+/* Apply border-radius to the first button's left corners in Cipher/Base groups */
+#optionCipher .mode-btn-menu:first-child,
+#optionBase .mode-btn-menu:first-child {
+    border-top-left-radius: 5px; /* Slightly less than container radius */
+    border-bottom-left-radius: 5px;
+}
+
+/* Apply border-radius to the last button's right corners in Cipher/Base groups */
+#optionCipher .mode-btn-menu:last-child,
+#optionBase .mode-btn-menu:last-child {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* NEW: Remove press effect specifically from Cipher/Base buttons */
+#optionCipher .mode-btn-menu:active,
+#optionBase .mode-btn-menu:active {
+    transform: none; /* Override scaling effect */
+    /* Ensure active background/color is still applied if needed */
+    background-color: #e9b54d; 
+    color: #000;
 }
 
 .mode-btn-menu span {

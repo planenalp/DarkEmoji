@@ -184,17 +184,20 @@ defaultBtn.addEventListener("click", () => {
     
     // Visual state is handled by switchCipherMode and setActiveOption
     
-    updateSubtitle();
+    // updateSubtitle(); // Called within switchCipherMode now
 });
 
 customBtn.addEventListener("click", () => {
-    // When switching to custom, ensure the current selections are visually active
-    // We don't set specific defaults here, just switch the mode
+    // Set the desired defaults for Custom mode FIRST
+    currentEncrypt = 'AES-256-GCM';
+    currentEncode = 'Base1024';
+    
+    // Now switch the mode; it will use the values set above
     switchCipherMode("custom");
     
-    // Visual state is handled by switchCipherMode and setActiveOption
+    // Visual state and subtitle update are handled by switchCipherMode
 
-    updateSubtitle();
+    // updateSubtitle(); // Called within switchCipherMode now
 });
 
 function switchCipherMode(mode) {
@@ -247,18 +250,29 @@ function setupOptionGroup(container, callback) {
         // Update active state within the group
         setActiveOption(container, value);
 
-        // Call the callback with the selected value
+        // Call the callback to update the state variable (currentEncrypt or currentEncode)
         if (callback) {
             callback(value);
         }
         
-        // If a custom option is clicked, ensure custom mode is active
-        if (!isDefaultMode) {
-             // No need to switch again if already in custom
+        // --- NEW LOGIC: Check for Default combination --- 
+        if (currentEncrypt === 'AES-256-GCM' && currentEncode === 'Base64') {
+            // If the current combination *is* the default, switch to Default mode.
+            // switchCipherMode will update buttons and subtitle.
+            switchCipherMode('default');
         } else {
-             switchCipherMode('custom'); // Switch to custom if default was active
+            // If the current combination is *not* the default, ensure we are in Custom mode.
+            if (isDefaultMode) {
+                // If we were previously in Default mode, switch to Custom.
+                // switchCipherMode will update buttons and subtitle.
+                switchCipherMode('custom');
+            } else {
+                // If we were already in Custom mode, the mode doesn't change,
+                // but the subtitle needs updating to reflect the new selection.
+                updateSubtitle();
+            }
         }
-        updateSubtitle(); // Update subtitle after any option change
+        // --- END NEW LOGIC ---
     });
 }
 
