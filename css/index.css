@@ -887,6 +887,8 @@ input[type="text"]:focus {
 @media (max-width: 768px) {
     body {
         padding: 10px;
+        /* Add padding for safe area at the bottom */
+        padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
     }
     
     .title {
