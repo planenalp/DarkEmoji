@@ -926,7 +926,7 @@ input[type="text"]:focus {
 
     /* Add matching responsive styles for footer link */
     .footer a {
-        font-size: 10px;
+        font-size: 15px;
         padding: 0 5px;
     }
     
