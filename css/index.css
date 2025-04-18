@@ -1036,6 +1036,7 @@ input[type="text"]:focus {
 .action-btn .btn-text.success,
 .action-btn .btn-text.query {
     opacity: 0;
+    pointer-events: none; /* Prevent interacting with the hidden span */
 }
 
 /* Specific rules for buttons that DO have changing text */

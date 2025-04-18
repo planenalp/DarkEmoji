@@ -448,20 +448,59 @@ async function pasteFromClipboard(textarea) {
 async function copyToClipboard(textareaElement, buttonElement) {
     const textToCopy = textareaElement.value;
     
+    // Get references to the text spans WITHIN the specific button
+    const defaultSpan = buttonElement.querySelector('.btn-text.default');
+    const successSpan = buttonElement.querySelector('.btn-text.success');
+    const querySpan = buttonElement.querySelector('.btn-text.query'); // Assuming .query class exists for empty state
+
+    // Function to reset button to default state
+    const resetToDefault = () => {
+        if (defaultSpan) defaultSpan.style.opacity = '1';
+        if (defaultSpan) defaultSpan.style.pointerEvents = 'auto';
+        if (successSpan) successSpan.style.opacity = '0';
+        if (successSpan) successSpan.style.pointerEvents = 'none';
+        if (querySpan) querySpan.style.opacity = '0';
+        if (querySpan) querySpan.style.pointerEvents = 'none';
+        buttonElement.classList.remove('is-success', 'is-query');
+    };
+    
     if (!textToCopy.trim()) { // If empty or only whitespace
-        buttonElement.classList.add('is-query');
-        setTimeout(() => buttonElement.classList.remove('is-query'), 500);
+        if (querySpan) {
+            // Show Empty state
+            if (defaultSpan) defaultSpan.style.opacity = '0';
+            if (successSpan) successSpan.style.opacity = '0';
+            querySpan.style.opacity = '1';
+            querySpan.style.pointerEvents = 'auto'; // Allow interaction if needed?
+            buttonElement.classList.add('is-query'); // Use is-query class for visual feedback
+            
+            setTimeout(() => {
+                resetToDefault();
+            }, 500);
+        } else {
+            // Fallback if querySpan doesn't exist (should not happen now)
+            buttonElement.classList.add('is-query');
+            setTimeout(() => buttonElement.classList.remove('is-query'), 500);
+        }
         return false; // Indicate failure (nothing to copy)
     }
 
     try {
         await navigator.clipboard.writeText(textToCopy);
+        // Show Success state
+        if (defaultSpan) defaultSpan.style.opacity = '0';
+        if (successSpan) successSpan.style.opacity = '1';
+        if (successSpan) successSpan.style.pointerEvents = 'auto';
+        if (querySpan) querySpan.style.opacity = '0'; 
         buttonElement.classList.add('is-success');
-        setTimeout(() => buttonElement.classList.remove('is-success'), 500);
+
+        setTimeout(() => {
+            resetToDefault();
+        }, 500);
         return true; // Indicate success
     } catch (err) {
         console.error('Failed to copy text: ', err);
         alert('Failed to copy text.');
+        resetToDefault(); // Reset on error too
         // Optionally add an 'is-error' class here if needed
         return false; // Indicate failure
     }
