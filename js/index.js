@@ -159,76 +159,46 @@ function updateSubtitle() {
 // Initialize menu state
 function initializeMenuState() {
     // Set Default as active
-    defaultBtn.classList.add('active');
-    customBtn.classList.remove('active');
+    defaultBtn.classList.add("active");
+    customBtn.classList.remove("active");
     isDefaultMode = true;
     
-    // Set AES-256-GCM and Base64 as active
-    // document.querySelector('.menu-item[data-encrypt="AES-256-GCM"]').classList.add('active');
-    // document.querySelector('.menu-item[data-encode="Base64"]').classList.add('active');
+    // Set AES-256-GCM and Base64 as active by default in HTML
+    // No need for JS to set initial active state for these anymore
+    // setActiveOption(optionCipherContainer, "AES-256-GCM");
+    // setActiveOption(optionBaseContainer, "Base64");
 }
 
 // Toggle dropdown menu
-cipherSubtitle.addEventListener('click', (e) => {
+cipherSubtitle.addEventListener("click", (e) => {
     e.stopPropagation();
-    cipherMenu.classList.toggle('show');
+    cipherMenu.classList.toggle("show");
 });
 
 // Mode switching for Default/Custom
-defaultBtn.addEventListener('click', () => {
+defaultBtn.addEventListener("click", () => {
     // Always switch to default mode and set AES-256-GCM and Base64
-    currentEncrypt = 'AES-256-GCM';
-    currentEncode = 'Base64';
-    switchCipherMode('default');
+    currentEncrypt = "AES-256-GCM";
+    currentEncode = "Base64";
+    switchCipherMode("default");
     
-    // Update menu items
-    /*
-    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.encrypt === 'AES-256-GCM') {
-            item.classList.add('active');
-        }
-    });
+    // Visual state is handled by switchCipherMode and setActiveOption
     
-    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.encode === 'Base64') {
-            item.classList.add('active');
-        }
-    });
-    */
-        
     updateSubtitle();
 });
 
-customBtn.addEventListener('click', () => {
-    // Always switch to custom mode and set AES-256-GCM and Base1024
-    currentEncrypt = 'AES-256-GCM';
-    currentEncode = 'Base1024';
-    switchCipherMode('custom');
+customBtn.addEventListener("click", () => {
+    // When switching to custom, ensure the current selections are visually active
+    // We don't set specific defaults here, just switch the mode
+    switchCipherMode("custom");
     
-    // Update menu items
-    /*
-    document.querySelectorAll('.menu-item[data-encrypt]').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.encrypt === 'AES-256-GCM') {
-            item.classList.add('active');
-        }
-    });
-    
-    document.querySelectorAll('.menu-item[data-encode]').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.encode === 'Base1024') {
-            item.classList.add('active');
-        }
-    });
-    */
-    
+    // Visual state is handled by switchCipherMode and setActiveOption
+
     updateSubtitle();
 });
 
 function switchCipherMode(mode) {
-    isDefaultMode = mode === 'default';
+    isDefaultMode = mode === "default";
     
     // Update button states
     defaultBtn.classList.toggle('active', isDefaultMode);
