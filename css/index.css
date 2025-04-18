@@ -112,7 +112,6 @@ body {
     margin: 0;
     text-align: center;
     position: relative;
-    letter-spacing: -1px;
     text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all 0.3s ease;
