@@ -28,6 +28,11 @@
     --button-hover-color: #000000;                /* Black text on yellow bg */
     --button-active-hover-bg: #e9b54d;           /* Specific active/hover yellow */
     --button-active-hover-color: #000000;         /* Black text for active/hover yellow */
+    /* Active State Colors */
+    --title-active-bg: var(--title-color);       /* #000000 */
+    --title-active-color: var(--bg-color);         /* #face64 */
+    --subtitle-active-bg: var(--title-color);    /* #000000 */
+    --subtitle-active-color: var(--bg-color);      /* #face64 */
 }
 
 [data-theme="dark"] {
@@ -56,6 +61,11 @@
     --button-hover-color: #000000;                /* Black text on yellow bg */
     --button-active-hover-bg: #e9b54d;           /* Specific active/hover yellow */
     --button-active-hover-color: #000000;         /* Black text for active/hover yellow */
+    /* Active State Colors */
+    --title-active-bg: var(--title-color);       /* #face64 */
+    --title-active-color: var(--bg-color);         /* #000000 */
+    --subtitle-active-bg: var(--title-color);    /* #face64 */
+    --subtitle-active-color: var(--bg-color);      /* #000000 */
 }
 
 html {
@@ -109,17 +119,9 @@ body {
 
 .title:active {
     transform: scale(0.95); /* Add press effect */
-    /* Apply hover colors for active state */
-}
-
-[data-theme="light"] .title:active {
-    background: #000000;
-    color: #face64;
-}
-
-[data-theme="dark"] .title:active {
-    background: #face64;
-    color: #000000;
+    /* Apply active colors using theme variables */
+    background: var(--title-active-bg);
+    color: var(--title-active-color);
 }
 
 .subtitle-container {
@@ -150,17 +152,9 @@ body {
 
 .subtitle:active {
     transform: scale(0.95); /* Add press effect */
-    /* Apply hover colors for active state */
-}
-
-[data-theme="light"] .subtitle:active {
-    background: #000000;
-    color: #face64;
-}
-
-[data-theme="dark"] .subtitle:active {
-    background: #face64;
-    color: #000000;
+    /* Apply active colors using theme variables */
+    background: var(--subtitle-active-bg);
+    color: var(--subtitle-active-color);
 }
 
 .dropdown-menu {
@@ -278,16 +272,9 @@ body {
 /* Match subtitle active state */
 .footer a:active {
     transform: scale(0.95);
-}
-
-[data-theme="light"] .footer a:active {
-    background: var(--title-color); /* Use variable */
-    color: var(--bg-color);   /* Use variable */
-}
-
-[data-theme="dark"] .footer a:active {
-    background: var(--title-color); /* Use variable */
-    color: var(--bg-color);   /* Use variable */
+    /* Apply active colors using theme variables */
+    background: var(--title-color);
+    color: var(--bg-color);
 }
 
 /* When input is expanded, let it grow */
@@ -903,7 +890,7 @@ input[type="text"]:focus {
     }
     
     .title {
-        font-size: 42px;
+        font-size: 41px;
         margin: 0;
     }
     
@@ -912,7 +899,7 @@ input[type="text"]:focus {
     }
     
     .subtitle {
-        font-size: 14px;
+        font-size: 15px;
         padding: 3px 8px;
     }
 
@@ -929,7 +916,9 @@ input[type="text"]:focus {
     .container {
         padding: 10px;
         margin-bottom: 0; /* Prevent extra space at bottom on mobile */
-        min-height: 360px;
+        /* min-height: 360px; */
+        /* body padding 10px + Title 64px + Subtitle 26px+ Subtitle bottom 10px + container bottom 10px = 120px */
+        min-height: calc(100dvh - 120px);
     }
 
     /* 调整 Expand 状态下的样式以利用额外空间 */
