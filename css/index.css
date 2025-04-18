@@ -894,6 +894,12 @@ input[type="text"]:focus {
         background-color: var(--button-active-hover-bg); /* Use var */
         color: var(--button-active-hover-color); /* Use var */
     }
+
+    .language-option:hover {
+        /* Match hover from @media (any-hover: hover) */
+        background: var(--button-hover-bg);
+        color: var(--button-hover-color);
+    }
 }
 
 /* 移动设备适配 */
@@ -1161,12 +1167,6 @@ input[type="text"]:focus {
 
 .language-option:last-child {
     margin-bottom: 0; /* Remove margin from last option */
-}
-
-.language-option:hover {
-    /* Match hover from @media (any-hover: hover) */
-    background: var(--button-hover-bg);
-    color: var(--button-hover-color);
 }
 
 .language-option:active {
