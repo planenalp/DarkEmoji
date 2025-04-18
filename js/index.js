@@ -227,6 +227,34 @@ const translations = {
         aboutLinkText: '정보',
         githubLinkText: 'GitHub',
         alertNoInput: '텍스트나 파일이 입력되지 않았습니다。'
+    },
+    ru: {
+        mainTitle: 'Тёмные эмодзи',
+        defaultBtnText: 'По умолчанию',
+        customBtnText: 'Пользовательский',
+        inputPlaceholderEncrypt: 'Ввод',
+        inputPlaceholderDecrypt: 'Зашифрованный ввод',
+        expandBtnText: 'Развернуть',
+        collapseBtnText: 'Свернуть',
+        pasteBtnText: 'Вставить',
+        copyBtnText: 'Копировать',
+        pastedBtnText: 'Вставлено',
+        copiedBtnText: 'Скопировано',
+        clearBtnText: 'Очистить',
+        clearedBtnText: 'Очищено',
+        emptyBtnText: 'Пусто',
+        selectOrDropText: 'Выберите или перетащите',
+        passwordPlaceholder: 'Пароль (необязательно)',
+        showBtnText: 'Показать',
+        hideBtnText: 'Скрыть',
+        generateBtnText: 'Сгенерировать',
+        generatedBtnText: 'Сгенерировано',
+        outputPlaceholderEncrypt: 'Вывод',
+        outputPlaceholderDecrypt: 'Расшифрованный вывод',
+        downloadText: 'Скачать',
+        aboutLinkText: 'О программе',
+        githubLinkText: 'GitHub',
+        alertNoInput: 'Текст или файлы не были введены.'
     }
 };
 
@@ -270,6 +298,7 @@ function setLanguage(lang) {
 
 // Function to toggle language dropdown
 function toggleLanguageDropdown(e) {
+    e.preventDefault(); // Prevent adding # to URL
     e.stopPropagation();
     languageDropdown.classList.toggle('show');
     // Close cipher menu if open
@@ -756,6 +785,7 @@ function clearTextarea(textarea) {
 // Input button event listeners
 inputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
+    closeDropdowns(); // Close dropdowns when expanding/collapsing
     const isExpanding = !inputText.classList.contains('expanded');
 
     // If output is expanded, collapse it first
@@ -839,6 +869,7 @@ inputButtons.clear.addEventListener('click', () => {
 // Output button event listeners
 outputButtons.expand.addEventListener('click', (e) => {
     e.stopPropagation();
+    closeDropdowns(); // Close dropdowns when expanding/collapsing
     const isExpanding = !outputText.classList.contains('expanded');
 
     // If input is expanded, collapse it first
@@ -1339,6 +1370,7 @@ passwordCopyBtn.addEventListener('click', (e) => {
     // 阻止事件传播，避免意外交互
     e.preventDefault();
     e.stopPropagation();
+    closeDropdowns(); // Close dropdowns when toggling visibility
     
     const isEmpty = password.value.trim() === '';
     if (isEmpty) return; // Do nothing if empty
@@ -1427,3 +1459,9 @@ passwordButtons.generate.addEventListener('click', () => {
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
 });
+
+// Helper function to close dropdowns
+function closeDropdowns() {
+    cipherMenu.classList.remove('show');
+    languageDropdown.classList.remove('show');
+}
