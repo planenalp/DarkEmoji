@@ -173,6 +173,10 @@ function initializeMenuState() {
 cipherSubtitle.addEventListener("click", (e) => {
     e.stopPropagation();
     cipherMenu.classList.toggle("show");
+    // Close language dropdown if open
+    if (languageDropdown.classList.contains('show')) {
+        languageDropdown.classList.remove('show');
+    }
 });
 
 // Mode switching for Default/Custom
@@ -291,13 +295,18 @@ setupOptionGroup(optionBaseContainer, (value) => {
     if (isDefaultMode) switchCipherMode('custom');
 });
 
-// Close dropdown when clicking outside
+// Close dropdown when clicking outside (Handles BOTH menus now)
 document.addEventListener('click', (e) => {
     const target = e.target;
-    
-    // 只保留关闭下拉菜单的逻辑，不添加自动折叠文本框的逻辑
-    if (!target.closest('.subtitle-container')) {
+
+    // Close cipher menu if click is outside subtitle container AND not the subtitle itself
+    if (!target.closest('.subtitle-container') && !target.isEqualNode(cipherSubtitle)) {
         cipherMenu.classList.remove('show');
+    }
+
+    // Close language menu if click is outside language selector AND not the language link itself
+    if (!target.closest('.language-selector') && !target.isEqualNode(languageLink)) {
+        languageDropdown.classList.remove('show');
     }
 });
 
@@ -850,7 +859,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (languageLink && languageDropdown && languageOptions.length > 0) {
         languageLink.addEventListener('click', (event) => {
             event.preventDefault(); // Prevent default link behavior
+            event.stopPropagation(); // Prevent triggering the document click listener immediately
             languageDropdown.classList.toggle('show');
+            // Close cipher menu if open
+            if (cipherMenu.classList.contains('show')) {
+                cipherMenu.classList.remove('show');
+            }
         });
 
         languageOptions.forEach(option => {
@@ -861,32 +875,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.classList.add('active');
 
                 const selectedLanguageText = option.textContent;
+                const selectedLangCode = option.dataset.lang; // Get language code
                 languageLink.textContent = selectedLanguageText;
+
+                // Save the selected language to localStorage
+                localStorage.setItem('language', selectedLangCode);
+
                 // languageDropdown.classList.remove('show'); // REMOVED: Don't close immediately
                 // Add code here to actually change the site language if needed
-                // e.g., load different text resources based on option.dataset.lang
+                // e.g., load different text resources based on selectedLangCode
+                console.log(`Language changed to: ${selectedLangCode}`); // Placeholder
             });
         });
 
-        // Close dropdown if clicked outside
-        window.addEventListener('click', (event) => {
-            if (!languageLink.contains(event.target) && !languageDropdown.contains(event.target)) {
-                if (languageDropdown.classList.contains('show')) {
-                    languageDropdown.classList.remove('show');
-                }
+        // Load saved language preference on page load
+        const savedLang = localStorage.getItem('language');
+        if (savedLang) {
+            const matchingOption = Array.from(languageOptions).find(opt => opt.dataset.lang === savedLang);
+            if (matchingOption) {
+                languageLink.textContent = matchingOption.textContent;
+                // Ensure correct button is active
+                languageOptions.forEach(opt => opt.classList.remove('active'));
+                matchingOption.classList.add('active');
+                // Add code here to apply the saved language
+                console.log(`Loaded saved language: ${savedLang}`); // Placeholder
             }
-        });
+        } else {
+            // Optional: Set default if nothing is saved (already handled by HTML default)
+            // localStorage.setItem('language', 'en');
+        }
     }
-
-    // Initial setup (e.g., load saved language preference if any)
-    // const savedLang = localStorage.getItem('language');
-    // if (savedLang) {
-    //     const matchingOption = Array.from(languageOptions).find(opt => opt.dataset.lang === savedLang);
-    //     if (matchingOption) {
-    //         languageLink.textContent = matchingOption.textContent;
-    //         // Add code here to apply the saved language
-    //     }
-    // }
 });
 
 // Initialize mode
