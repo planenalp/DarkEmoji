@@ -920,8 +920,6 @@ input[type="text"]:focus {
         /* body padding 10px + Title 64px + Subtitle 26px+ Subtitle bottom 10px + container bottom 10px = 120px */
         /* 添加对底部安全区域的支持 */
         min-height: calc(100dvh - 120px - env(safe-area-inset-bottom, 0px));
-        /* 添加额外的底部padding以防止内容贴近底部 */
-        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
     }
 
     /* 调整 Expand 状态下的样式以利用额外空间 */
