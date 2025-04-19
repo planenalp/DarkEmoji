@@ -1,59 +1,46 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title data-translate-key="mainTitle">DarkEmoji</title>
-    <link rel="stylesheet" href="css/reset.css">
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkEmoji</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJOb0VkZ2UiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE4MDAgMTgwMCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtzdHJva2U6IzAwMDt9LmNscy0xLC5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjEwMHB4O30uY2xzLTN7ZmlsbDojZmFjZTY0O30uY2xzLTJ7c3Ryb2tlOiNmYWNlNjQ7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGlkPSJmYWNlQmlnUmlnaHQiIGQ9Ik0xODAwLDkwMEMxODAwLDQwMi45NCwxMzk3LjA2LDAsOTAwLDB2MTgwMGM0OTcuMDYsMCw5MDAtNDAyLjk0LDkwMC05MDBaIi8+PHBhdGggaWQ9ImZhY2VCaWdMZWZ0IiBjbGFzcz0iY2xzLTMiIGQ9Ik0wLDkwMGMwLDQ5Ny4wNiw0MDIuOTQsOTAwLDkwMCw5MDBWMEM0MDIuOTQsMCwwLDQwMi45NCwwLDkwMFoiLz48bGluZSBpZD0iZXllLWNyb3NzLTIiIGNsYXNzPSJjbHMtMSIgeDE9IjI1MCIgeTE9IjEwNTAiIHgyPSI3NTAiIHkyPSI1NTAiLz48bGluZSBpZD0iZXllLWNyb3NzLTEiIGNsYXNzPSJjbHMtMSIgeDE9Ijc1MCIgeTE9IjEwNTAiIHgyPSIyNTAiIHkyPSI1NTAiLz48Y2lyY2xlIGlkPSJleWUtY2lyY2xlIiBjbGFzcz0iY2xzLTIiIGN4PSIxMzAwIiBjeT0iODAwIiByPSIyNTAiLz48L3N2Zz4=">
     <script>
         // 立即设置主题，避免闪烁
         document.documentElement.setAttribute('data-theme',
             localStorage.getItem('theme') === 'light' ? 'light' : 'dark' // Default to dark if not 'light'
         );
     </script>
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
-    <div class="top-bar">
+    <div class="title-container">
         <h1 class="title" data-translate-key="mainTitle">DarkEmoji</h1>
-        <div class="controls">
-            <!-- Language Selector -->
-            <div class="language-selector">
-                <a href="#" id="languageLink" class="language-link">🌐 EN</a>
-                <div id="languageDropdown" class="language-dropdown">
-                    <a href="#" class="language-option" data-lang="en">English</a>
-                    <a href="#" class="language-option" data-lang="zh-Hans">简体中文</a>
-                    <a href="#" class="language-option" data-lang="zh-Hant">繁體中文</a>
-                    <!-- Add more languages here -->
-                </div>
+    </div>
+    <div class="subtitle-container">
+        <h2 class="subtitle" id="cipherSubtitle">AES-256-GCM & Base64</h2>
+        <div class="dropdown-menu" id="cipherMenu">
+            <div class="menu-mode-switch" id="defaultCustomSwitch">
+                <button id="defaultBtn" class="mode-btn mode-btn-menu active" data-encrypt="AES-256-GCM" data-encode="Base64">
+                    <span data-translate-key="defaultBtnText">Default</span>
+                </button>
+                <button id="customBtn" class="mode-btn mode-btn-menu">
+                    <span data-translate-key="customBtnText">Custom</span>
+                </button>
             </div>
-            <!-- Cipher Selector -->
-            <div class="subtitle-container">
-                <span id="cipherSubtitle">AES-256-GCM & Base64</span>
-                <div id="cipherMenu" class="dropdown-menu">
-                    <div class="menu-section mode-selection">
-                        <button id="defaultBtn" class="mode-btn-menu active" data-translate-key="defaultBtnText">Default</button>
-                        <button id="customBtn" class="mode-btn-menu" data-translate-key="customBtnText">Custom</button>
-                    </div>
-                    <div class="menu-section options">
-                        <div id="optionCipher" class="option-group">
-                            <button class="mode-btn-menu active" data-value="AES-256-GCM">AES-256-GCM</button>
-                            <button class="mode-btn-menu" data-value="ChaCha20-Poly1305">ChaCha20-Poly1305</button>
-                        </div>
-                        <div id="optionBase" class="option-group">
-                            <button class="mode-btn-menu active" data-value="Base64">Base64</button>
-                            <button class="mode-btn-menu" data-value="Base128">Base128</button>
-                            <button class="mode-btn-menu" data-value="Base256">Base256</button>
-                            <button class="mode-btn-menu" data-value="Base512">Base512</button>
-                            <button class="mode-btn-menu" data-value="Base1024">Base1024</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="menu-mode-switch" id="optionCipher">
+                <button class="mode-btn mode-btn-menu active" data-value="AES-256-GCM"><span>AES-256-GCM</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="ChaCha20-Poly1305"><span>ChaCha20-Poly1305</span></button>
+            </div>
+            <div class="menu-mode-switch" id="optionBase">
+                <button class="mode-btn mode-btn-menu active" data-value="Base64"><span>Base64</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base128"><span>Base128</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base256"><span>Base256</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base512"><span>Base512</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base1024"><span>Base1024</span></button>
             </div>
         </div>
     </div>
-
     <div class="container">
         <div class="mode-switch">
             <button id="encryptBtn" class="mode-btn active">
@@ -90,10 +77,12 @@
         </div>
 
         <div class="password-section">
-            <form id="passwordForm" autocomplete="on" target="hiddenFrame" action="?">
+            <form id="passwordForm" autocomplete="on" target="passwordSubmitFrame">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
                 <input type="submit" style="display: none;">
             </form>
+            <!-- Hidden iframe for form submission to prevent page reload -->
+            <iframe name="passwordSubmitFrame" style="display: none;"></iframe>
             <div class="button-group">
                 <button class="action-btn" id="passwordCopy">
                     <span class="btn-text default empty-text" data-translate-key="emptyBtnText">Empty</span>
@@ -146,16 +135,24 @@
         <button id="actionBtn" class="main-btn"><span>🔒</span></button>
     </div>
 
-    <footer>
-        <a href="https://github.com/iterami/DarkEmoji/blob/main/README.md" target="_blank" data-translate-key="aboutLinkText">About</a> |
-        <a href="https://github.com/iterami/DarkEmoji" target="_blank" data-translate-key="githubLinkText">GitHub</a>
+    <footer class="footer">
+        <a href="https://github.com/planenalp/DarkEmoji/blob/main/README.md" data-translate-key="aboutLinkText">About</a>
+        <div class="language-selector">
+            <a href="#" id="languageLink">English</a>
+            <div class="language-dropdown" id="languageDropdown">
+                <button class="language-option" data-lang="zh-Hans">Chinese (Simplified)</button>
+                <button class="language-option" data-lang="zh-Hant">Chinese (Traditional)</button>
+                <button class="language-option active" data-lang="en">English</button>
+                <button class="language-option" data-lang="ja">Japanese</button>
+                <button class="language-option" data-lang="ko">Korean</button>
+                <button class="language-option" data-lang="ru">Russian</button>
+            </div>
+        </div>
+        <a href="https://github.com/planenalp/DarkEmoji" data-translate-key="githubLinkText">GitHub</a>
     </footer>
 
-    <!-- Hidden iframe for password form submission -->
-    <iframe name="hiddenFrame" id="hiddenFrame" style="display: none;"></iframe>
-
-    <script src="js/language.js"></script>
     <script src="js/cipher.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/index.js"></script>
 </body>
 </html> 
