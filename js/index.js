@@ -103,7 +103,7 @@ const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 // Helper function to close dropdowns - MODIFIED (Language part handled in language.js)
 function closeDropdowns() {
     if (cipherMenu) cipherMenu.classList.remove('show');
-    if (window.languageDropdown.classList.contains('show')) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
+    if (window.languageDropdown) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
 }
 
 // Function to update the combined input button state (Paste/Copy)
@@ -427,7 +427,7 @@ encryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            triggerPasswordSave();
+            document.getElementById('passwordForm').submit();
         }
     } else {
         switchMode('encrypt');
@@ -444,7 +444,7 @@ decryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            triggerPasswordSave();
+            document.getElementById('passwordForm').submit();
         }
     } else {
         switchMode('decrypt');
@@ -881,7 +881,7 @@ actionBtn.addEventListener('click', () => {
     }
     // Add form submission after action
     if (password.value.trim()) { // Only submit if password is not empty
-        triggerPasswordSave();
+        document.getElementById('passwordForm').submit();
     }
 });
 
@@ -1272,6 +1272,11 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
+// 防止密码表单提交
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+});
+
 // Save file content and name to localStorage
 // IMPORTANT: Make saveFileContent global so download can use it
 window.saveFileContent = saveFileContent;
@@ -1288,35 +1293,3 @@ function clearFileContent() {
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
-
-// 新的触发密码保存函数 - 使用自动点击提交按钮的方式
-function triggerPasswordSave() {
-    // 获取 passwordForm
-    const form = document.getElementById('passwordForm');
-    if (!form) return;
-    
-    // 创建一个临时的提交按钮（如果表单中没有）
-    let submitButton = form.querySelector('input[type="submit"]');
-    let needToRemove = false;
-    
-    if (!submitButton) {
-        submitButton = document.createElement('input');
-        submitButton.type = 'submit';
-        submitButton.style.display = 'none';
-        form.appendChild(submitButton);
-        needToRemove = true;
-    }
-    
-    // 添加一次性事件监听器来防止页面刷新
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // 如果需要，移除临时创建的提交按钮
-        if (needToRemove && submitButton && submitButton.parentNode) {
-            submitButton.parentNode.removeChild(submitButton);
-        }
-    }, { once: true });
-    
-    // 点击提交按钮 - 这会触发真实的表单提交事件
-    submitButton.click();
-}
