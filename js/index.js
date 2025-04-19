@@ -426,10 +426,12 @@ encryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 提交密码表单以触发浏览器保存密码
+        // 直接触发表单提交以触发浏览器保存密码
         if (password.value) {
-            const passwordForm = document.getElementById('passwordForm');
-            passwordForm.requestSubmit();
+            const hiddenSubmit = document.getElementById('hiddenSubmit');
+            if (hiddenSubmit) {
+                hiddenSubmit.click(); // 直接点击提交按钮
+            }
         }
     } else {
         switchMode('encrypt');
@@ -445,10 +447,12 @@ decryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 提交密码表单以触发浏览器保存密码
+        // 直接触发表单提交以触发浏览器保存密码
         if (password.value) {
-            const passwordForm = document.getElementById('passwordForm');
-            passwordForm.requestSubmit();
+            const hiddenSubmit = document.getElementById('hiddenSubmit');
+            if (hiddenSubmit) {
+                hiddenSubmit.click(); // 直接点击提交按钮
+            }
         }
     } else {
         switchMode('decrypt');
@@ -880,17 +884,21 @@ actionBtn.addEventListener('click', () => {
     }
     if (isEncryptMode) {
         outputText.value = inputText.value; // Placeholder logic
-        // 提交密码表单以触发浏览器保存密码
+        // 直接触发表单提交以触发浏览器保存密码
         if (password.value) {
-            const passwordForm = document.getElementById('passwordForm');
-            passwordForm.requestSubmit();
+            const hiddenSubmit = document.getElementById('hiddenSubmit');
+            if (hiddenSubmit) {
+                hiddenSubmit.click(); // 直接点击提交按钮
+            }
         }
     } else {
         outputText.value = inputText.value; // Placeholder logic
-        // 提交密码表单以触发浏览器保存密码
+        // 直接触发表单提交以触发浏览器保存密码
         if (password.value) {
-            const passwordForm = document.getElementById('passwordForm');
-            passwordForm.requestSubmit();
+            const hiddenSubmit = document.getElementById('hiddenSubmit');
+            if (hiddenSubmit) {
+                hiddenSubmit.click(); // 直接点击提交按钮
+            }
         }
     }
 });
@@ -1282,11 +1290,26 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交导致页面刷新，但允许触发浏览器询问保存密码
+// 处理密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    e.preventDefault(); // 阻止页面刷新
+    console.log('密码表单已提交'); // 用于调试
     // 这里我们阻止了表单默认提交行为，但浏览器已经收到了提交操作，会询问是否保存密码
 });
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
+
+// 密码框的回车键处理
+password.addEventListener('keydown', function(e) {
+    // 如果按下的是回车键
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        e.preventDefault(); // 阻止默认行为
+        
+        // 手动触发表单提交
+        const hiddenSubmit = document.getElementById('hiddenSubmit');
+        if (hiddenSubmit) {
+            hiddenSubmit.click();
+        }
+    }
+});
