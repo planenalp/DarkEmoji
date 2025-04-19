@@ -103,7 +103,7 @@ const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 // Helper function to close dropdowns - MODIFIED (Language part handled in language.js)
 function closeDropdowns() {
     if (cipherMenu) cipherMenu.classList.remove('show');
-    if (window.languageDropdown) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
+    if (window.languageDropdown.classList.contains('show')) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
 }
 
 // Function to update the combined input button state (Paste/Copy)
@@ -398,9 +398,6 @@ function switchMode(mode, saveState = true) { // Add saveState flag
         if (typeof updatePasswordButtonState === 'function') updatePasswordButtonState();
         if (typeof updatePasswordVisibilityState === 'function') updatePasswordVisibilityState();
     }
-
-    // 触发表单提交以保存密码
-    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
 }
 
 // Helper function to collapse any expanded textareas
@@ -419,15 +416,24 @@ function collapseAllTextareas() {
     }
 }
 
+const passwordForm = document.getElementById('passwordForm');
+
+function triggerPasswordSavePrompt() {
+    // 只有在密码字段非空时才尝试触发表单提交以保存密码
+    if (password && password.value.trim() !== '') {
+        const hiddenSubmit = passwordForm.querySelector('input[type="submit"]');
+        if (hiddenSubmit) {
+            hiddenSubmit.click();
+            console.log("Password save prompt triggered programmatically."); // 用于调试
+        }
+    }
+}
+
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas(); 
-        if (!inputText.value.trim()) {
-            alert(window.getTranslation('alertNoInput')); // Use global translation
-            return;
-        }
-        outputText.value = inputText.value; // Placeholder logic
+        // 触发密码保存提示
+        triggerPasswordSavePrompt();
     } else {
         switchMode('encrypt');
     }
@@ -435,12 +441,8 @@ encryptBtn.addEventListener('click', () => {
 
 decryptBtn.addEventListener('click', () => {
     if (!isEncryptMode) {
-        collapseAllTextareas();
-        if (!inputText.value.trim()) {
-            alert(window.getTranslation('alertNoInput')); // Use global translation
-            return;
-        }
-        outputText.value = inputText.value; // Placeholder logic
+        // 触发密码保存提示
+        triggerPasswordSavePrompt();
     } else {
         switchMode('decrypt');
     }
@@ -863,19 +865,97 @@ downloadFileArea.addEventListener('click', () => {
 });
 
 // Action button click handler
-actionBtn.addEventListener('click', () => {
-    collapseAllTextareas();
-    if (!inputText.value.trim()) {
-        alert(window.getTranslation('alertNoInput')); // Use global translation
+actionBtn.addEventListener('click', async () => {
+    const inputTextValue = inputText.value.trim();
+    const passwordValue = password.value; // 获取密码，不 trim
+
+    // 检查输入是否为空
+    if (!inputTextValue) {
+        alert(window.getTranslation('alertNoInput')); // 使用全局翻译
         return;
     }
-    if (isEncryptMode) {
-        outputText.value = inputText.value; // Placeholder logic
-    } else {
-        outputText.value = inputText.value; // Placeholder logic
+
+    // 对于解密，检查输入是否可能是 Base64 (因为 cipher.js 目前主要处理 Base64)
+    if (!isEncryptMode && currentEncode === 'Base64') { 
+        const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+        if (!base64Regex.test(inputTextValue)) {
+            alert(window.getTranslation('alertInvalidBase64')); // Add a translation key for this
+            return; // Stop if input is invalid Base64 for decryption
+        }
     }
-    // 触发表单提交以保存密码
-    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
+
+    try {
+        actionBtn.disabled = true;
+        actionBtn.classList.add('is-loading');
+
+        if (isEncryptMode) {
+            // 调用 Cipher.encrypt 并传递所需参数
+            const result = await Cipher.encrypt(inputTextValue, passwordValue, currentEncrypt, currentEncode);
+            if (result !== null) {
+                outputText.value = result;
+                triggerPasswordSavePrompt();
+            } else {
+                // 加密失败处理 (可以保留或根据 Cipher 模块的错误处理调整)
+                 alert(window.getTranslation('alertEncryptionFailed')); 
+            }
+        } else {
+            // 调用 Cipher.decrypt 并传递所需参数
+            const result = await Cipher.decrypt(inputTextValue, passwordValue, currentEncrypt, currentEncode);
+            if (result !== null) {
+                outputText.value = result;
+                triggerPasswordSavePrompt();
+            } else {
+                 // 解密失败处理 (可以保留或根据 Cipher 模块的错误处理调整)
+                 alert(window.getTranslation('alertDecryptionFailed')); 
+                 outputText.value = '';
+            }
+        }
+    } catch (error) {
+        console.error('Error during action:', error);
+        // 根据错误类型显示不同消息 (来自 cipher.js 的错误)
+        if (error.message.includes("decryption failed") || error.message.includes("Malformed UTF-8 data") || (error.message.includes("bad decrypt") && currentEncrypt === 'AES-256-GCM') || (error.message.includes("Unsupported state or unable to authenticate data") && currentEncrypt === 'ChaCha20-Poly1305')) {
+            alert(window.getTranslation('alertPasswordIncorrect')); 
+        } else if (error.message.includes("Base64 decoding failed")) {
+            alert(window.getTranslation('alertInvalidBase64'));
+        } else {
+            alert(`${window.getTranslation('alertActionFailed')}: ${error.message}`);
+        }
+        outputText.value = '';
+    } finally {
+        actionBtn.disabled = false;
+        actionBtn.classList.remove('is-loading');
+        // Update button states after operation
+        if (typeof updateInputButtonState === 'function') updateInputButtonState();
+        if (typeof updatePasswordButtonState === 'function') updatePasswordButtonState();
+        if (typeof updatePasswordVisibilityState === 'function') updatePasswordVisibilityState();
+        // --- 确保 updateOutputButtonState 存在并被调用 --- 
+        if (typeof updateOutputButtonState === 'function') { 
+             updateOutputButtonState(); // 更新输出按钮状态，比如清空后的'Empty'
+        } else {
+            // 如果 updateOutputButtonState 不存在，可能需要更新输出按钮的通用逻辑
+             if (typeof copyToClipboard === 'function') { // 检查 copyToClipboard 是否可用
+                 // 手动重置输出复制按钮状态 (如果需要)
+                 const outputCopyButton = document.getElementById('outputCopy');
+                 if (outputCopyButton) {
+                    const defaultSpan = outputCopyButton.querySelector('.btn-text.default');
+                    const successSpan = outputCopyButton.querySelector('.btn-text.success');
+                    const querySpan = outputCopyButton.querySelector('.btn-text.query');
+                    
+                    outputCopyButton.classList.remove('is-success', 'is-query');
+                    if (outputText.value.trim() === '') {
+                        if(querySpan) querySpan.style.opacity = '1';
+                        if(defaultSpan) defaultSpan.style.opacity = '0';
+                        if(successSpan) successSpan.style.opacity = '0';
+                    } else {
+                        if(querySpan) querySpan.style.opacity = '0';
+                        if(defaultSpan) defaultSpan.style.opacity = '1';
+                        if(successSpan) successSpan.style.opacity = '0';
+                    }
+                 }
+             }
+        }
+        // --- 结束 updateOutputButtonState 检查 --- 
+    }
 });
 
 // Initialize on page load - MODIFIED
