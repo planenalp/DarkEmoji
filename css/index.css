@@ -72,9 +72,9 @@
 @font-face {
     font-family: 'EmojiFont';
     /* 提供多种格式，浏览器会选择它支持的第一个 */
-    src: url('../fonts/NotoEmoji-Regular.woff2') format('woff2'),
-         url('../fonts/NotoEmoji-Regular.woff') format('woff'),
-         url('../fonts/NotoEmoji-Regular.ttf') format('truetype');
+    src: url('../fonts/NotoEmoji-Bold.ttf') format('truetype'),
+         url('../fonts/NotoEmoji-Bold.woff') format('woff'),
+         url('../fonts/NotoEmoji-Bold.woff2') format('woff2');
     /* Focused Emoji Unicode ranges */
     unicode-range:
         U+1F300-1F5FF, /* Miscellaneous Symbols and Pictographs */
