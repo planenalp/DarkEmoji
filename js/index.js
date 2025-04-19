@@ -452,7 +452,7 @@ async function copyInputToClipboard() {
         return true; // Indicate success
     } catch (err) {
         console.error('Failed to copy input text: ', err);
-        alert('Failed to copy text.');
+        alert(window.getTranslation('alertCopyTextFailed'));
         return false; // Indicate failure
     }
 }
@@ -470,10 +470,18 @@ async function pasteFromClipboard(textarea) {
         }
         return false; // Indicate failure (no text read)
     } catch (err) {
-        console.error('Failed to paste text: ', err);
-        // Avoid alert if it's just a lack of text/permission denied gracefully
-        if (!err.message.includes('permission')) { 
-           alert('Failed to paste text.'); 
+        if (textarea === password) {
+            console.error('Failed to paste password: ', err);
+             // Avoid alert if it's just a lack of text/permission denied gracefully
+            if (!err.message.includes('permission')) { 
+                alert(window.getTranslation('alertPastePasswordFailed')); 
+            }
+        } else {
+            console.error('Failed to paste text: ', err);
+            // Avoid alert if it's just a lack of text/permission denied gracefully
+            if (!err.message.includes('permission')) { 
+                alert(window.getTranslation('alertPasteTextFailed')); 
+            }
         }
         return false; // Indicate failure
     }
@@ -534,7 +542,7 @@ async function copyToClipboard(textareaElement, buttonElement) {
         return true; // Indicate success
     } catch (err) {
         console.error('Failed to copy text: ', err);
-        alert('Failed to copy text.');
+        alert(window.getTranslation('alertCopyTextFailed'));
         resetToDefault(); // Reset on error too
         // Optionally add an 'is-error' class here if needed
         return false; // Indicate failure
@@ -833,8 +841,7 @@ fileDropArea.addEventListener('click', () => {
 // Save file functionality
 downloadFileArea.addEventListener('click', () => {
     if (!outputText.value) {
-        // Optional: Translate this alert too if needed
-        alert('No content to save.'); 
+        alert(window.getTranslation('alertNoContentToDownload'));
         return;
     }
 
@@ -902,7 +909,7 @@ async function copyPasswordToClipboard() {
         return true; // Indicate success
     } catch (err) {
         console.error('Failed to copy password: ', err);
-        alert('Failed to copy password.');
+        alert(window.getTranslation('alertCopyPasswordFailed'));
         return false; // Indicate failure
     }
 }

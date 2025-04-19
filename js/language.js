@@ -34,7 +34,12 @@ const translations = {
         downloadText: 'Download',
         aboutLinkText: 'About',
         githubLinkText: 'GitHub',
-        alertNoInput: 'No text or files were entered.'
+        alertNoInput: 'No text or files were entered.',
+        alertNoContentToDownload: 'No content to download.',
+        alertCopyTextFailed: 'Failed to copy text.',
+        alertPasteTextFailed: 'Failed to paste text.',
+        alertCopyPasswordFailed: 'Failed to copy password.',
+        alertPastePasswordFailed: 'Failed to paste password.'
     },
     'zh-Hans': {
         mainTitle: '暗表情',
@@ -61,8 +66,13 @@ const translations = {
         outputPlaceholderDecrypt: '解密输出',
         downloadText: '下载',
         aboutLinkText: '关于',
-        githubLinkText: 'GitHub', // Keep English for GitHub
-        alertNoInput: '未输入任何文本或文件。'
+        githubLinkText: 'GitHub',
+        alertNoInput: '未输入任何文本或文件。',
+        alertNoContentToDownload: '没有可下载的内容。',
+        alertCopyTextFailed: '复制文本失败。',
+        alertPasteTextFailed: '粘贴文本失败。',
+        alertCopyPasswordFailed: '复制密码失败。',
+        alertPastePasswordFailed: '粘贴密码失败。'
     },
     'zh-Hant': {
         mainTitle: '暗表情',
@@ -89,8 +99,13 @@ const translations = {
         outputPlaceholderDecrypt: '解密輸出',
         downloadText: '下載',
         aboutLinkText: '關於',
-        githubLinkText: 'GitHub', // Keep English for GitHub
-        alertNoInput: '未輸入任何文字或檔案。'
+        githubLinkText: 'GitHub',
+        alertNoInput: '未輸入任何文字或檔案。',
+        alertNoContentToDownload: '沒有可下載的內容。',
+        alertCopyTextFailed: '複製文字失敗。',
+        alertPasteTextFailed: '貼上文字失敗。',
+        alertCopyPasswordFailed: '複製密碼失敗。',
+        alertPastePasswordFailed: '貼上密碼失敗。'
     },
     ja: {
         mainTitle: 'ダーク絵文字',
@@ -118,7 +133,12 @@ const translations = {
         downloadText: 'ダウンロード',
         aboutLinkText: '情報',
         githubLinkText: 'GitHub',
-        alertNoInput: 'テキストまたはファイルが入力されていません。'
+        alertNoInput: 'テキストまたはファイルが入力されていません。',
+        alertNoContentToDownload: 'ダウンロードする内容がありません。',
+        alertCopyTextFailed: 'テキストのコピーに失敗しました。',
+        alertPasteTextFailed: 'テキストの貼り付けに失敗しました。',
+        alertCopyPasswordFailed: 'パスワードのコピーに失敗しました。',
+        alertPastePasswordFailed: 'パスワードの貼り付けに失敗しました。'
     },
     ko: {
         mainTitle: '다크이모지',
@@ -146,7 +166,12 @@ const translations = {
         downloadText: '다운로드',
         aboutLinkText: '정보',
         githubLinkText: 'GitHub',
-        alertNoInput: '텍스트나 파일이 입력되지 않았습니다。'
+        alertNoInput: '텍스트나 파일이 입력되지 않았습니다.',
+        alertNoContentToDownload: '다운로드할 내용이 없습니다.',
+        alertCopyTextFailed: '텍스트 복사에 실패했습니다.',
+        alertPasteTextFailed: '텍스트 붙여넣기에 실패했습니다.',
+        alertCopyPasswordFailed: '비밀번호 복사에 실패했습니다.',
+        alertPastePasswordFailed: '비밀번호 붙여넣기에 실패했습니다.'
     },
     ru: {
         mainTitle: 'Тёмные эмодзи',
@@ -174,7 +199,12 @@ const translations = {
         downloadText: 'Скачать',
         aboutLinkText: 'О программе',
         githubLinkText: 'GitHub',
-        alertNoInput: 'Текст или файлы не были введены.'
+        alertNoInput: 'Текст или файлы не были введены.',
+        alertNoContentToDownload: 'Нет содержимого для скачивания.',
+        alertCopyTextFailed: 'Не удалось скопировать текст.',
+        alertPasteTextFailed: 'Не удалось вставить текст.',
+        alertCopyPasswordFailed: 'Не удалось скопировать пароль.',
+        alertPastePasswordFailed: 'Не удалось вставить пароль.'
     }
 };
 
