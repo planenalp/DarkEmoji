@@ -77,10 +77,10 @@
         </div>
 
         <div class="password-section">
-            <form id="passwordForm" method="post" action="javascript:void(0);" autocomplete="on">
-                <input type="text" id="username" name="username" value="user@example.com" autocomplete="username" style="display: none;">
+            <form id="passwordForm" autocomplete="on">
+                <input type="text" name="username" autocomplete="username" value="user" style="position: absolute; left: -9999px; opacity: 0;">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
-                <button type="submit" id="loginBtn" style="display: none;">Login</button>
+                <input type="submit" style="display: none;">
             </form>
             <div class="button-group">
                 <button class="action-btn" id="passwordCopy">

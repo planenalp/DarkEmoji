@@ -426,9 +426,10 @@ encryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 触发密码保存
+        // 触发表单提交来激活浏览器密码保存功能
         if (password.value) {
-            triggerPasswordSave();
+            // document.getElementById('passwordForm').requestSubmit();
+            document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
         }
     } else {
         switchMode('encrypt');
@@ -444,9 +445,10 @@ decryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 触发密码保存
+        // 触发表单提交来激活浏览器密码保存功能
         if (password.value) {
-            triggerPasswordSave();
+            // document.getElementById('passwordForm').requestSubmit();
+            document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
         }
     } else {
         switchMode('decrypt');
@@ -882,9 +884,10 @@ actionBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
     }
     
-    // 触发密码保存
+    // 触发表单提交来激活浏览器密码保存功能
     if (password.value) {
-        triggerPasswordSave();
+        // document.getElementById('passwordForm').requestSubmit();
+        document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
     }
 });
 
@@ -1275,30 +1278,10 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交导致页面刷新
+// 防止密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    // 模拟登录成功的视觉反馈
-    const pwdSection = document.querySelector('.password-section');
-    if (pwdSection) {
-        pwdSection.classList.add('login-success');
-        setTimeout(() => {
-            pwdSection.classList.remove('login-success');
-        }, 800);
-    }
 });
-
-// 简化触发密码保存的函数
-function triggerPasswordSave() {
-    if (!password.value) return;
-    
-    // 获取登录按钮并点击它
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.click();
-    }
-}
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
