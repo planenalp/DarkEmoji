@@ -426,9 +426,9 @@ encryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 触发表单提交来激活浏览器密码保存功能
+        // 触发密码保存
         if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
+            triggerPasswordSave();
         }
     } else {
         switchMode('encrypt');
@@ -444,9 +444,9 @@ decryptBtn.addEventListener('click', () => {
         }
         outputText.value = inputText.value; // Placeholder logic
         
-        // 触发表单提交来激活浏览器密码保存功能
+        // 触发密码保存
         if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
+            triggerPasswordSave();
         }
     } else {
         switchMode('decrypt');
@@ -882,9 +882,9 @@ actionBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
     }
     
-    // 触发表单提交来激活浏览器密码保存功能
+    // 触发密码保存
     if (password.value) {
-        document.getElementById('passwordForm').requestSubmit();
+        triggerPasswordSave();
     }
 });
 
@@ -1279,6 +1279,59 @@ passwordButtons.generate.addEventListener('click', () => {
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
 });
+
+// 添加一个辅助函数来触发密码保存
+function triggerPasswordSave() {
+    if (!password.value) return;
+    
+    // 创建一个隐藏的iframe来提交表单，避免页面刷新
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    
+    // 当iframe加载完成后，创建并提交表单
+    iframe.onload = function() {
+        try {
+            // 获取iframe的document
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            // 创建表单
+            const form = iframeDoc.createElement('form');
+            form.method = 'post';
+            form.action = 'javascript:void(0)';
+            
+            // 复制密码字段
+            const pwdInput = iframeDoc.createElement('input');
+            pwdInput.type = 'password';
+            pwdInput.name = 'password';
+            pwdInput.value = password.value;
+            pwdInput.autocomplete = 'current-password';
+            form.appendChild(pwdInput);
+            
+            // 添加提交按钮
+            const submitBtn = iframeDoc.createElement('input');
+            submitBtn.type = 'submit';
+            form.appendChild(submitBtn);
+            
+            // 添加表单到iframe的document
+            iframeDoc.body.appendChild(form);
+            
+            // 提交表单
+            form.submit();
+            
+            // 移除iframe
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+            }, 1000);
+        } catch (e) {
+            console.error('Failed to trigger password save:', e);
+            document.body.removeChild(iframe);
+        }
+    };
+    
+    // 设置空白src以触发加载
+    iframe.src = 'about:blank';
+}
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
