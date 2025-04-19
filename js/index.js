@@ -430,9 +430,7 @@ encryptBtn.addEventListener('click', () => {
             const form = document.getElementById('passwordForm');
             form.submit();
             // 阻止表单提交后的页面刷新
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-            }, { once: true });
+            return false;
         }
     } else {
         switchMode('encrypt');
@@ -452,9 +450,7 @@ decryptBtn.addEventListener('click', () => {
             const form = document.getElementById('passwordForm');
             form.submit();
             // 阻止表单提交后的页面刷新
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-            }, { once: true });
+            return false;
         }
     } else {
         switchMode('decrypt');
@@ -894,9 +890,7 @@ actionBtn.addEventListener('click', () => {
         const form = document.getElementById('passwordForm');
         form.submit();
         // 阻止表单提交后的页面刷新
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-        }, { once: true });
+        return false;
     }
 });
 
@@ -1303,3 +1297,12 @@ function clearFileContent() {
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
+
+// 防止密码表单提交导致页面刷新，但保持密码保存提示功能
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // 创建一个新的表单提交事件
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    this.dispatchEvent(submitEvent);
+    return false;
+});
