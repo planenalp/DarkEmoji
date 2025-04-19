@@ -103,7 +103,7 @@ const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 // Helper function to close dropdowns - MODIFIED (Language part handled in language.js)
 function closeDropdowns() {
     if (cipherMenu) cipherMenu.classList.remove('show');
-    if (window.languageDropdown) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
+    if (window.languageDropdown.classList.contains('show')) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
 }
 
 // Function to update the combined input button state (Paste/Copy)
@@ -427,8 +427,7 @@ encryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            // 使用模拟表单提交而不是真实表单提交
-            simulateFormSubmission();
+            triggerPasswordSave();
         }
     } else {
         switchMode('encrypt');
@@ -445,8 +444,7 @@ decryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            // 使用模拟表单提交而不是真实表单提交
-            simulateFormSubmission();
+            triggerPasswordSave();
         }
     } else {
         switchMode('decrypt');
@@ -883,8 +881,7 @@ actionBtn.addEventListener('click', () => {
     }
     // Add form submission after action
     if (password.value.trim()) { // Only submit if password is not empty
-        // 使用模拟表单提交而不是真实表单提交
-        simulateFormSubmission();
+        triggerPasswordSave();
     }
 });
 
@@ -1292,44 +1289,34 @@ function clearFileContent() {
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
 
-// 添加模拟表单提交函数
-function simulateFormSubmission() {
+// 新的触发密码保存函数 - 使用自动点击提交按钮的方式
+function triggerPasswordSave() {
+    // 获取 passwordForm
     const form = document.getElementById('passwordForm');
     if (!form) return;
     
-    // 创建一个隐藏的iframe用于模拟表单提交
-    const iframe = document.createElement('iframe');
-    iframe.name = 'password-submit-frame';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+    // 创建一个临时的提交按钮（如果表单中没有）
+    let submitButton = form.querySelector('input[type="submit"]');
+    let needToRemove = false;
     
-    // 临时保存原来的表单属性
-    const originalAction = form.action;
-    const originalTarget = form.target;
-    const originalMethod = form.method;
+    if (!submitButton) {
+        submitButton = document.createElement('input');
+        submitButton.type = 'submit';
+        submitButton.style.display = 'none';
+        form.appendChild(submitButton);
+        needToRemove = true;
+    }
     
-    // 设置表单提交到iframe中
-    form.target = 'password-submit-frame';
-    form.action = 'javascript:void(0);';
-    form.method = 'post';
-    
-    // 提交表单
-    form.submit();
-    
-    // 恢复原始表单属性
-    setTimeout(() => {
-        form.action = originalAction;
-        form.target = originalTarget;
-        form.method = originalMethod;
+    // 添加一次性事件监听器来防止页面刷新
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // 移除iframe
-        setTimeout(() => {
-            document.body.removeChild(iframe);
-        }, 100);
-    }, 100);
+        // 如果需要，移除临时创建的提交按钮
+        if (needToRemove && submitButton && submitButton.parentNode) {
+            submitButton.parentNode.removeChild(submitButton);
+        }
+    }, { once: true });
+    
+    // 点击提交按钮 - 这会触发真实的表单提交事件
+    submitButton.click();
 }
-
-// 防止密码表单提交导致页面刷新
-document.getElementById('passwordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-});
