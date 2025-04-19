@@ -77,7 +77,8 @@
         </div>
 
         <div class="password-section">
-            <form id="passwordForm" autocomplete="on" onsubmit="event.preventDefault();">
+            <form id="passwordForm" autocomplete="on" action="#" method="post" onsubmit="event.preventDefault();">
+                <input type="hidden" name="username" value="DarkEmoji">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
                 <input type="submit" style="display: none;">
             </form>

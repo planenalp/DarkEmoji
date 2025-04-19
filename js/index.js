@@ -426,8 +426,9 @@ encryptBtn.addEventListener('click', () => {
         }
         // 模拟表单提交以触发密码保存
         const form = document.getElementById('passwordForm');
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
+        if (password.value) {
+            form.requestSubmit();
+        }
         outputText.value = inputText.value; // Placeholder logic
     } else {
         switchMode('encrypt');
@@ -443,8 +444,9 @@ decryptBtn.addEventListener('click', () => {
         }
         // 模拟表单提交以触发密码保存
         const form = document.getElementById('passwordForm');
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
+        if (password.value) {
+            form.requestSubmit();
+        }
         outputText.value = inputText.value; // Placeholder logic
     } else {
         switchMode('decrypt');
@@ -876,8 +878,9 @@ actionBtn.addEventListener('click', () => {
     
     // 模拟表单提交以触发密码保存
     const form = document.getElementById('passwordForm');
-    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-    form.dispatchEvent(submitEvent);
+    if (password.value) {
+        form.requestSubmit();
+    }
     
     if (isEncryptMode) {
         outputText.value = inputText.value; // Placeholder logic
