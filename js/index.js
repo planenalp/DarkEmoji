@@ -427,7 +427,8 @@ encryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            document.getElementById('passwordForm').submit();
+            // 使用模拟表单提交而不是真实表单提交
+            simulateFormSubmission();
         }
     } else {
         switchMode('encrypt');
@@ -444,7 +445,8 @@ decryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            document.getElementById('passwordForm').submit();
+            // 使用模拟表单提交而不是真实表单提交
+            simulateFormSubmission();
         }
     } else {
         switchMode('decrypt');
@@ -881,7 +883,8 @@ actionBtn.addEventListener('click', () => {
     }
     // Add form submission after action
     if (password.value.trim()) { // Only submit if password is not empty
-        document.getElementById('passwordForm').submit();
+        // 使用模拟表单提交而不是真实表单提交
+        simulateFormSubmission();
     }
 });
 
@@ -1288,3 +1291,45 @@ function clearFileContent() {
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
+
+// 添加模拟表单提交函数
+function simulateFormSubmission() {
+    const form = document.getElementById('passwordForm');
+    if (!form) return;
+    
+    // 创建一个隐藏的iframe用于模拟表单提交
+    const iframe = document.createElement('iframe');
+    iframe.name = 'password-submit-frame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    
+    // 临时保存原来的表单属性
+    const originalAction = form.action;
+    const originalTarget = form.target;
+    const originalMethod = form.method;
+    
+    // 设置表单提交到iframe中
+    form.target = 'password-submit-frame';
+    form.action = 'javascript:void(0);';
+    form.method = 'post';
+    
+    // 提交表单
+    form.submit();
+    
+    // 恢复原始表单属性
+    setTimeout(() => {
+        form.action = originalAction;
+        form.target = originalTarget;
+        form.method = originalMethod;
+        
+        // 移除iframe
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 100);
+    }, 100);
+}
+
+// 防止密码表单提交导致页面刷新
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+});
