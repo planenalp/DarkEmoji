@@ -425,6 +425,10 @@ encryptBtn.addEventListener('click', () => {
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
+        // Add form submission when clicking the active button
+        if (password.value.trim()) { // Only submit if password is not empty
+            document.getElementById('passwordForm').submit();
+        }
     } else {
         switchMode('encrypt');
     }
@@ -438,6 +442,10 @@ decryptBtn.addEventListener('click', () => {
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
+        // Add form submission when clicking the active button
+        if (password.value.trim()) { // Only submit if password is not empty
+            document.getElementById('passwordForm').submit();
+        }
     } else {
         switchMode('decrypt');
     }
@@ -871,6 +879,10 @@ actionBtn.addEventListener('click', () => {
     } else {
         outputText.value = inputText.value; // Placeholder logic
     }
+    // Add form submission after action
+    if (password.value.trim()) { // Only submit if password is not empty
+        document.getElementById('passwordForm').submit();
+    }
 });
 
 // Initialize on page load - MODIFIED
@@ -1260,12 +1272,19 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交
-/*
-document.getElementById('passwordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-});
-*/
+// Save file content and name to localStorage
+// IMPORTANT: Make saveFileContent global so download can use it
+window.saveFileContent = saveFileContent;
+function saveFileContent(name, content) {
+    localStorage.setItem('file_content', content);
+    localStorage.setItem('file_name', name);
+}
+
+// Clear file content and name from localStorage
+function clearFileContent() {
+    localStorage.removeItem('file_content');
+    localStorage.removeItem('file_name');
+}
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
