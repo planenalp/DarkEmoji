@@ -77,11 +77,7 @@
         </div>
 
         <div class="password-section">
-            <!-- Add hidden iframe for password form submission -->
-            <iframe name="dummyFrame" id="dummyFrame" style="display: none;"></iframe>
-            <form id="passwordForm" autocomplete="on" target="dummyFrame">
-                <!-- Add a hidden username field to help browser detection -->
-                <input type="text" name="username" autocomplete="username" value="user" style="display: none;">
+            <form id="passwordForm" autocomplete="on">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
                 <input type="submit" style="display: none;">
             </form>
