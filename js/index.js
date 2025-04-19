@@ -103,7 +103,7 @@ const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 // Helper function to close dropdowns - MODIFIED (Language part handled in language.js)
 function closeDropdowns() {
     if (cipherMenu) cipherMenu.classList.remove('show');
-    if (window.languageDropdown.classList.contains('show')) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
+    if (window.languageDropdown) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
 }
 
 // Function to update the combined input button state (Paste/Copy)
@@ -360,6 +360,13 @@ function switchMode(mode, saveState = true) { // Add saveState flag
     isEncryptMode = mode === 'encrypt';
     window.isEncryptMode = isEncryptMode; // Update global variable
     
+    // 更新密码输入框的 autocomplete 属性
+    if (isEncryptMode) {
+        password.setAttribute('autocomplete', 'new-password');
+    } else {
+        password.setAttribute('autocomplete', 'current-password');
+    }
+    
     // Update button states - MOVED OUTSIDE if(saveState)
     encryptBtn.classList.toggle('active', isEncryptMode);
     decryptBtn.classList.toggle('active', !isEncryptMode);
@@ -424,6 +431,12 @@ encryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
+        
+        // 触发密码保存
+        if (password.value) {
+            document.getElementById('passwordForm').requestSubmit();
+        }
+        
         outputText.value = inputText.value; // Placeholder logic
     } else {
         switchMode('encrypt');
@@ -437,6 +450,12 @@ decryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
+        
+        // 触发密码保存
+        if (password.value) {
+            document.getElementById('passwordForm').requestSubmit();
+        }
+        
         outputText.value = inputText.value; // Placeholder logic
     } else {
         switchMode('decrypt');
@@ -866,6 +885,12 @@ actionBtn.addEventListener('click', () => {
         alert(window.getTranslation('alertNoInput')); // Use global translation
         return;
     }
+    
+    // 触发密码保存
+    if (password.value) {
+        document.getElementById('passwordForm').requestSubmit();
+    }
+    
     if (isEncryptMode) {
         outputText.value = inputText.value; // Placeholder logic
     } else {
@@ -880,6 +905,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateInputButtonState(); 
     updatePasswordButtonState(); 
     updatePasswordVisibilityState(); 
+    
+    // 确保密码输入框的 autocomplete 属性正确设置
+    if (isEncryptMode) {
+        password.setAttribute('autocomplete', 'new-password');
+    } else {
+        password.setAttribute('autocomplete', 'current-password');
+    }
 
     // Apply initial language setting - REMOVED (Handled in language.js)
     // setLanguage(currentLanguage);
@@ -1021,6 +1053,9 @@ passwordButtons.generate.addEventListener('click', () => {
     updatePasswordButtonState(); 
     // 更新可见性按钮状态
     updatePasswordVisibilityState(); 
+    
+    // 触发表单提交以提示保存密码
+    document.getElementById('passwordForm').requestSubmit();
     
     // 0.5秒后恢复到Generate状态
     setTimeout(() => {
@@ -1260,52 +1295,9 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 修改密码表单提交处理
+// 防止密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const password = document.getElementById('password').value;
-    if (password) {
-        // 创建一个临时的表单提交
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = window.location.href;
-        
-        const passwordInput = document.createElement('input');
-        passwordInput.type = 'password';
-        passwordInput.name = 'password';
-        passwordInput.value = password;
-        form.appendChild(passwordInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-    }
-});
-
-// 修改加密/解密按钮点击处理
-document.getElementById('encryptBtn').addEventListener('click', function() {
-    const password = document.getElementById('password').value;
-    if (password) {
-        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
-    }
-    // ... existing code ...
-});
-
-document.getElementById('decryptBtn').addEventListener('click', function() {
-    const password = document.getElementById('password').value;
-    if (password) {
-        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
-    }
-    // ... existing code ...
-});
-
-// 修改主操作按钮点击处理
-document.getElementById('actionBtn').addEventListener('click', function() {
-    const password = document.getElementById('password').value;
-    if (password) {
-        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
-    }
-    // ... existing code ...
 });
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
