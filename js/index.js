@@ -360,13 +360,6 @@ function switchMode(mode, saveState = true) { // Add saveState flag
     isEncryptMode = mode === 'encrypt';
     window.isEncryptMode = isEncryptMode; // Update global variable
     
-    // 更新密码输入框的 autocomplete 属性
-    if (isEncryptMode) {
-        password.setAttribute('autocomplete', 'new-password');
-    } else {
-        password.setAttribute('autocomplete', 'current-password');
-    }
-    
     // Update button states - MOVED OUTSIDE if(saveState)
     encryptBtn.classList.toggle('active', isEncryptMode);
     decryptBtn.classList.toggle('active', !isEncryptMode);
@@ -423,21 +416,50 @@ function collapseAllTextareas() {
     }
 }
 
-// Event listeners for mode switching
+// Function to trigger browser password save dialog
+function triggerPasswordSave() {
+    if (password.value.trim() !== '') {
+        const passwordForm = document.getElementById('passwordForm');
+        // Create a cloned form that won't have the preventDefault behavior
+        const tempForm = passwordForm.cloneNode(true);
+        document.body.appendChild(tempForm);
+        tempForm.requestSubmit();
+        // Remove the temp form after submission
+        setTimeout(() => {
+            document.body.removeChild(tempForm);
+        }, 100);
+    }
+}
+
+// Action button click handler
+actionBtn.addEventListener('click', () => {
+    collapseAllTextareas();
+    if (!inputText.value.trim()) {
+        alert(window.getTranslation('alertNoInput')); // Use global translation
+        return;
+    }
+    if (isEncryptMode) {
+        outputText.value = inputText.value; // Placeholder logic
+    } else {
+        outputText.value = inputText.value; // Placeholder logic
+    }
+    
+    // Trigger password save dialog if password is present
+    triggerPasswordSave();
+});
+
+// Mode switch buttons
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas(); 
+        collapseAllTextareas();
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        
-        // 触发密码保存
-        if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
-        }
-        
         outputText.value = inputText.value; // Placeholder logic
+        
+        // Trigger password save dialog if in encrypt mode and clicking encrypt button
+        triggerPasswordSave();
     } else {
         switchMode('encrypt');
     }
@@ -450,13 +472,10 @@ decryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        
-        // 触发密码保存
-        if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
-        }
-        
         outputText.value = inputText.value; // Placeholder logic
+        
+        // Trigger password save dialog if in decrypt mode and clicking decrypt button
+        triggerPasswordSave();
     } else {
         switchMode('decrypt');
     }
@@ -878,25 +897,15 @@ downloadFileArea.addEventListener('click', () => {
     // outputText.focus(); // Removed focus call
 });
 
-// Action button click handler
-actionBtn.addEventListener('click', () => {
-    collapseAllTextareas();
-    if (!inputText.value.trim()) {
-        alert(window.getTranslation('alertNoInput')); // Use global translation
-        return;
-    }
-    
-    // 触发密码保存
-    if (password.value) {
-        document.getElementById('passwordForm').requestSubmit();
-    }
-    
-    if (isEncryptMode) {
-        outputText.value = inputText.value; // Placeholder logic
-    } else {
-        outputText.value = inputText.value; // Placeholder logic
-    }
+// Theme switching
+title.addEventListener('click', () => {
+    isDarkTheme = !isDarkTheme;
+    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 });
+
+// Initialize theme
+document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
 // Initialize on page load - MODIFIED
 document.addEventListener('DOMContentLoaded', () => {
@@ -905,13 +914,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateInputButtonState(); 
     updatePasswordButtonState(); 
     updatePasswordVisibilityState(); 
-    
-    // 确保密码输入框的 autocomplete 属性正确设置
-    if (isEncryptMode) {
-        password.setAttribute('autocomplete', 'new-password');
-    } else {
-        password.setAttribute('autocomplete', 'current-password');
-    }
 
     // Apply initial language setting - REMOVED (Handled in language.js)
     // setLanguage(currentLanguage);
@@ -922,16 +924,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize mode - Needs to run after language is set
 // switchMode('encrypt'); // Now called indirectly by setLanguage in language.js
-
-// Theme switching
-title.addEventListener('click', () => {
-    isDarkTheme = !isDarkTheme;
-    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
-});
-
-// Initialize theme
-document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
 // --- New Function: Copy Password ---
 async function copyPasswordToClipboard() {
@@ -1053,9 +1045,6 @@ passwordButtons.generate.addEventListener('click', () => {
     updatePasswordButtonState(); 
     // 更新可见性按钮状态
     updatePasswordVisibilityState(); 
-    
-    // 触发表单提交以提示保存密码
-    document.getElementById('passwordForm').requestSubmit();
     
     // 0.5秒后恢复到Generate状态
     setTimeout(() => {
