@@ -424,12 +424,12 @@ encryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // 模拟表单提交以触发密码保存
-        const form = document.getElementById('passwordForm');
-        if (password.value) {
-            form.requestSubmit();
-        }
         outputText.value = inputText.value; // Placeholder logic
+        
+        // 触发表单提交来激活浏览器密码保存功能
+        if (password.value) {
+            document.getElementById('passwordForm').requestSubmit();
+        }
     } else {
         switchMode('encrypt');
     }
@@ -442,12 +442,12 @@ decryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // 模拟表单提交以触发密码保存
-        const form = document.getElementById('passwordForm');
-        if (password.value) {
-            form.requestSubmit();
-        }
         outputText.value = inputText.value; // Placeholder logic
+        
+        // 触发表单提交来激活浏览器密码保存功能
+        if (password.value) {
+            document.getElementById('passwordForm').requestSubmit();
+        }
     } else {
         switchMode('decrypt');
     }
@@ -871,21 +871,20 @@ downloadFileArea.addEventListener('click', () => {
 
 // Action button click handler
 actionBtn.addEventListener('click', () => {
+    collapseAllTextareas();
     if (!inputText.value.trim()) {
         alert(window.getTranslation('alertNoInput')); // Use global translation
         return;
     }
-    
-    // 模拟表单提交以触发密码保存
-    const form = document.getElementById('passwordForm');
-    if (password.value) {
-        form.requestSubmit();
-    }
-    
     if (isEncryptMode) {
         outputText.value = inputText.value; // Placeholder logic
     } else {
         outputText.value = inputText.value; // Placeholder logic
+    }
+    
+    // 触发表单提交来激活浏览器密码保存功能
+    if (password.value) {
+        document.getElementById('passwordForm').requestSubmit();
     }
 });
 
