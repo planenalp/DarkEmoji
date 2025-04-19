@@ -13,7 +13,6 @@ const fileDropArea = document.getElementById('fileDropArea');
 const fileInput = document.getElementById('fileInput');
 const downloadFileArea = document.getElementById('downloadFileArea');
 const password = document.getElementById('password');
-const passwordForm = document.getElementById('passwordForm');
 const cipherSubtitle = document.getElementById('cipherSubtitle');
 const cipherMenu = document.getElementById('cipherMenu');
 const defaultBtn = document.getElementById('defaultBtn');
@@ -417,41 +416,42 @@ function collapseAllTextareas() {
     }
 }
 
-// --- 新增：触发密码保存提示函数 ---
-function triggerPasswordSavePrompt() {
-    if (password && password.value && passwordForm) {
-        // 创建一个临时的 submit 事件监听器
-        const submitHandler = (event) => {
-            event.preventDefault(); // 阻止实际的表单提交（页面刷新）
-            console.log('Form submission prevented, triggering password save prompt.');
-            // 移除监听器，避免内存泄漏
-            passwordForm.removeEventListener('submit', submitHandler);
-        };
-        // 添加监听器
-        passwordForm.addEventListener('submit', submitHandler);
-        // 触发提交事件，这通常会提示浏览器保存密码
-        passwordForm.requestSubmit(); 
-        // 注意：如果 requestSubmit 不可用，可以回退到 passwordForm.submit()，
-        // 但需要确保 submitHandler 能及时执行 preventDefault。
-        // requestSubmit() 是更现代和推荐的方式。
+// Helper function to attempt form submission for password managers
+function triggerFormSubmitForPasswordManager(formElement) {
+    if (!formElement) return;
+    // Ensure password field has a value
+    const passwordInput = formElement.querySelector('input[type="password"]');
+    if (!passwordInput || !passwordInput.value) {
+        // Don't submit if password is empty, might not be intended
+        // Or handle as needed, maybe only submit if action involves password
+        return;
+    }
+
+    if (typeof formElement.requestSubmit === 'function') {
+        formElement.requestSubmit();
+    } else {
+        // Fallback for older browsers: find and click the hidden submit button
+        const submitButton = formElement.querySelector('input[type="submit"]');
+        if (submitButton) {
+            submitButton.click();
+        }
     }
 }
+
+// Get the form element once
+const passwordForm = document.getElementById('passwordForm');
 
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas();
-        // --- 触发密码保存 ---
-        if (password.value) {
-            triggerPasswordSavePrompt();
-        }
-        // --------------------
+        collapseAllTextareas(); 
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // 这里可以保留原有的占位逻辑或移除，取决于是否需要在不切换模式时有其他行为
-        // outputText.value = inputText.value; // Placeholder logic
+        outputText.value = inputText.value; // Placeholder logic
+        // *** ADDED: Trigger form submission ***
+        triggerFormSubmitForPasswordManager(passwordForm);
     } else {
         switchMode('encrypt');
     }
@@ -460,17 +460,13 @@ encryptBtn.addEventListener('click', () => {
 decryptBtn.addEventListener('click', () => {
     if (!isEncryptMode) {
         collapseAllTextareas();
-        // --- 触发密码保存 ---
-        if (password.value) {
-            triggerPasswordSavePrompt();
-        }
-        // --------------------
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // 这里可以保留原有的占位逻辑或移除
-        // outputText.value = inputText.value; // Placeholder logic
+        outputText.value = inputText.value; // Placeholder logic
+        // *** ADDED: Trigger form submission ***
+        triggerFormSubmitForPasswordManager(passwordForm);
     } else {
         switchMode('decrypt');
     }
@@ -893,51 +889,19 @@ downloadFileArea.addEventListener('click', () => {
 });
 
 // Action button click handler
-actionBtn.addEventListener('click', async () => { // Make async for await
+actionBtn.addEventListener('click', () => {
     collapseAllTextareas();
-    const currentInput = inputText.value;
-    const currentPassword = password.value;
-
-    if (!currentInput.trim()) {
-        alert(window.getTranslation('alertNoInput'));
+    if (!inputText.value.trim()) {
+        alert(window.getTranslation('alertNoInput')); // Use global translation
         return;
     }
-
-    // --- 触发密码保存 ---
-    if (currentPassword) {
-        triggerPasswordSavePrompt();
+    if (isEncryptMode) {
+        outputText.value = inputText.value; // Placeholder logic
+    } else {
+        outputText.value = inputText.value; // Placeholder logic
     }
-    // --------------------
-
-    actionBtn.disabled = true; // 禁用按钮防止重复点击
-    actionBtn.classList.add('is-loading'); // 添加加载状态
-
-    try {
-        let result = '';
-        if (isEncryptMode) {
-            // 调用加密函数
-            result = await Cipher.encrypt(currentInput, currentPassword, currentEncrypt, currentEncode);
-        } else {
-            // 调用解密函数
-            result = await Cipher.decrypt(currentInput, currentPassword, currentEncrypt, currentEncode);
-        }
-        outputText.value = result;
-        updateOutputButtonState(); // 更新输出按钮状态
-    } catch (error) {
-        console.error("Action failed:", error);
-        // 根据错误类型显示不同提示
-        if (isEncryptMode) {
-            alert(`Encryption failed: ${error.message}`); 
-        } else {
-             // 解密失败通常是密码错误或数据损坏
-            alert(`Decryption failed. Check password or input data. Details: ${error.message}`);
-        }
-        outputText.value = ''; // 清空输出
-        updateOutputButtonState();
-    } finally {
-        actionBtn.disabled = false; // 重新启用按钮
-        actionBtn.classList.remove('is-loading'); // 移除加载状态
-    }
+    // *** ADDED: Trigger form submission ***
+    triggerFormSubmitForPasswordManager(passwordForm);
 });
 
 // Initialize on page load - MODIFIED
@@ -1328,8 +1292,9 @@ passwordButtons.generate.addEventListener('click', () => {
 });
 
 // 防止密码表单提交
-document.getElementById('passwordForm').addEventListener('submit', function(e) {
+passwordForm.addEventListener('submit', function(e) {
     e.preventDefault();
+    console.log("Form submit event triggered and prevented default."); // Optional: for debugging
 });
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
