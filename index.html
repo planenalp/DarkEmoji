@@ -77,10 +77,9 @@
         </div>
 
         <div class="password-section">
-            <form id="passwordForm" autocomplete="on" action="javascript:void(0);" method="post">
-                <input type="text" id="username" name="username" autocomplete="username" value="user@darkemail.app">
+            <form id="passwordForm" autocomplete="on">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
-                <button type="submit" id="hiddenSubmit">登录</button>
+                <input type="submit" style="display: none;">
             </form>
             <div class="button-group">
                 <button class="action-btn" id="passwordCopy">
@@ -153,23 +152,5 @@
     <script src="js/cipher.js"></script>
     <script src="js/language.js"></script>
     <script src="js/index.js"></script>
-
-    <!-- 添加一个隐藏的登录表单样式，让表单看起来更像真实登录 -->
-    <style>
-        #username {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0.01; /* 不要完全隐藏，让浏览器能看到 */
-            pointer-events: none;
-        }
-        #hiddenSubmit {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0.01; /* 不要完全隐藏，让浏览器能看到 */
-            pointer-events: none;
-        }
-    </style>
 </body>
 </html> 
