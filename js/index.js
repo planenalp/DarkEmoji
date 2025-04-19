@@ -1275,62 +1275,66 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交
+// 防止密码表单提交导致页面刷新
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // 触发密码保存（模拟登录成功）
+    if (password.value) {
+        // 模拟成功的登录响应
+        setTimeout(() => {
+            // 可选：显示密码已保存的视觉反馈
+            const pwdSection = document.querySelector('.password-section');
+            if (pwdSection) {
+                pwdSection.classList.add('login-success');
+                setTimeout(() => {
+                    pwdSection.classList.remove('login-success');
+                }, 1000);
+            }
+        }, 300);
+    }
 });
 
 // 添加一个辅助函数来触发密码保存
 function triggerPasswordSave() {
     if (!password.value) return;
     
-    // 创建一个隐藏的iframe来提交表单，避免页面刷新
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+    // 确保密码表单有正确的结构以便浏览器识别为登录表单
+    const passwordForm = document.getElementById('passwordForm');
     
-    // 当iframe加载完成后，创建并提交表单
-    iframe.onload = function() {
-        try {
-            // 获取iframe的document
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            
-            // 创建表单
-            const form = iframeDoc.createElement('form');
-            form.method = 'post';
-            form.action = 'javascript:void(0)';
-            
-            // 复制密码字段
-            const pwdInput = iframeDoc.createElement('input');
-            pwdInput.type = 'password';
-            pwdInput.name = 'password';
-            pwdInput.value = password.value;
-            pwdInput.autocomplete = 'current-password';
-            form.appendChild(pwdInput);
-            
-            // 添加提交按钮
-            const submitBtn = iframeDoc.createElement('input');
-            submitBtn.type = 'submit';
-            form.appendChild(submitBtn);
-            
-            // 添加表单到iframe的document
-            iframeDoc.body.appendChild(form);
-            
-            // 提交表单
-            form.submit();
-            
-            // 移除iframe
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 1000);
-        } catch (e) {
-            console.error('Failed to trigger password save:', e);
-            document.body.removeChild(iframe);
-        }
-    };
+    // 检查是否已存在用户名字段，如果没有则添加
+    let usernameInput = passwordForm.querySelector('input[autocomplete="username"]');
+    if (!usernameInput) {
+        usernameInput = document.createElement('input');
+        usernameInput.type = 'text';
+        usernameInput.name = 'username';
+        usernameInput.autocomplete = 'username';
+        usernameInput.style.display = 'none';
+        usernameInput.value = 'user@example.com'; // 提供一个默认值
+        
+        // 确保它作为表单的第一个字段（在密码字段之前）
+        passwordForm.insertBefore(usernameInput, passwordForm.firstChild);
+    }
     
-    // 设置空白src以触发加载
-    iframe.src = 'about:blank';
+    // 确保密码字段设置了正确的autocomplete属性
+    password.autocomplete = 'current-password';
+    
+    // 确保表单有action属性（即使我们之后会preventDefault）
+    passwordForm.action = location.href;
+    passwordForm.method = 'post';
+    
+    // 添加提交按钮（如果不存在）
+    let submitButton = passwordForm.querySelector('input[type="submit"]');
+    if (!submitButton) {
+        submitButton = document.createElement('input');
+        submitButton.type = 'submit';
+        submitButton.style.display = 'none';
+        passwordForm.appendChild(submitButton);
+    }
+    
+    // 提交表单 - 这里使用click而不是submit方法
+    // 这样浏览器更可能将其视为用户操作
+    submitButton.click();
 }
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
