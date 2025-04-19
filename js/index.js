@@ -1295,47 +1295,91 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
     }
 });
 
-// 添加一个辅助函数来触发密码保存
+// 添加一个彻底的方法来触发浏览器密码保存
 function triggerPasswordSave() {
     if (!password.value) return;
+
+    // 保存当前页面状态
+    const currentState = {
+        inputText: inputText.value,
+        outputText: outputText.value,
+        password: password.value,
+        isEncryptMode: isEncryptMode
+    };
     
-    // 确保密码表单有正确的结构以便浏览器识别为登录表单
-    const passwordForm = document.getElementById('passwordForm');
+    // 保存状态到localStorage（为了导航后恢复）
+    localStorage.setItem('darkmoji_temp_state', JSON.stringify(currentState));
     
-    // 检查是否已存在用户名字段，如果没有则添加
-    let usernameInput = passwordForm.querySelector('input[autocomplete="username"]');
-    if (!usernameInput) {
-        usernameInput = document.createElement('input');
-        usernameInput.type = 'text';
-        usernameInput.name = 'username';
-        usernameInput.autocomplete = 'username';
-        usernameInput.style.display = 'none';
-        usernameInput.value = 'user@example.com'; // 提供一个默认值
-        
-        // 确保它作为表单的第一个字段（在密码字段之前）
-        passwordForm.insertBefore(usernameInput, passwordForm.firstChild);
-    }
+    // 创建一个登录表单并提交
+    const loginForm = document.createElement('form');
+    loginForm.method = 'post';
+    loginForm.action = location.href + '?auth=1'; // 添加参数使其看起来像不同的URL
+    loginForm.style.display = 'none';
     
-    // 确保密码字段设置了正确的autocomplete属性
-    password.autocomplete = 'current-password';
+    // 添加用户名字段
+    const usernameField = document.createElement('input');
+    usernameField.type = 'text';
+    usernameField.name = 'username';
+    usernameField.autocomplete = 'username';
+    usernameField.value = 'user@example.com';
+    loginForm.appendChild(usernameField);
     
-    // 确保表单有action属性（即使我们之后会preventDefault）
-    passwordForm.action = location.href;
-    passwordForm.method = 'post';
+    // 添加密码字段
+    const passwordField = document.createElement('input');
+    passwordField.type = 'password';
+    passwordField.name = 'password';
+    passwordField.autocomplete = 'current-password';
+    passwordField.value = password.value;
+    loginForm.appendChild(passwordField);
     
-    // 添加提交按钮（如果不存在）
-    let submitButton = passwordForm.querySelector('input[type="submit"]');
-    if (!submitButton) {
-        submitButton = document.createElement('input');
-        submitButton.type = 'submit';
-        submitButton.style.display = 'none';
-        passwordForm.appendChild(submitButton);
-    }
+    // 添加提交按钮
+    const submitBtn = document.createElement('input');
+    submitBtn.type = 'submit';
+    loginForm.appendChild(submitBtn);
     
-    // 提交表单 - 这里使用click而不是submit方法
-    // 这样浏览器更可能将其视为用户操作
-    submitButton.click();
+    // 添加到页面
+    document.body.appendChild(loginForm);
+    
+    // 提交表单
+    loginForm.submit();
 }
+
+// 检查是否从登录重定向回来
+window.addEventListener('load', function() {
+    // 检查URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('auth')) {
+        // 从URL中移除auth参数，避免重复触发
+        const cleanUrl = window.location.href.replace(/[?&]auth=1/, '');
+        window.history.replaceState({}, document.title, cleanUrl);
+        
+        // 尝试恢复先前的状态
+        try {
+            const savedState = localStorage.getItem('darkmoji_temp_state');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                inputText.value = state.inputText || '';
+                outputText.value = state.outputText || '';
+                password.value = state.password || '';
+                
+                // 如果当前加密/解密模式与保存的状态不同，切换模式
+                if (state.isEncryptMode !== isEncryptMode) {
+                    switchMode(state.isEncryptMode ? 'encrypt' : 'decrypt');
+                }
+                
+                // 更新按钮状态
+                updateInputButtonState();
+                updatePasswordButtonState();
+                updatePasswordVisibilityState();
+                
+                // 清除临时状态
+                localStorage.removeItem('darkmoji_temp_state');
+            }
+        } catch (e) {
+            console.error('Error restoring state:', e);
+        }
+    }
+});
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
