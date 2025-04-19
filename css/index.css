@@ -72,9 +72,7 @@
 @font-face {
     font-family: 'EmojiFont';
     /* 提供多种格式，浏览器会选择它支持的第一个 */
-    src: url('../fonts/NotoEmoji-Bold.ttf') format('truetype'),
-         url('../fonts/NotoEmoji-Bold.woff') format('woff'),
-         url('../fonts/NotoEmoji-Bold.woff2') format('woff2');
+    src: url('../fonts/NotoEmoji-Bold.woff2') format('woff2');
     /* Focused Emoji Unicode ranges */
     unicode-range:
         U+1F300-1F5FF, /* Miscellaneous Symbols and Pictographs */
@@ -465,13 +463,13 @@ textarea {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     font-size: 16px;
+    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     resize: none;
     min-height: 40px; /* Restore fixed min-height */
     height: 140px; /* Restore fixed height */
     flex-grow: 1; /* Allow textarea to grow vertically */
     background: var(--input-bg);
     color: var(--text-color);
-    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     overflow: auto; /* Keep scroll enabled */
     display: block;
@@ -532,8 +530,8 @@ input[type="text"] {
     padding: 10px;
     min-height: auto;
     height: 40px;
-    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     font-size: 16px;
+    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     color: var(--text-color);
     background: var(--input-bg);
     transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
