@@ -427,7 +427,12 @@ encryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            document.getElementById('passwordForm').submit();
+            const form = document.getElementById('passwordForm');
+            form.submit();
+            // 阻止表单提交后的页面刷新
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+            }, { once: true });
         }
     } else {
         switchMode('encrypt');
@@ -444,7 +449,12 @@ decryptBtn.addEventListener('click', () => {
         outputText.value = inputText.value; // Placeholder logic
         // Add form submission when clicking the active button
         if (password.value.trim()) { // Only submit if password is not empty
-            document.getElementById('passwordForm').submit();
+            const form = document.getElementById('passwordForm');
+            form.submit();
+            // 阻止表单提交后的页面刷新
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+            }, { once: true });
         }
     } else {
         switchMode('decrypt');
@@ -881,7 +891,12 @@ actionBtn.addEventListener('click', () => {
     }
     // Add form submission after action
     if (password.value.trim()) { // Only submit if password is not empty
-        document.getElementById('passwordForm').submit();
+        const form = document.getElementById('passwordForm');
+        form.submit();
+        // 阻止表单提交后的页面刷新
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+        }, { once: true });
     }
 });
 
@@ -1270,11 +1285,6 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
     updatePasswordVisibilityState();
     // ... existing code ...
-});
-
-// 防止密码表单提交
-document.getElementById('passwordForm').addEventListener('submit', function(e) {
-    e.preventDefault();
 });
 
 // Save file content and name to localStorage
