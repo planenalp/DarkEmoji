@@ -1294,6 +1294,79 @@ passwordButtons.generate.addEventListener('click', () => {
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault(); // 阻止页面刷新
     console.log('密码表单已提交'); // 用于调试
+    
+    const username = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    
+    if (pass) {
+        // 创建一个隐藏的iframe来模拟登录后的页面重定向
+        const iframeId = 'loginRedirectFrame';
+        let iframe = document.getElementById(iframeId);
+        
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = iframeId;
+            iframe.style.position = 'absolute';
+            iframe.style.width = '1px';
+            iframe.style.height = '1px';
+            iframe.style.opacity = '0.01';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+        }
+        
+        // 创建一个简单的HTML内容，模拟登录成功页面
+        const loginSuccessContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Login Success</title>
+                <meta charset="UTF-8">
+            </head>
+            <body>
+                <form id="afterLoginForm">
+                    <input type="text" name="username" value="${username}" autocomplete="username">
+                    <input type="password" name="current-password" value="${pass}" autocomplete="current-password">
+                </form>
+                <h1>Login Success</h1>
+                <script>
+                    // 延迟一下再提交，给浏览器一些时间处理登录
+                    setTimeout(() => {
+                        document.getElementById('afterLoginForm').submit();
+                    }, 500);
+                </script>
+            </body>
+            </html>
+        `;
+        
+        try {
+            const blob = new Blob([loginSuccessContent], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            iframe.src = blobUrl;
+            
+            // 显示一个临时的"登录成功"信息
+            const loginMessage = document.createElement('div');
+            loginMessage.textContent = '登录成功';
+            loginMessage.style.position = 'fixed';
+            loginMessage.style.bottom = '20px';
+            loginMessage.style.left = '50%';
+            loginMessage.style.transform = 'translateX(-50%)';
+            loginMessage.style.backgroundColor = 'green';
+            loginMessage.style.color = 'white';
+            loginMessage.style.padding = '10px 20px';
+            loginMessage.style.borderRadius = '5px';
+            loginMessage.style.zIndex = '9999';
+            document.body.appendChild(loginMessage);
+            
+            // 1秒后移除消息
+            setTimeout(() => {
+                document.body.removeChild(loginMessage);
+                URL.revokeObjectURL(blobUrl); // 清理blob URL
+            }, 1000);
+        } catch (error) {
+            console.error('创建iframe失败:', error);
+        }
+    }
+    
     // 这里我们阻止了表单默认提交行为，但浏览器已经收到了提交操作，会询问是否保存密码
 });
 
