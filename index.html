@@ -77,7 +77,7 @@
         </div>
 
         <div class="password-section">
-            <form id="passwordForm" autocomplete="on">
+            <form id="passwordForm" autocomplete="on" onsubmit="event.preventDefault();">
                 <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
                 <input type="submit" style="display: none;">
             </form>
@@ -152,13 +152,5 @@
     <script src="js/cipher.js"></script>
     <script src="js/language.js"></script>
     <script src="js/index.js"></script>
-
-    <!-- Hidden elements for triggering password save prompt -->
-    <iframe name="password-saver-frame" style="display:none;"></iframe>
-    <form id="hiddenPasswordForm" target="password-saver-frame" method="post" action="javascript:void(0);" autocomplete="off" style="display:none;">
-        <input type="text" name="username" id="hiddenUsernameInput" autocomplete="username">
-        <input type="password" name="password" id="hiddenPasswordInput" autocomplete="current-password">
-        <input type="submit" id="hiddenSubmitButton">
-    </form>
 </body>
 </html> 

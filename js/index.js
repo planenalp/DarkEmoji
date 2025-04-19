@@ -419,17 +419,16 @@ function collapseAllTextareas() {
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas();
+        collapseAllTextareas(); 
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
+        // 模拟表单提交以触发密码保存
+        const form = document.getElementById('passwordForm');
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
         outputText.value = inputText.value; // Placeholder logic
-        // --- TRIGGER PASSWORD SAVE ---
-        if (password.value.trim() !== '') {
-            triggerPasswordSavePrompt();
-        }
-        // --- END TRIGGER ---
     } else {
         switchMode('encrypt');
     }
@@ -442,12 +441,11 @@ decryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
+        // 模拟表单提交以触发密码保存
+        const form = document.getElementById('passwordForm');
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
         outputText.value = inputText.value; // Placeholder logic
-        // --- TRIGGER PASSWORD SAVE ---
-        if (password.value.trim() !== '') {
-            triggerPasswordSavePrompt();
-        }
-        // --- END TRIGGER ---
     } else {
         switchMode('decrypt');
     }
@@ -871,21 +869,21 @@ downloadFileArea.addEventListener('click', () => {
 
 // Action button click handler
 actionBtn.addEventListener('click', () => {
-    collapseAllTextareas();
     if (!inputText.value.trim()) {
         alert(window.getTranslation('alertNoInput')); // Use global translation
         return;
     }
+    
+    // 模拟表单提交以触发密码保存
+    const form = document.getElementById('passwordForm');
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    
     if (isEncryptMode) {
         outputText.value = inputText.value; // Placeholder logic
     } else {
         outputText.value = inputText.value; // Placeholder logic
     }
-    // --- TRIGGER PASSWORD SAVE ---
-    if (password.value.trim() !== '') {
-        triggerPasswordSavePrompt();
-    }
-    // --- END TRIGGER ---
 });
 
 // Initialize on page load - MODIFIED
@@ -1282,31 +1280,3 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
-
-// --- ADD HELPER FUNCTION FOR PASSWORD SAVE ---
-function triggerPasswordSavePrompt() {
-    const hiddenForm = document.getElementById('hiddenPasswordForm');
-    const hiddenUsernameInput = document.getElementById('hiddenUsernameInput');
-    const hiddenPasswordInput = document.getElementById('hiddenPasswordInput');
-    const hiddenSubmitButton = document.getElementById('hiddenSubmitButton');
-    const mainPasswordInput = document.getElementById('password'); // Get main password input
-
-    if (hiddenForm && hiddenUsernameInput && hiddenPasswordInput && hiddenSubmitButton && mainPasswordInput) {
-        // Use a fixed username or derive one if needed. Using a fixed one for now.
-        hiddenUsernameInput.value = 'darkemoji-user';
-        hiddenPasswordInput.value = mainPasswordInput.value;
-
-        // Timeout helps ensure the browser registers the submission
-        setTimeout(() => {
-            hiddenSubmitButton.click();
-            // Optionally clear the hidden form afterwards, though it shouldn't matter much
-            // setTimeout(() => {
-            //     hiddenUsernameInput.value = '';
-            //     hiddenPasswordInput.value = '';
-            // }, 100);
-        }, 50); // Small delay
-    } else {
-        console.error("Hidden form elements for password saving not found!");
-    }
-}
-// --- END HELPER FUNCTION ---
