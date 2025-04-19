@@ -428,8 +428,7 @@ encryptBtn.addEventListener('click', () => {
         
         // 触发表单提交来激活浏览器密码保存功能
         if (password.value) {
-            // document.getElementById('passwordForm').requestSubmit();
-            document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
+            document.getElementById('passwordForm').requestSubmit();
         }
     } else {
         switchMode('encrypt');
@@ -447,8 +446,7 @@ decryptBtn.addEventListener('click', () => {
         
         // 触发表单提交来激活浏览器密码保存功能
         if (password.value) {
-            // document.getElementById('passwordForm').requestSubmit();
-            document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
+            document.getElementById('passwordForm').requestSubmit();
         }
     } else {
         switchMode('decrypt');
@@ -886,8 +884,7 @@ actionBtn.addEventListener('click', () => {
     
     // 触发表单提交来激活浏览器密码保存功能
     if (password.value) {
-        // document.getElementById('passwordForm').requestSubmit();
-        document.getElementById('passwordForm').querySelector('input[type="submit"]').click(); // Try clicking the submit button
+        document.getElementById('passwordForm').requestSubmit();
     }
 });
 
@@ -1278,10 +1275,12 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
+/*
 // 防止密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
 });
+*/
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
