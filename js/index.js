@@ -1279,77 +1279,25 @@ passwordButtons.generate.addEventListener('click', () => {
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // 触发密码保存（模拟登录成功）
-    if (password.value) {
-        // 模拟成功的登录响应
+    // 模拟登录成功的视觉反馈
+    const pwdSection = document.querySelector('.password-section');
+    if (pwdSection) {
+        pwdSection.classList.add('login-success');
         setTimeout(() => {
-            // 可选：显示密码已保存的视觉反馈
-            const pwdSection = document.querySelector('.password-section');
-            if (pwdSection) {
-                pwdSection.classList.add('login-success');
-                setTimeout(() => {
-                    pwdSection.classList.remove('login-success');
-                }, 1000);
-            }
-        }, 300);
+            pwdSection.classList.remove('login-success');
+        }, 800);
     }
 });
 
-// 添加一个彻底的方法来触发浏览器密码保存
+// 简化触发密码保存的函数
 function triggerPasswordSave() {
     if (!password.value) return;
     
-    // 创建一个临时登录表单
-    const loginForm = document.createElement('form');
-    loginForm.method = 'post'; // 仍使用POST，但会阻止实际提交
-    loginForm.action = 'javascript:void(0);'; // 防止实际导航
-    loginForm.style.display = 'none';
-    
-    // 添加用户名字段
-    const usernameField = document.createElement('input');
-    usernameField.type = 'text';
-    usernameField.name = 'username';
-    usernameField.autocomplete = 'username';
-    usernameField.value = 'user@example.com';
-    loginForm.appendChild(usernameField);
-    
-    // 添加密码字段 - 复制当前密码值
-    const passwordField = document.createElement('input');
-    passwordField.type = 'password';
-    passwordField.name = 'password';
-    passwordField.autocomplete = 'current-password';
-    passwordField.value = password.value;
-    loginForm.appendChild(passwordField);
-    
-    // 添加提交按钮
-    const submitBtn = document.createElement('input');
-    submitBtn.type = 'submit';
-    loginForm.appendChild(submitBtn);
-    
-    // 添加事件监听器阻止实际提交
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // 模拟成功的登录响应
-        setTimeout(() => {
-            document.body.removeChild(loginForm);
-            
-            // 可选：显示密码已保存的视觉反馈
-            const pwdSection = document.querySelector('.password-section');
-            if (pwdSection) {
-                pwdSection.classList.add('login-success');
-                setTimeout(() => {
-                    pwdSection.classList.remove('login-success');
-                }, 800);
-            }
-        }, 500);
-    });
-    
-    // 添加到页面
-    document.body.appendChild(loginForm);
-    
-    // 提交表单 - 使用click而不是submit方法更接近用户操作
-    submitBtn.click();
+    // 获取登录按钮并点击它
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.click();
+    }
 }
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
