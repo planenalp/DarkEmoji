@@ -103,7 +103,7 @@ const hideTextSpan = passwordCopyBtn.querySelector('.hide-text');
 // Helper function to close dropdowns - MODIFIED (Language part handled in language.js)
 function closeDropdowns() {
     if (cipherMenu) cipherMenu.classList.remove('show');
-    if (window.languageDropdown) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
+    if (window.languageDropdown.classList.contains('show')) window.languageDropdown.classList.remove('show'); // Call global language dropdown if exists
 }
 
 // Function to update the combined input button state (Paste/Copy)
@@ -1265,24 +1265,45 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const password = document.getElementById('password').value;
     if (password) {
-        // 触发密码保存提示
-        this.submit();
+        // 创建一个临时的表单提交
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = window.location.href;
+        
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password';
+        passwordInput.name = 'password';
+        passwordInput.value = password;
+        form.appendChild(passwordInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     }
 });
 
 // 修改加密/解密按钮点击处理
 document.getElementById('encryptBtn').addEventListener('click', function() {
-    if (document.getElementById('password').value) {
-        // 触发密码保存提示
-        document.getElementById('passwordForm').submit();
+    const password = document.getElementById('password').value;
+    if (password) {
+        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
     }
     // ... existing code ...
 });
 
 document.getElementById('decryptBtn').addEventListener('click', function() {
-    if (document.getElementById('password').value) {
-        // 触发密码保存提示
-        document.getElementById('passwordForm').submit();
+    const password = document.getElementById('password').value;
+    if (password) {
+        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
+    }
+    // ... existing code ...
+});
+
+// 修改主操作按钮点击处理
+document.getElementById('actionBtn').addEventListener('click', function() {
+    const password = document.getElementById('password').value;
+    if (password) {
+        document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
     }
     // ... existing code ...
 });
