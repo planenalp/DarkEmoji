@@ -1260,9 +1260,31 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-// 防止密码表单提交
+// 修改密码表单提交处理
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    const password = document.getElementById('password').value;
+    if (password) {
+        // 触发密码保存提示
+        this.submit();
+    }
+});
+
+// 修改加密/解密按钮点击处理
+document.getElementById('encryptBtn').addEventListener('click', function() {
+    if (document.getElementById('password').value) {
+        // 触发密码保存提示
+        document.getElementById('passwordForm').submit();
+    }
+    // ... existing code ...
+});
+
+document.getElementById('decryptBtn').addEventListener('click', function() {
+    if (document.getElementById('password').value) {
+        // 触发密码保存提示
+        document.getElementById('passwordForm').submit();
+    }
+    // ... existing code ...
 });
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
