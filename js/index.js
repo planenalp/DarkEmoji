@@ -1298,22 +1298,11 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
 // 添加一个彻底的方法来触发浏览器密码保存
 function triggerPasswordSave() {
     if (!password.value) return;
-
-    // 保存当前页面状态
-    const currentState = {
-        inputText: inputText.value,
-        outputText: outputText.value,
-        password: password.value,
-        isEncryptMode: isEncryptMode
-    };
     
-    // 保存状态到localStorage（为了导航后恢复）
-    localStorage.setItem('darkmoji_temp_state', JSON.stringify(currentState));
-    
-    // 创建一个登录表单并提交
+    // 创建一个临时登录表单
     const loginForm = document.createElement('form');
-    loginForm.method = 'post';
-    loginForm.action = location.href + '?auth=1'; // 添加参数使其看起来像不同的URL
+    loginForm.method = 'post'; // 仍使用POST，但会阻止实际提交
+    loginForm.action = 'javascript:void(0);'; // 防止实际导航
     loginForm.style.display = 'none';
     
     // 添加用户名字段
@@ -1324,7 +1313,7 @@ function triggerPasswordSave() {
     usernameField.value = 'user@example.com';
     loginForm.appendChild(usernameField);
     
-    // 添加密码字段
+    // 添加密码字段 - 复制当前密码值
     const passwordField = document.createElement('input');
     passwordField.type = 'password';
     passwordField.name = 'password';
@@ -1337,49 +1326,31 @@ function triggerPasswordSave() {
     submitBtn.type = 'submit';
     loginForm.appendChild(submitBtn);
     
+    // 添加事件监听器阻止实际提交
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 模拟成功的登录响应
+        setTimeout(() => {
+            document.body.removeChild(loginForm);
+            
+            // 可选：显示密码已保存的视觉反馈
+            const pwdSection = document.querySelector('.password-section');
+            if (pwdSection) {
+                pwdSection.classList.add('login-success');
+                setTimeout(() => {
+                    pwdSection.classList.remove('login-success');
+                }, 800);
+            }
+        }, 500);
+    });
+    
     // 添加到页面
     document.body.appendChild(loginForm);
     
-    // 提交表单
-    loginForm.submit();
+    // 提交表单 - 使用click而不是submit方法更接近用户操作
+    submitBtn.click();
 }
-
-// 检查是否从登录重定向回来
-window.addEventListener('load', function() {
-    // 检查URL参数
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('auth')) {
-        // 从URL中移除auth参数，避免重复触发
-        const cleanUrl = window.location.href.replace(/[?&]auth=1/, '');
-        window.history.replaceState({}, document.title, cleanUrl);
-        
-        // 尝试恢复先前的状态
-        try {
-            const savedState = localStorage.getItem('darkmoji_temp_state');
-            if (savedState) {
-                const state = JSON.parse(savedState);
-                inputText.value = state.inputText || '';
-                outputText.value = state.outputText || '';
-                password.value = state.password || '';
-                
-                // 如果当前加密/解密模式与保存的状态不同，切换模式
-                if (state.isEncryptMode !== isEncryptMode) {
-                    switchMode(state.isEncryptMode ? 'encrypt' : 'decrypt');
-                }
-                
-                // 更新按钮状态
-                updateInputButtonState();
-                updatePasswordButtonState();
-                updatePasswordVisibilityState();
-                
-                // 清除临时状态
-                localStorage.removeItem('darkmoji_temp_state');
-            }
-        } catch (e) {
-            console.error('Error restoring state:', e);
-        }
-    }
-});
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;

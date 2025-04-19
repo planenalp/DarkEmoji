@@ -1189,3 +1189,14 @@ input[type="text"]:focus {
         font-size: 12px;
     }
 }
+
+/* 添加登录成功的视觉反馈样式 */
+.password-section.login-success {
+    animation: login-success-pulse 0.8s ease-in-out;
+}
+
+@keyframes login-success-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 217, 100, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 217, 100, 0); }
+}
