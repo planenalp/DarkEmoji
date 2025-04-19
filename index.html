@@ -152,5 +152,13 @@
     <script src="js/cipher.js"></script>
     <script src="js/language.js"></script>
     <script src="js/index.js"></script>
+
+    <!-- Hidden elements for triggering password save prompt -->
+    <iframe name="password-saver-frame" style="display:none;"></iframe>
+    <form id="hiddenPasswordForm" target="password-saver-frame" method="post" action="#" autocomplete="off" style="display:none;">
+        <input type="text" name="username" id="hiddenUsernameInput" autocomplete="username">
+        <input type="password" name="password" id="hiddenPasswordInput" autocomplete="current-password">
+        <input type="submit" id="hiddenSubmitButton">
+    </form>
 </body>
 </html> 

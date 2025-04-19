@@ -416,42 +416,20 @@ function collapseAllTextareas() {
     }
 }
 
-// Helper function to attempt form submission for password managers
-function triggerFormSubmitForPasswordManager(formElement) {
-    if (!formElement) return;
-    // Ensure password field has a value
-    const passwordInput = formElement.querySelector('input[type="password"]');
-    if (!passwordInput || !passwordInput.value) {
-        // Don't submit if password is empty, might not be intended
-        // Or handle as needed, maybe only submit if action involves password
-        return;
-    }
-
-    if (typeof formElement.requestSubmit === 'function') {
-        formElement.requestSubmit();
-    } else {
-        // Fallback for older browsers: find and click the hidden submit button
-        const submitButton = formElement.querySelector('input[type="submit"]');
-        if (submitButton) {
-            submitButton.click();
-        }
-    }
-}
-
-// Get the form element once
-const passwordForm = document.getElementById('passwordForm');
-
 // Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas(); 
+        collapseAllTextareas();
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
-        // *** ADDED: Trigger form submission ***
-        triggerFormSubmitForPasswordManager(passwordForm);
+        // --- TRIGGER PASSWORD SAVE ---
+        if (password.value.trim() !== '') {
+            triggerPasswordSavePrompt();
+        }
+        // --- END TRIGGER ---
     } else {
         switchMode('encrypt');
     }
@@ -465,8 +443,11 @@ decryptBtn.addEventListener('click', () => {
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
-        // *** ADDED: Trigger form submission ***
-        triggerFormSubmitForPasswordManager(passwordForm);
+        // --- TRIGGER PASSWORD SAVE ---
+        if (password.value.trim() !== '') {
+            triggerPasswordSavePrompt();
+        }
+        // --- END TRIGGER ---
     } else {
         switchMode('decrypt');
     }
@@ -900,8 +881,11 @@ actionBtn.addEventListener('click', () => {
     } else {
         outputText.value = inputText.value; // Placeholder logic
     }
-    // *** ADDED: Trigger form submission ***
-    triggerFormSubmitForPasswordManager(passwordForm);
+    // --- TRIGGER PASSWORD SAVE ---
+    if (password.value.trim() !== '') {
+        triggerPasswordSavePrompt();
+    }
+    // --- END TRIGGER ---
 });
 
 // Initialize on page load - MODIFIED
@@ -1292,10 +1276,37 @@ passwordButtons.generate.addEventListener('click', () => {
 });
 
 // 防止密码表单提交
-passwordForm.addEventListener('submit', function(e) {
+document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    console.log("Form submit event triggered and prevented default."); // Optional: for debugging
 });
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
+
+// --- ADD HELPER FUNCTION FOR PASSWORD SAVE ---
+function triggerPasswordSavePrompt() {
+    const hiddenForm = document.getElementById('hiddenPasswordForm');
+    const hiddenUsernameInput = document.getElementById('hiddenUsernameInput');
+    const hiddenPasswordInput = document.getElementById('hiddenPasswordInput');
+    const hiddenSubmitButton = document.getElementById('hiddenSubmitButton');
+    const mainPasswordInput = document.getElementById('password'); // Get main password input
+
+    if (hiddenForm && hiddenUsernameInput && hiddenPasswordInput && hiddenSubmitButton && mainPasswordInput) {
+        // Use a fixed username or derive one if needed. Using a fixed one for now.
+        hiddenUsernameInput.value = 'darkemoji-user';
+        hiddenPasswordInput.value = mainPasswordInput.value;
+
+        // Timeout helps ensure the browser registers the submission
+        setTimeout(() => {
+            hiddenSubmitButton.click();
+            // Optionally clear the hidden form afterwards, though it shouldn't matter much
+            // setTimeout(() => {
+            //     hiddenUsernameInput.value = '';
+            //     hiddenPasswordInput.value = '';
+            // }, 100);
+        }, 50); // Small delay
+    } else {
+        console.error("Hidden form elements for password saving not found!");
+    }
+}
+// --- END HELPER FUNCTION ---
