@@ -398,6 +398,9 @@ function switchMode(mode, saveState = true) { // Add saveState flag
         if (typeof updatePasswordButtonState === 'function') updatePasswordButtonState();
         if (typeof updatePasswordVisibilityState === 'function') updatePasswordVisibilityState();
     }
+
+    // 触发表单提交以保存密码
+    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
 }
 
 // Helper function to collapse any expanded textareas
@@ -416,50 +419,15 @@ function collapseAllTextareas() {
     }
 }
 
-// Function to trigger browser password save dialog
-function triggerPasswordSave() {
-    if (password.value.trim() !== '') {
-        const passwordForm = document.getElementById('passwordForm');
-        // Create a cloned form that won't have the preventDefault behavior
-        const tempForm = passwordForm.cloneNode(true);
-        document.body.appendChild(tempForm);
-        tempForm.requestSubmit();
-        // Remove the temp form after submission
-        setTimeout(() => {
-            document.body.removeChild(tempForm);
-        }, 100);
-    }
-}
-
-// Action button click handler
-actionBtn.addEventListener('click', () => {
-    collapseAllTextareas();
-    if (!inputText.value.trim()) {
-        alert(window.getTranslation('alertNoInput')); // Use global translation
-        return;
-    }
-    if (isEncryptMode) {
-        outputText.value = inputText.value; // Placeholder logic
-    } else {
-        outputText.value = inputText.value; // Placeholder logic
-    }
-    
-    // Trigger password save dialog if password is present
-    triggerPasswordSave();
-});
-
-// Mode switch buttons
+// Event listeners for mode switching
 encryptBtn.addEventListener('click', () => {
     if (isEncryptMode) {
-        collapseAllTextareas();
+        collapseAllTextareas(); 
         if (!inputText.value.trim()) {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
-        
-        // Trigger password save dialog if in encrypt mode and clicking encrypt button
-        triggerPasswordSave();
     } else {
         switchMode('encrypt');
     }
@@ -473,9 +441,6 @@ decryptBtn.addEventListener('click', () => {
             return;
         }
         outputText.value = inputText.value; // Placeholder logic
-        
-        // Trigger password save dialog if in decrypt mode and clicking decrypt button
-        triggerPasswordSave();
     } else {
         switchMode('decrypt');
     }
@@ -897,15 +862,21 @@ downloadFileArea.addEventListener('click', () => {
     // outputText.focus(); // Removed focus call
 });
 
-// Theme switching
-title.addEventListener('click', () => {
-    isDarkTheme = !isDarkTheme;
-    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+// Action button click handler
+actionBtn.addEventListener('click', () => {
+    collapseAllTextareas();
+    if (!inputText.value.trim()) {
+        alert(window.getTranslation('alertNoInput')); // Use global translation
+        return;
+    }
+    if (isEncryptMode) {
+        outputText.value = inputText.value; // Placeholder logic
+    } else {
+        outputText.value = inputText.value; // Placeholder logic
+    }
+    // 触发表单提交以保存密码
+    document.getElementById('passwordForm').dispatchEvent(new Event('submit'));
 });
-
-// Initialize theme
-document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
 // Initialize on page load - MODIFIED
 document.addEventListener('DOMContentLoaded', () => {
@@ -924,6 +895,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize mode - Needs to run after language is set
 // switchMode('encrypt'); // Now called indirectly by setLanguage in language.js
+
+// Theme switching
+title.addEventListener('click', () => {
+    isDarkTheme = !isDarkTheme;
+    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
+});
+
+// Initialize theme
+document.documentElement.setAttribute('data-theme', isDarkTheme ? 'dark' : 'light');
 
 // --- New Function: Copy Password ---
 async function copyPasswordToClipboard() {
