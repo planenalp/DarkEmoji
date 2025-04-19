@@ -1275,12 +1275,10 @@ passwordButtons.generate.addEventListener('click', () => {
     // ... existing code ...
 });
 
-/*
 // 防止密码表单提交
 document.getElementById('passwordForm').addEventListener('submit', function(e) {
     e.preventDefault();
 });
-*/
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;

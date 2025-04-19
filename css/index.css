@@ -68,6 +68,22 @@
     --subtitle-active-color: var(--bg-color);      /* #000000 */
 }
 
+/* Define custom font for Emoji */
+@font-face {
+    font-family: 'EmojiFont';
+    src: url('../fonts/NotoEmoji-Bold.ttf') format('truetype');
+    /* Focused Emoji Unicode ranges */
+    unicode-range:
+        U+1F300-1F5FF, /* Miscellaneous Symbols and Pictographs */
+        U+1F600-1F64F, /* Emoticons */
+        U+1F680-1F6FF, /* Transport and Map Symbols */
+        U+2600-26FF,   /* Miscellaneous Symbols */
+        U+2700-27BF,   /* Dingbats */
+        U+FE00-FE0F,   /* Variation Selectors */
+        U+1F900-1F9FF, /* Supplemental Symbols and Pictographs */
+        U+1FA70-1FAFF; /* Symbols and Pictographs Extended-A */
+}
+
 html {
     height: 100dvh; /* Use dynamic viewport height */
 }
@@ -80,7 +96,7 @@ html {
 
 body {
     background-color: var(--bg-color);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; */
     min-height: 100dvh; /* Use dynamic viewport height as minimum */
     /* Remove fixed height to allow body to expand naturally */
     /* height: 100dvh; */ 
@@ -452,6 +468,7 @@ textarea {
     flex-grow: 1; /* Allow textarea to grow vertically */
     background: var(--input-bg);
     color: var(--text-color);
+    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     transition: height 0.3s ease, border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     overflow: auto; /* Keep scroll enabled */
     display: block;
@@ -512,7 +529,7 @@ input[type="text"] {
     padding: 10px;
     min-height: auto;
     height: 40px;
-    font-family: inherit;
+    font-family: EmojiFont, system-ui; /* Use Emoji font + system fallback */
     font-size: 16px;
     color: var(--text-color);
     background: var(--input-bg);
