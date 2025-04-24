@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkEmoji</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJOb0VkZ2UiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE4MDAgMTgwMCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtzdHJva2U6IzAwMDt9LmNscy0xLC5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjEwMHB4O30uY2xzLTN7ZmlsbDojZmFjZTY0O30uY2xzLTJ7c3Ryb2tlOiNmYWNlNjQ7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGlkPSJmYWNlQmlnUmlnaHQiIGQ9Ik0xODAwLDkwMEMxODAwLDQwMi45NCwxMzk3LjA2LDAsOTAwLDB2MTgwMGM0OTcuMDYsMCw5MDAtNDAyLjk0LDkwMC05MDBaIi8+PHBhdGggaWQ9ImZhY2VCaWdMZWZ0IiBjbGFzcz0iY2xzLTMiIGQ9Ik0wLDkwMGMwLDQ5Ny4wNiw0MDIuOTQsOTAwLDkwMCw5MDBWMEM0MDIuOTQsMCwwLDQwMi45NCwwLDkwMFoiLz48bGluZSBpZD0iZXllLWNyb3NzLTIiIGNsYXNzPSJjbHMtMSIgeDE9IjI1MCIgeTE9IjEwNTAiIHgyPSI3NTAiIHkyPSI1NTAiLz48bGluZSBpZD0iZXllLWNyb3NzLTEiIGNsYXNzPSJjbHMtMSIgeDE9Ijc1MCIgeTE9IjEwNTAiIHgyPSIyNTAiIHkyPSI1NTAiLz48Y2lyY2xlIGlkPSJleWUtY2lyY2xlIiBjbGFzcz0iY2xzLTIiIGN4PSIxMzAwIiBjeT0iODAwIiByPSIyNTAiLz48L3N2Zz4=">
+    <script>
+        // 立即设置主题，避免闪烁
+        document.documentElement.setAttribute('data-theme',
+            localStorage.getItem('theme') === 'light' ? 'light' : 'dark' // Default to dark if not 'light'
+        );
+    </script>
+    <link rel="stylesheet" href="src/css/index.css">
+</head>
+<body>
+    <div class="title-container">
+        <h1 class="title" data-translate-key="mainTitle">DarkEmoji</h1>
+    </div>
+    <div class="subtitle-container">
+        <h2 class="subtitle" id="cipherSubtitle">AES-256-GCM & Base64</h2>
+        <div class="dropdown-menu" id="cipherMenu">
+            <div class="menu-mode-switch" id="defaultCustomSwitch">
+                <button id="defaultBtn" class="mode-btn mode-btn-menu active" data-encrypt="AES-256-GCM" data-encode="Base64">
+                    <span data-translate-key="defaultBtnText">Default</span>
+                </button>
+                <button id="customBtn" class="mode-btn mode-btn-menu">
+                    <span data-translate-key="customBtnText">Custom</span>
+                </button>
+            </div>
+            <p class="option-description">Encryption Algorithm</p>
+            <div class="menu-mode-switch" id="optionAlgorithm">
+                <button class="mode-btn mode-btn-menu active" data-value="AES-256-GCM"><span>AES-256-GCM</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="ChaCha20-Poly1305"><span>ChaCha20-Poly1305</span></button>
+            </div>
+            <p class="option-description">Iteration Count</p>
+            <div class="menu-mode-switch" id="optionIterations">
+                <button class="mode-btn mode-btn-menu active" data-value="Iterations-100k"><span>100k</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Iterations-500k"><span>500k</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Iterations-1M"><span>1M</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Iterations-5M"><span>5M</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Iterations-10M"><span>10M</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Iterations-50M"><span>50M</span></button>
+            </div>
+            <p class="option-description">Output Base</p>
+            <div class="menu-mode-switch" id="optionBase">
+                <button class="mode-btn mode-btn-menu active" data-value="Base64"><span>64</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base128"><span>128</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base256"><span>256</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base512"><span>512</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base1024"><span>1024</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Base2048"><span>2048</span></button>
+            </div>
+            <p class="option-description">Dummy Emoji</p>
+            <div class="menu-mode-switch" id="optionDummyEmoji">
+                <button class="mode-btn mode-btn-menu active" data-value="DummyEmoji-0%"><span>0%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-5%"><span>5%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-10%"><span>10%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-20%"><span>20%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-30%"><span>30%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-40%"><span>40%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-50%"><span>50%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-60%"><span>60%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-70%"><span>70%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-80%"><span>80%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-90%"><span>90%</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="DummyEmoji-100%"><span>100%</span></button>
+            </div>
+            <p class="option-description">Emoji Version</p>
+            <div class="menu-mode-switch" id="optionEmoji">
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v4.0"><span>v4.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v5.0"><span>v5.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v11.0"><span>v11.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v12.0"><span>v12.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v12.1"><span>v12.1</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v13.0"><span>v13.0</span></button>
+                <button class="mode-btn mode-btn-menu active" data-value="Emoji-v13.1"><span>v13.1</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v14.0"><span>v14.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v15.0"><span>v15.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v15.1"><span>v15.1</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v16.0"><span>v16.0</span></button>
+                <button class="mode-btn mode-btn-menu" data-value="Emoji-v17.0"><span>v17.0</span></button>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="mode-switch">
+            <button id="encryptBtn" class="mode-btn active">
+                <span>🔒</span>
+            </button>
+            <button id="decryptBtn" class="mode-btn">
+                <span>🔓</span>
+            </button>
+        </div>
+
+        <div class="input-section">
+            <textarea id="inputText" placeholder="Input" data-translate-key="inputPlaceholderEncrypt"></textarea>
+            <div class="button-group">
+                <button class="action-btn" id="inputExpand">
+                    <span class="btn-text default" data-translate-key="expandBtnText">Expand</span>
+                    <span class="btn-text success" data-translate-key="collapseBtnText">Collapse</span>
+                </button>
+                <button class="action-btn" id="inputPaste">
+                    <span class="btn-text default paste-text" data-translate-key="pasteBtnText">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;" data-translate-key="pastedBtnText">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;" data-translate-key="copiedBtnText">Copied</span>
+                </button>
+                <button class="action-btn" id="inputClear">
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
+                </button>
+                <div class="file-drop-area" id="fileDropArea">
+                    <span class="file-msg" data-translate-key="selectOrDropText">Select or Drop</span>
+                    <input type="file" id="fileInput" class="file-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="password-section">
+            <form id="passwordForm" autocomplete="on">
+                <input type="password" id="password" name="password" placeholder="Password (optional)" autocomplete="current-password" data-translate-key="passwordPlaceholder">
+                <input type="submit" style="display: none;">
+            </form>
+            <div class="button-group">
+                <button class="action-btn" id="passwordCopy">
+                    <span class="btn-text default empty-text" data-translate-key="emptyBtnText">Empty</span>
+                    <span class="btn-text default show-text" style="opacity: 0; pointer-events: none;" data-translate-key="showBtnText">Show</span>
+                    <span class="btn-text default hide-text" style="opacity: 0; pointer-events: none;" data-translate-key="hideBtnText">Hide</span>
+                </button>
+                <button class="action-btn" id="passwordPaste">
+                    <span class="btn-text default paste-text" data-translate-key="pasteBtnText">Paste</span>
+                    <span class="btn-text default copy-text" style="opacity: 0; pointer-events: none;" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success pasted-text" style="opacity: 0; pointer-events: none;" data-translate-key="pastedBtnText">Pasted</span>
+                    <span class="btn-text success copied-text" style="opacity: 0; pointer-events: none;" data-translate-key="copiedBtnText">Copied</span>
+                </button>
+                <button class="action-btn" id="passwordClear">
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
+                </button>
+                <button class="action-btn" id="passwordGenerate">
+                    <span class="btn-text default" data-translate-key="generateBtnText">Generate</span>
+                    <span class="btn-text success" data-translate-key="generatedBtnText">Generated</span>
+                    <span class="btn-text query" style="opacity: 0; pointer-events: none;" data-translate-key="emptyBtnText">Empty</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <textarea id="outputText" placeholder="Output" readonly data-translate-key="outputPlaceholderEncrypt"></textarea>
+            <div class="button-group">
+                <button class="action-btn" id="outputExpand">
+                    <span class="btn-text default" data-translate-key="expandBtnText">Expand</span>
+                    <span class="btn-text success" data-translate-key="collapseBtnText">Collapse</span>
+                </button>
+                <button class="action-btn" id="outputCopy">
+                    <span class="btn-text default" data-translate-key="copyBtnText">Copy</span>
+                    <span class="btn-text success" data-translate-key="copiedBtnText">Copied</span>
+                    <span class="btn-text query" style="opacity: 0; pointer-events: none;" data-translate-key="emptyBtnText">Empty</span>
+                </button>
+                <button class="action-btn" id="outputClear">
+                    <span class="btn-text default" data-translate-key="clearBtnText">Clear</span>
+                    <span class="btn-text success" data-translate-key="clearedBtnText">Cleared</span>
+                    <span class="btn-text query" data-translate-key="emptyBtnText">Empty</span>
+                </button>
+                <div class="file-drop-area" id="downloadFileArea">
+                    <span class="file-msg" data-translate-key="downloadText">Download</span>
+                    <input type="file" id="saveFileInput" class="file-input" style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <button id="actionBtn" class="main-btn"><span>🔒</span></button>
+    </div>
+
+    <footer class="footer">
+        <a href="https://github.com/planenalp/DarkEmoji/blob/main/README.md" data-translate-key="aboutLinkText">About</a>
+        <div class="language-selector">
+            <a href="#" id="languageLink">English</a>
+            <div class="language-dropdown" id="languageDropdown">
+                <button class="language-option" data-lang="zh-Hans">Chinese (Simplified)</button>
+                <button class="language-option" data-lang="zh-Hant">Chinese (Traditional)</button>
+                <button class="language-option active" data-lang="en">English</button>
+                <button class="language-option" data-lang="ja">Japanese</button>
+                <button class="language-option" data-lang="ko">Korean</button>
+                <button class="language-option" data-lang="ru">Russian</button>
+            </div>
+        </div>
+        <a href="https://github.com/planenalp/DarkEmoji" data-translate-key="githubLinkText">GitHub</a>
+    </footer>
+
+    <script src="src/js/emojiCipher.js"></script>
+    <script src="src/js/language.js"></script>
+    <script src="src/js/index.js"></script>
+</body>
+</html> 

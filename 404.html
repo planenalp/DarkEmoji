@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>404</title>
+        <link id="favicon" rel="icon" type="image/svg+xml" href="">
+        <style>
+            /* 视口高度处理 */
+            html, body {
+                margin: 0;
+                height: calc(var(--vh, 1vh) * 100);
+                display: flex;
+                flex-direction: column; /* 垂直排列 */
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.3s ease; /* 背景过渡 */
+            }
+            
+            /* 缩放效果 */
+            img {
+                width: 20vmin;  /* Default size for mobile */
+                height: 20vmin; /* Default size for mobile */
+                transition: 
+                    transform 0.3s ease, /* 缩放动画 */
+                    opacity 0.3s ease;  /* 淡入效果 */
+                -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+                -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+                -webkit-user-select: none; /* 禁用 iOS Safari 和其他 WebKit 内核浏览器的文本选择 */
+                -moz-user-select: none; /* 适用于 Firefox */
+                -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
+                user-select: none; /* 标准语法 */
+                outline: none;
+            }
+     
+            img:active {
+                transform: scale(0.9);
+            }
+
+            a {
+                display: inline-block;
+                text-decoration: none;
+                -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+                -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+                -webkit-user-select: none; /* 禁用 iOS Safari 和其他 WebKit 内核浏览器的文本选择 */
+                -moz-user-select: none; /* 适用于 Firefox */
+                -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
+                user-select: none; /* 标准语法 */
+            }
+
+            h1, p {
+                margin: 0;
+                transition: color 0.3s ease; /* 与背景过渡同步 */
+                -webkit-tap-highlight-color: transparent; /* 修复某些安卓设备的点击外框 */
+                -webkit-touch-callout: none; /* 禁用 iOS 长按弹出菜单 */
+                -webkit-user-select: none; /* 禁用 iOS Safari 和其他 WebKit 内核浏览器的文本选择 */
+                -moz-user-select: none; /* 适用于 Firefox */
+                -ms-user-select: none; /* 适用于 IE10+ 和 Edge */
+                user-select: none; /* 标准语法 */
+            }
+
+            h1 {
+                font-size: 60px; /* 可根据需要调整 */
+                font-family:
+                    "PingFang SC",     /* 苹方（macOS/iOS） */
+                    "Microsoft YaHei", /* 微软雅黑（Windows） */
+                    "Noto Sans SC",    /* 思源黑体（Linux/Android） */
+                    sans-serif;        /* 最终回退到无衬线字体 */
+            }
+
+            p {
+                font-size: 30px; /* 可根据需要调整 */
+                font-family:
+                    "PingFang SC",     /* 苹方（macOS/iOS） */
+                    "Microsoft YaHei", /* 微软雅黑（Windows） */
+                    "Noto Sans SC",    /* 思源黑体（Linux/Android） */
+                    sans-serif;        /* 最终回退到无衬线字体 */
+            }
+
+            @media (any-hover: hover) {
+                img:hover {
+                    transform: scale(1.1);
+                }
+            }
+            
+            @media (max-width: 768px) { /* Apply styles for screens 768px and wider */
+                img {
+                    width: 30vmin;
+                    height: 30vmin;
+                }
+
+                h1 {
+                    font-size: 50px;
+                }
+
+                p {
+                    font-size: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- 链接结构 -->
+        <a href="https://darkemoji.com/">
+            <img id="theme-logo" alt="Logo">
+        </a>
+        <h1 id="error-code">404</h1>
+        <p id="error-message">PAGE NOT FOUND</p>
+
+        <script>
+            // Store the repeated SVG data
+            const svgData = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJOb0VkZ2UiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE4MDAgMTgwMCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtzdHJva2U6IzAwMDt9LmNscy0xLC5jbHMtMntmaWxsOm5vbmU7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjEwMHB4O30uY2xzLTN7ZmlsbDojZmFjZTY0O30uY2xzLTJ7c3Ryb2tlOiNmYWNlNjQ7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGlkPSJmYWNlQmlnUmlnaHQiIGQ9Ik0xODAwLDkwMEMxODAwLDQwMi45NCwxMzk3LjA2LDAsOTAwLDB2MTgwMGM0OTcuMDYsMCw5MDAtNDAyLjk0LDkwMC05MDBaIi8+PHBhdGggaWQ9ImZhY2VCaWdMZWZ0IiBjbGFzcz0iY2xzLTMiIGQ9Ik0wLDkwMGMwLDQ5Ny4wNiw0MDIuOTQsOTAwLDkwMCw5MDBWMEM0MDIuOTQsMCwwLDQwMi45NCwwLDkwMFoiLz48bGluZSBpZD0iZXllLWNyb3NzLTIiIGNsYXNzPSJjbHMtMSIgeDE9IjI1MCIgeTE9IjEwNTAiIHgyPSI3NTAiIHkyPSI1NTAiLz48bGluZSBpZD0iZXllLWNyb3NzLTEiIGNsYXNzPSJjbHMtMSIgeDE9Ijc1MCIgeTE9IjEwNTAiIHgyPSIyNTAiIHkyPSI1NTAiLz48Y2lyY2xlIGlkPSJleWUtY2lyY2xlIiBjbGFzcz0iY2xzLTIiIGN4PSIxMzAwIiBjeT0iODAwIiByPSIyNTAiLz48L3N2Zz4=";
+
+            // Set the favicon href
+            document.getElementById('favicon').href = svgData;
+
+            // 视口高度计算逻辑
+            function setVh() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            }
+
+            // 添加触摸事件支持允许移动端实现图标按压特效
+            document.addEventListener('touchstart', function() {}, { passive: true });
+            document.addEventListener('touchend', function() {}, { passive: true });
+
+            // 主题系统
+            const themes = [
+                {
+                    background: "#000000",
+                    logo: svgData,
+                    textColor: "#face64"
+                },
+                {
+                    background: "#face64",
+                    logo: svgData,
+                    textColor: "#000000"
+                }
+            ];
+
+            // 预加载 logo 图片，确保切换时图像已缓存，从而减少移动端延迟
+            themes.forEach(theme => {
+                const img = new Image();
+                img.src = theme.logo;
+            });
+
+            // 用于记录当前主题下标
+            let currentThemeIndex = 0;
+
+            function applyTheme(theme) {
+                // 同步设置背景颜色并触发 CSS 过渡效果
+                document.body.style.backgroundColor = theme.background;
+
+                const logo = document.getElementById('theme-logo');
+                
+                // 立即更新 logo 源（图片采用预加载）
+                logo.src = theme.logo;
+                // 立即将 logo 设为透明
+                logo.style.opacity = 0;
+                // 强制浏览器重排，确保上述样式立即生效
+                void logo.offsetWidth;
+                // 立刻触发透明度变化，使 logo 与背景色同步淡入
+                logo.style.opacity = 1;
+
+                // 设置文字颜色
+                const errorCode = document.getElementById('error-code');
+                const errorMessage = document.getElementById('error-message');
+                errorCode.style.color = theme.textColor;
+                errorMessage.style.color = theme.textColor;
+            }
+
+            function toggleTheme() {
+                // 在两个主题之间切换
+                currentThemeIndex = currentThemeIndex === 0 ? 1 : 0;
+                applyTheme(themes[currentThemeIndex]);
+            }
+
+            // 初始化流程
+            function init() {
+                setVh();
+                // 随机选择一个主题作为默认
+                currentThemeIndex = Math.random() < 0.5 ? 0 : 1;
+                applyTheme(themes[currentThemeIndex]);
+            }
+
+            // 点击 logo 以外区域切换主题
+            const logoLink = document.querySelector('a[href="https://darkemoji.com/"]');
+            document.addEventListener('click', function(e) {
+                // 如果点击目标不在 logoLink 或其子元素中，则切换主题
+                if (!logoLink.contains(e.target)) {
+                    toggleTheme();
+                }
+            });
+
+            // 保留窗口resize监听
+            window.addEventListener('resize', setVh);
+            init();
+        </script>
+    </body>
+</html>
