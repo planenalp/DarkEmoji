@@ -183,30 +183,6 @@ function updatePasswordVisibilityState() {
     }
 }
 
-// --- NEW: Function to update the output button states ---
-function updateOutputButtonState() {
-    // Reset success/query states for output buttons, particularly after an action
-    if (outputButtons.copy) {
-        // Reset based on the structure expected by copyToClipboard's reset logic
-        const defaultSpan = outputButtons.copy.querySelector('.btn-text.default');
-        const successSpan = outputButtons.copy.querySelector('.btn-text.success');
-        const querySpan = outputButtons.copy.querySelector('.btn-text.query'); 
-
-        if (defaultSpan) defaultSpan.style.opacity = '1';
-        if (defaultSpan) defaultSpan.style.pointerEvents = 'auto';
-        if (successSpan) successSpan.style.opacity = '0';
-        if (successSpan) successSpan.style.pointerEvents = 'none';
-        if (querySpan) querySpan.style.opacity = '0';
-        if (querySpan) querySpan.style.pointerEvents = 'none';
-        outputButtons.copy.classList.remove('is-success', 'is-query');
-    }
-    if (outputButtons.clear) {
-         // Just remove potential status classes
-         outputButtons.clear.classList.remove('is-success', 'is-query');
-    }
-    // Expand button state is usually managed by its own click handler
-}
-
 // Update subtitle text
 function updateSubtitle() {
     let shortEncrypt = currentEncrypt;
@@ -1227,90 +1203,126 @@ downloadFileArea.addEventListener('click', () => {
     // outputText.focus(); // Removed focus call
 });
 
-// Action button functionality
-actionBtn.addEventListener('click', async () => { // Make listener async
-    // REMOVED: currentInput, currentPassword (handled below)
-    // const currentInput = inputText.value;
-    // const currentPassword = password.value;
-
-    // Add a subtle animation on click
-    actionBtn.classList.add('is-processing');
-    // Removed timeout here, will be removed in finally block
-
-    if (isEncryptMode) {
-        // --- ENCRYPTION LOGIC ---
-        try {
-            outputText.value = window.getTranslation('processingEncryption'); // Show processing message
-
-            const options = {
-                algorithm: currentEncrypt,
-                iterations: currentIterations,
-                base: currentEncode,
-                dummyEmoji: currentDummyEmoji,
-                emojiVersion: currentEmoji
-            };
-
-            // Get password and determine input data type
-            const userPassword = password.value;
-            let inputData;
-            const plainText = inputText.value;
-
-            if (encryptState.cachedInputData) {
-                // Use cached file data if available
-                inputData = encryptState.cachedInputData; // { filename: string, data: base64_string }
-                 if (!inputData.filename || typeof inputData.data !== 'string') {
-                      throw new Error("Invalid cached file data.");
-                 }
-            } else if (plainText) {
-                 // Use direct text input
-                 inputData = { filename: "content.txt", rawText: plainText }; // Pass raw text
-            } else {
-                 // No input
-                 outputText.value = window.getTranslation('errorInputRequired');
-                 showToast(window.getTranslation('errorInputRequired'), 'error');
-                 actionBtn.classList.remove('is-processing'); // Stop processing animation
-                 return; // Stop if no input
+// Action button click handler
+actionBtn.addEventListener('click', async () => { // Make the handler async
+    collapseAllTextareas();
+    if (!inputText.value.trim()) {
+        alert(window.getTranslation('alertNoInput')); // Use global translation
+        return;
+    }
+    
+    // Disable button during operation
+    actionBtn.disabled = true;
+    actionBtn.classList.add('is-loading'); // Add loading visual state
+    outputText.value = ''; // Clear previous output
+    let progressElement = null; // Element to show progress text
+    
+    // Function to update progress in the output textarea
+    const updateProgress = (percentage) => {
+        console.log(`Progress: ${percentage}%`); // Log progress
+        if (!progressElement) {
+            // Style for top-center positioning with default font size
+            progressElement = document.createElement('div');
+            progressElement.style.textAlign = 'center';
+            progressElement.style.position = 'absolute';
+            progressElement.style.top = '10px'; // Small offset from the top
+            progressElement.style.left = '50%';
+            progressElement.style.transform = 'translateX(-50%)'; // Only horizontal centering
+            progressElement.style.color = 'var(--text-color)'; // Use theme color
+            progressElement.style.width = '100px'; // Give it some width to prevent text wrapping issue at 100%
+            progressElement.style.pointerEvents = 'none'; // Prevent blocking clicks on textarea
+            outputText.parentNode.insertBefore(progressElement, outputText.nextSibling); // Insert after textarea
+        }
+        // Update text, handle completion
+        if (percentage < 100) {
+            // Display only the percentage
+            progressElement.textContent = `${percentage}%`;
+            outputText.style.opacity = '0.5'; // Dim textarea during progress
+        } else {
+            // Clear progress on completion/error
+            if (progressElement) {
+                progressElement.textContent = '';
+                progressElement.remove(); // Remove the element
+                progressElement = null;
             }
+            outputText.style.opacity = '1'; // Restore textarea opacity
+        }
+    };
+    
+    if (isEncryptMode) {
+         // --- New Cache Handling Logic for Encryption ---
+        let dataToOutput;
+        if (encryptState.cachedInputData) {
+            // Use cached data if available (from file upload)
+            dataToOutput = encryptState.cachedInputData;
+        } else {
+            // Generate cache data for direct input
+            try {
+                 dataToOutput = {
+                    filename: "content.txt",
+                    data: unicodeToBase64(inputText.value)
+                 };
+                 // Optionally update the cache for potential reuse
+                 // encryptState.cachedInputData = dataToOutput; 
+            } catch (error) {
+                 console.error('Error encoding direct input Base64:', error);
+                 alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding input content.'));
+                 outputText.value = ''; // Clear output on error
+                 return;
+            }
+        }
+        
+        try {
+            // 1. Prepare the JSON string from the data object
+            jsonStringToEncrypt = JSON.stringify(dataToOutput); // No pretty print needed for encryption
+        } catch (error) {
+             console.error('Error stringifying JSON data:', error);
+             alert(window.getTranslation('alertJSONError', 'Error formatting output data.'));
+             outputText.value = ''; // Clear output on error
+             actionBtn.disabled = false; // Re-enable button
+             actionBtn.classList.remove('is-loading'); // Remove loading state
+             updateProgress(100); // Clear progress indicator
+             return;
+        }
+        // --- End New Logic ---
+        
+        // 2. Gather options and password
+        const options = {
+            selectedAlgorithm: currentEncrypt,
+            selectedIterations: currentIterations,
+            selectedBase: currentEncode,
+            selectedDummyEmoji: currentDummyEmoji,
+            selectedEmojiVersion: currentEmoji
+        };
+        const passwordValue = password.value;
 
-            // No separate check for password, as encryptData handles empty password case
-            // if (!userPassword) { ... }
-
-            // Call the main encryption function from emojiCipher.js
-            // Pass options, inputData object, and password
-            const finalEncryptedOutput = await window.encryptData(options, inputData, userPassword);
-
-            // Display result
-            outputText.value = finalEncryptedOutput;
-            updateOutputButtonState(); // Update button states based on new output
-
+        // 3. Call the encrypt function
+        try {
+            updateProgress(0); // Start progress
+            const encryptedEmojiString = await encrypt(jsonStringToEncrypt, passwordValue, options, updateProgress);
+            outputText.value = encryptedEmojiString;
         } catch (error) {
             console.error('Encryption failed:', error);
-            // Display specific error from encryptData or a generic one
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            outputText.value = `${window.getTranslation('errorEncryptionFailed')}: ${errorMessage}`;
+            // Display a user-friendly error message
+            outputText.value = `${window.getTranslation('errorPrefix', 'Error:')} ${error.message}`;
+            // Consider showing a specific alert or more detail depending on the error type
+            // alert(`${window.getTranslation('alertEncryptionFailed', 'Encryption failed:')} ${error.message}`);
         } finally {
-             actionBtn.classList.remove('is-processing'); // Ensure removal even on error
+            // 4. Re-enable button and clear progress regardless of success/failure
+            actionBtn.disabled = false;
+            actionBtn.classList.remove('is-loading');
+            updateProgress(100);
         }
-
     } else {
-        // --- DECRYPTION LOGIC --- (Remains Placeholder)
-        try {
-            outputText.value = window.getTranslation('processingDecryption'); // Show processing message
+        // Decrypt mode still uses placeholder logic
+        outputText.value = inputText.value; // Placeholder logic
+        actionBtn.disabled = false; // Re-enable button (placeholder)
+        actionBtn.classList.remove('is-loading'); // Remove loading state (placeholder)
+    }
 
-            // TODO: Implement decryption logic here
-            // ... (steps outlined previously) ...
-
-            console.log("Decryption logic needs implementation.");
-            outputText.value = "Decryption successful (placeholder)"; // Placeholder
-            updateOutputButtonState();
-
-        } catch (error) {
-            console.error('Decryption failed:', error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            outputText.value = `${window.getTranslation('errorDecryptionFailed')}: ${errorMessage}`;
-        } finally {
-             actionBtn.classList.remove('is-processing'); // Ensure removal even on error
-        }
+    // 触发表单提交来激活浏览器密码保存功能
+    if (password.value) {
+        document.getElementById('passwordForm').requestSubmit();
     }
 });
 
@@ -1811,194 +1823,6 @@ document.getElementById('passwordForm').addEventListener('submit', function(e) {
 
 // Make cipherMenu globally accessible for language.js toggle/close functions
 window.cipherMenu = cipherMenu;
-
-// --- Helper Functions for Unicode Safe Base64 ---
-function unicodeToBase64(str) {
-    try {
-        // 1. Encode string to UTF-8 bytes
-        const encoder = new TextEncoder();
-        const uint8Array = encoder.encode(str);
-        // 2. Convert Uint8Array to a binary string (char codes match byte values)
-        let binaryString = '';
-        uint8Array.forEach(byte => {
-            binaryString += String.fromCharCode(byte);
-        });
-        // 3. Encode binary string to Base64
-        return btoa(binaryString);
-    } catch (error) {
-        console.error("Error encoding Unicode to Base64:", error);
-        // Re-throw to allow caller-specific error handling (e.g., showing an alert)
-        throw new Error('Failed to encode content to Base64.'); 
-    }
-}
-
-function base64ToUnicode(base64) {
-    try {
-        // 1. Decode Base64 to binary string
-        const binaryString = atob(base64);
-        const len = binaryString.length;
-        // 2. Convert binary string to Uint8Array
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        // 3. Decode UTF-8 bytes to string
-        const decoder = new TextDecoder(); // Defaults to 'utf-8'
-        return decoder.decode(bytes);
-    } catch (error) {
-        console.error("Error decoding Base64 to Unicode:", error);
-         // Re-throw to allow caller-specific error handling
-        throw new Error('Failed to decode Base64 content.');
-    }
-}
-
-// --- Function to Equalize Button Widths --- 
-function equalizeRowButtonWidths(containerSelector) {
-    const container = document.querySelector(containerSelector);
-    if (!container) return;
-
-    const buttons = container.querySelectorAll('.mode-btn-menu');
-    if (!buttons || buttons.length === 0) return;
-
-    let maxWidth = 0;
-    // First pass: find the maximum width
-    buttons.forEach(button => {
-        // Temporarily remove min-width to measure natural width
-        const originalMinWidth = button.style.minWidth;
-        button.style.minWidth = '0';
-        maxWidth = Math.max(maxWidth, button.scrollWidth);
-        // Restore original min-width (or remove if it wasn't set)
-        button.style.minWidth = originalMinWidth;
-    });
-
-    // Add a small buffer (e.g., 2px) for potential rounding/border issues
-    // maxWidth += 2; 
-
-    // Second pass: apply the maximum width as min-width
-    buttons.forEach(button => {
-        button.style.minWidth = `${maxWidth}px`;
-    });
-}
-
-// Make the equalize function globally accessible for language.js
-window.equalizeRowButtonWidths = equalizeRowButtonWidths;
-
-// 添加更多事件监听，以确保文本输入时光标始终可见
-inputText.addEventListener('input', () => {
-    // 原有代码保持不变
-    // Update the Paste/Copy button state whenever input changes
-    updateInputButtonState(); 
-    // Original logic for resetting other buttons (if any) can remain
-    
-    // --- REMOVED: 不再在输入时自动滚动 ---
-    /* 
-    if (inputText.classList.contains('expanded') && document.activeElement === inputText) {
-        requestAnimationFrame(() => {
-            ensureCursorVisibleInTextarea(inputText);
-        });
-    }
-    */
-});
-
-outputText.addEventListener('input', () => {
-    // --- REMOVED: 不再在输入时自动滚动 ---
-    /*
-    if (outputText.classList.contains('expanded') && document.activeElement === outputText) {
-        requestAnimationFrame(() => {
-            ensureCursorVisibleInTextarea(outputText);
-        });
-    }
-    */
-});
-
-// 添加键盘选择事件监听，确保使用方向键改变光标位置时也能保持可见
-inputText.addEventListener('keyup', (e) => {
-    // 只监听可能改变光标位置的键：方向键、Home、End、PageUp、PageDown
-    const cursorMovementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'];
-    // --- REMOVED: 不再在键盘移动光标时自动滚动 ---
-    /*
-    if (cursorMovementKeys.includes(e.key) && inputText.classList.contains('expanded')) {
-        ensureCursorVisibleInTextarea(inputText);
-    }
-    */
-});
-
-outputText.addEventListener('keyup', (e) => {
-    // 只监听可能改变光标位置的键：方向键、Home、End、PageUp、PageDown
-    const cursorMovementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'];
-    // --- REMOVED: 不再在键盘移动光标时自动滚动 ---
-    /*
-    if (cursorMovementKeys.includes(e.key) && outputText.classList.contains('expanded')) {
-        ensureCursorVisibleInTextarea(outputText);
-    }
-    */
-});
-
-// 点击文本框时也需要保持光标可见
-inputText.addEventListener('click', () => {
-    // --- REMOVED: 不再在点击时自动滚动 ---
-    /*
-    if (inputText.classList.contains('expanded')) {
-        requestAnimationFrame(() => {
-            ensureCursorVisibleInTextarea(inputText);
-        });
-    }
-    */
-});
-
-outputText.addEventListener('click', () => {
-    // --- REMOVED: 不再在点击时自动滚动 ---
-    /*
-    if (outputText.classList.contains('expanded')) {
-        requestAnimationFrame(() => {
-            ensureCursorVisibleInTextarea(outputText);
-        });
-    }
-    */
-});
-
-// ... existing code ...
-window.cipherMenu = cipherMenu;
-
-// --- Simple Toast Notification Implementation ---
-function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-
-    // Add close button
-    const closeButton = document.createElement('button');
-    closeButton.textContent = '×';
-    closeButton.className = 'toast-close-btn';
-    closeButton.onclick = () => toast.remove();
-    toast.appendChild(closeButton);
-
-    toastContainer.appendChild(toast);
-
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-        toast.remove();
-    }, 5000);
-}
-
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    document.body.appendChild(container);
-    return container;
-}
-// Add some basic CSS for the toast in index.css later if needed
-/* Example CSS:
-#toastContainer { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-.toast { padding: 10px 20px; border-radius: 5px; color: #fff; background-color: #333; box-shadow: 0 2px 10px rgba(0,0,0,0.2); opacity: 0.9; display: flex; align-items: center; justify-content: space-between; }
-.toast-success { background-color: #28a745; }
-.toast-error { background-color: #dc3545; }
-.toast-info { background-color: #17a2b8; }
-.toast-warning { background-color: #ffc107; color: #333; }
-.toast-close-btn { background: none; border: none; color: inherit; font-size: 1.2em; margin-left: 15px; cursor: pointer; padding: 0; line-height: 1; }
-*/
 
 // --- Helper Functions for Unicode Safe Base64 ---
 function unicodeToBase64(str) {
