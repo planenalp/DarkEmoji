@@ -1,0 +1,544 @@
+{
+  "metadata": {
+    "title": "测试数据集",
+    "description": "这是一个用于测试数据压缩的样本JSON文件",
+    "version": "1.0",
+    "created": "2023-07-15",
+    "author": "测试用户"
+  },
+  "settings": {
+    "compression": true,
+    "encryption": true,
+    "theme": "dark",
+    "language": "zh-CN",
+    "notifications": {
+      "email": true,
+      "push": false,
+      "sms": false
+    },
+    "display": {
+      "fontSize": 14,
+      "fontFamily": "Arial, sans-serif",
+      "colorScheme": {
+        "primary": "#007bff",
+        "secondary": "#6c757d",
+        "success": "#28a745",
+        "danger": "#dc3545",
+        "warning": "#ffc107",
+        "info": "#17a2b8",
+        "light": "#f8f9fa",
+        "dark": "#343a40"
+      }
+    }
+  },
+  "users": [
+    {
+      "id": 1,
+      "username": "user1",
+      "email": "user1@example.com",
+      "name": "张三",
+      "age": 28,
+      "gender": "男",
+      "address": {
+        "street": "北京路123号",
+        "city": "上海",
+        "province": "上海",
+        "postalCode": "200001",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "021-12345678"
+        },
+        {
+          "type": "手机",
+          "number": "13800138000"
+        }
+      ],
+      "preferences": {
+        "theme": "dark",
+        "notifications": true,
+        "newsletter": false,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-14T10:30:45Z",
+        "loginCount": 137,
+        "createdAt": "2022-01-15T08:20:10Z",
+        "active": true
+      },
+      "permissions": ["read", "write", "delete", "admin"],
+      "notes": "这是用户张三的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 2,
+      "username": "user2",
+      "email": "user2@example.com",
+      "name": "李四",
+      "age": 33,
+      "gender": "女",
+      "address": {
+        "street": "南京东路45号",
+        "city": "上海",
+        "province": "上海",
+        "postalCode": "200002",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "021-87654321"
+        },
+        {
+          "type": "手机",
+          "number": "13900139000"
+        }
+      ],
+      "preferences": {
+        "theme": "light",
+        "notifications": false,
+        "newsletter": true,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-13T14:15:20Z",
+        "loginCount": 85,
+        "createdAt": "2022-02-20T11:30:45Z",
+        "active": true
+      },
+      "permissions": ["read", "write"],
+      "notes": "这是用户李四的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 3,
+      "username": "user3",
+      "email": "user3@example.com",
+      "name": "王五",
+      "age": 45,
+      "gender": "男",
+      "address": {
+        "street": "人民路67号",
+        "city": "北京",
+        "province": "北京",
+        "postalCode": "100001",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "010-12345678"
+        },
+        {
+          "type": "手机",
+          "number": "13700137000"
+        },
+        {
+          "type": "工作",
+          "number": "010-98765432"
+        }
+      ],
+      "preferences": {
+        "theme": "auto",
+        "notifications": true,
+        "newsletter": true,
+        "language": "en-US"
+      },
+      "stats": {
+        "lastLogin": "2023-07-12T08:45:30Z",
+        "loginCount": 213,
+        "createdAt": "2021-11-05T14:25:30Z",
+        "active": true
+      },
+      "permissions": ["read", "write", "delete"],
+      "notes": "这是用户王五的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 4,
+      "username": "user4",
+      "email": "user4@example.com",
+      "name": "赵六",
+      "age": 22,
+      "gender": "女",
+      "address": {
+        "street": "天府大道88号",
+        "city": "成都",
+        "province": "四川",
+        "postalCode": "610000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "手机",
+          "number": "13600136000"
+        }
+      ],
+      "preferences": {
+        "theme": "dark",
+        "notifications": false,
+        "newsletter": false,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-15T06:12:40Z",
+        "loginCount": 42,
+        "createdAt": "2022-05-18T09:15:22Z",
+        "active": true
+      },
+      "permissions": ["read"],
+      "notes": "这是用户赵六的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 5,
+      "username": "user5",
+      "email": "user5@example.com",
+      "name": "钱七",
+      "age": 38,
+      "gender": "男",
+      "address": {
+        "street": "中山路56号",
+        "city": "广州",
+        "province": "广东",
+        "postalCode": "510000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "020-12345678"
+        },
+        {
+          "type": "手机",
+          "number": "13500135000"
+        }
+      ],
+      "preferences": {
+        "theme": "light",
+        "notifications": true,
+        "newsletter": true,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-10T18:30:55Z",
+        "loginCount": 156,
+        "createdAt": "2021-09-08T10:45:33Z",
+        "active": true
+      },
+      "permissions": ["read", "write", "delete"],
+      "notes": "这是用户钱七的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 6,
+      "username": "user6",
+      "email": "user6@example.com",
+      "name": "孙八",
+      "age": 29,
+      "gender": "男",
+      "address": {
+        "street": "解放路123号",
+        "city": "武汉",
+        "province": "湖北",
+        "postalCode": "430000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "手机",
+          "number": "13400134000"
+        },
+        {
+          "type": "工作",
+          "number": "027-87654321"
+        }
+      ],
+      "preferences": {
+        "theme": "dark",
+        "notifications": true,
+        "newsletter": false,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-14T09:25:12Z",
+        "loginCount": 78,
+        "createdAt": "2022-04-12T15:40:18Z",
+        "active": true
+      },
+      "permissions": ["read", "write"],
+      "notes": "这是用户孙八的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 7,
+      "username": "user7",
+      "email": "user7@example.com",
+      "name": "周九",
+      "age": 41,
+      "gender": "女",
+      "address": {
+        "street": "西湖路78号",
+        "city": "杭州",
+        "province": "浙江",
+        "postalCode": "310000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "0571-12345678"
+        },
+        {
+          "type": "手机",
+          "number": "13300133000"
+        }
+      ],
+      "preferences": {
+        "theme": "light",
+        "notifications": false,
+        "newsletter": true,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-11T16:40:25Z",
+        "loginCount": 123,
+        "createdAt": "2022-01-05T07:35:50Z",
+        "active": false
+      },
+      "permissions": ["read"],
+      "notes": "这是用户周九的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 8,
+      "username": "user8",
+      "email": "user8@example.com",
+      "name": "吴十",
+      "age": 35,
+      "gender": "男",
+      "address": {
+        "street": "青年路45号",
+        "city": "青岛",
+        "province": "山东",
+        "postalCode": "266000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "手机",
+          "number": "13200132000"
+        }
+      ],
+      "preferences": {
+        "theme": "auto",
+        "notifications": true,
+        "newsletter": true,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-13T11:20:45Z",
+        "loginCount": 92,
+        "createdAt": "2022-03-15T12:10:30Z",
+        "active": true
+      },
+      "permissions": ["read", "write"],
+      "notes": "这是用户吴十的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 9,
+      "username": "user9",
+      "email": "user9@example.com",
+      "name": "郑十一",
+      "age": 27,
+      "gender": "女",
+      "address": {
+        "street": "和平路67号",
+        "city": "天津",
+        "province": "天津",
+        "postalCode": "300000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "家庭",
+          "number": "022-12345678"
+        },
+        {
+          "type": "手机",
+          "number": "13100131000"
+        }
+      ],
+      "preferences": {
+        "theme": "dark",
+        "notifications": false,
+        "newsletter": false,
+        "language": "en-US"
+      },
+      "stats": {
+        "lastLogin": "2023-07-09T14:55:20Z",
+        "loginCount": 67,
+        "createdAt": "2022-05-25T09:30:15Z",
+        "active": true
+      },
+      "permissions": ["read", "write"],
+      "notes": "这是用户郑十一的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    },
+    {
+      "id": 10,
+      "username": "user10",
+      "email": "user10@example.com",
+      "name": "王十二",
+      "age": 32,
+      "gender": "男",
+      "address": {
+        "street": "南京路88号",
+        "city": "南京",
+        "province": "江苏",
+        "postalCode": "210000",
+        "country": "中国"
+      },
+      "phoneNumbers": [
+        {
+          "type": "手机",
+          "number": "13000130000"
+        },
+        {
+          "type": "工作",
+          "number": "025-87654321"
+        }
+      ],
+      "preferences": {
+        "theme": "light",
+        "notifications": true,
+        "newsletter": true,
+        "language": "zh-CN"
+      },
+      "stats": {
+        "lastLogin": "2023-07-15T08:10:35Z",
+        "loginCount": 145,
+        "createdAt": "2021-12-10T16:20:40Z",
+        "active": true
+      },
+      "permissions": ["read", "write", "delete", "admin"],
+      "notes": "这是用户王十二的详细信息，包含了各种常见的数据字段和结构。这段文字主要用来增加数据量，并提供一些可以被压缩的重复内容。每个用户都会有类似的描述，但会有细微的变化。这样可以测试压缩算法对于相似但不完全相同的内容的处理效果。"
+    }
+  ],
+  "products": [
+    {
+      "id": "P001",
+      "name": "高清液晶显示器",
+      "category": "电子产品",
+      "price": 1299.99,
+      "currency": "CNY",
+      "stock": 120,
+      "rating": 4.5,
+      "description": "27英寸高清液晶显示器，支持HDR，刷新率144Hz，响应时间1ms。这是一款性价比极高的显示器，适合办公和游戏使用。此描述用于测试压缩效果，会有一定的重复信息。",
+      "specifications": {
+        "brand": "品牌A",
+        "model": "X27",
+        "dimensions": {
+          "width": 609.7,
+          "height": 383.4,
+          "depth": 57.3,
+          "unit": "mm"
+        },
+        "weight": 5.6,
+        "weightUnit": "kg",
+        "connectivity": ["HDMI", "DisplayPort", "USB-C"],
+        "warranty": "3年有限保修"
+      }
+    },
+    {
+      "id": "P002",
+      "name": "机械键盘",
+      "category": "电子产品",
+      "price": 499.99,
+      "currency": "CNY",
+      "stock": 85,
+      "rating": 4.8,
+      "description": "104键机械键盘，采用Cherry MX轴，RGB背光，铝合金面板。这是一款手感极佳的键盘，适合打字和游戏使用。此描述用于测试压缩效果，会有一定的重复信息。",
+      "specifications": {
+        "brand": "品牌B",
+        "model": "K104",
+        "dimensions": {
+          "width": 440,
+          "height": 140,
+          "depth": 40,
+          "unit": "mm"
+        },
+        "weight": 1.2,
+        "weightUnit": "kg",
+        "connectivity": ["USB"],
+        "warranty": "2年有限保修"
+      }
+    },
+    {
+      "id": "P003",
+      "name": "无线鼠标",
+      "category": "电子产品",
+      "price": 199.99,
+      "currency": "CNY",
+      "stock": 210,
+      "rating": 4.3,
+      "description": "无线鼠标，16000DPI，7个可编程按键，内置可充电锂电池。这是一款精准度高的鼠标，适合办公和游戏使用。此描述用于测试压缩效果，会有一定的重复信息。",
+      "specifications": {
+        "brand": "品牌C",
+        "model": "M16",
+        "dimensions": {
+          "width": 120,
+          "height": 65,
+          "depth": 40,
+          "unit": "mm"
+        },
+        "weight": 0.1,
+        "weightUnit": "kg",
+        "connectivity": ["Bluetooth", "2.4GHz无线"],
+        "warranty": "1年有限保修"
+      }
+    },
+    {
+      "id": "P004",
+      "name": "高效能笔记本电脑",
+      "category": "电子产品",
+      "price": 8999.99,
+      "currency": "CNY",
+      "stock": 45,
+      "rating": 4.7,
+      "description": "15.6英寸笔记本电脑，搭载第12代Intel Core i7处理器，16GB内存，512GB SSD，RTX3060显卡。这是一款性能强劲的笔记本，适合办公和游戏使用。此描述用于测试压缩效果，会有一定的重复信息。",
+      "specifications": {
+        "brand": "品牌D",
+        "model": "X15",
+        "dimensions": {
+          "width": 356,
+          "height": 235,
+          "depth": 19.9,
+          "unit": "mm"
+        },
+        "weight": 2.3,
+        "weightUnit": "kg",
+        "connectivity": ["HDMI", "USB-A", "USB-C", "Thunderbolt 4", "Wi-Fi 6", "Bluetooth 5.2"],
+        "warranty": "2年有限保修"
+      }
+    },
+    {
+      "id": "P005",
+      "name": "无线耳机",
+      "category": "电子产品",
+      "price": 899.99,
+      "currency": "CNY",
+      "stock": 150,
+      "rating": 4.6,
+      "description": "无线蓝牙耳机，主动降噪，40mm驱动单元，30小时电池续航。这是一款音质出色的耳机，适合日常通勤使用。此描述用于测试压缩效果，会有一定的重复信息。",
+      "specifications": {
+        "brand": "品牌E",
+        "model": "H40",
+        "dimensions": {
+          "width": 160,
+          "height": 180,
+          "depth": 80,
+          "unit": "mm"
+        },
+        "weight": 0.25,
+        "weightUnit": "kg",
+        "connectivity": ["Bluetooth 5.0", "3.5mm音频线"],
+        "warranty": "1年有限保修"
+      }
+    }
+  ]
+} 

@@ -675,7 +675,7 @@ textarea.expanded {
 
 /* Style for displaying filename in input textarea */
 textarea.filename-display {
-    text-align: center; /* 水平居中 */
+    /* text-align: center; */ /* 水平居中 - 已移除 */
   }
 
 input[type="password"],
