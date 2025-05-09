@@ -264,7 +264,7 @@ function setLanguage(lang) {
         window.equalizeRowButtonWidths('#optionAlgorithm');
         window.equalizeRowButtonWidths('#optionIterations');
         window.equalizeRowButtonWidths('#optionBase');
-        window.equalizeRowButtonWidths('#optionEmoji');
+        window.equalizeRowButtonWidths('#optionEmojiVersion');
     }
 }
 

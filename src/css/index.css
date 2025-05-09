@@ -227,7 +227,7 @@ body {
 #optionAlgorithm,
 #optionIterations,
 #optionBase,
-#optionEmoji,
+#optionEmojiVersion,
 #optionDummyEmoji {
     max-width: 100%; /* Limit width to container */
     overflow-x: auto; /* Enable horizontal scroll */
@@ -240,11 +240,11 @@ body {
     /* We can keep the general padding and add padding-bottom */
 }
 
-/* Reset margin for the last element (was #optionBase, now #optionEmoji) */
+/* Reset margin for the last element (was #optionBase, now #optionEmojiVersion) */
 /* #optionBase { */ /* REMOVED this rule */
 /*    margin-bottom: 0; */
 /* } */
-#optionEmoji, #optionDummyEmoji { /* EXTENDED selector */
+#optionEmojiVersion, #optionDummyEmoji { /* EXTENDED selector */
     display: grid;
     grid-template-columns: repeat(6, auto); /* 6 columns, auto width based on content */
     gap: 0; /* No gap between grid cells */
@@ -259,7 +259,7 @@ body {
 }
 
 /* Style buttons within the grid */
-#optionEmoji .mode-btn-menu,
+#optionEmojiVersion .mode-btn-menu,
 #optionDummyEmoji .mode-btn-menu { /* EXTENDED selector */
     border: none;
     border-radius: 0;
@@ -280,42 +280,42 @@ body {
 }
 
 /* Remove right border for the last button in each row (6th, 12th, etc.) */
-#optionEmoji .mode-btn-menu:nth-child(6n),
+#optionEmojiVersion .mode-btn-menu:nth-child(6n),
 #optionDummyEmoji .mode-btn-menu:nth-child(6n) { /* EXTENDED selector */
     border-right: none;
 }
 
 /* Remove bottom border for buttons in the last row (assuming exactly 12 buttons for now) */
-#optionEmoji .mode-btn-menu:nth-child(n+7),
+#optionEmojiVersion .mode-btn-menu:nth-child(n+7),
 #optionDummyEmoji .mode-btn-menu:nth-child(n+7) { /* EXTENDED selector */
     border-bottom: none;
 }
 
 /* Apply top-left border radius to the very first button */
-#optionEmoji .mode-btn-menu:first-child,
+#optionEmojiVersion .mode-btn-menu:first-child,
 #optionDummyEmoji .mode-btn-menu:first-child { /* EXTENDED selector */
     border-top-left-radius: 6px;
 }
 
 /* Apply top-right border radius to the 6th button (end of first row) */
-#optionEmoji .mode-btn-menu:nth-child(6),
+#optionEmojiVersion .mode-btn-menu:nth-child(6),
 #optionDummyEmoji .mode-btn-menu:nth-child(6) { /* EXTENDED selector */
     border-top-right-radius: 6px;
 }
 
 /* Apply bottom-left border radius to the 7th button (start of second row) */
-#optionEmoji .mode-btn-menu:nth-child(7),
+#optionEmojiVersion .mode-btn-menu:nth-child(7),
 #optionDummyEmoji .mode-btn-menu:nth-child(7) { /* EXTENDED selector */
     border-bottom-left-radius: 6px;
 }
 
 /* Apply bottom-right border radius to the very last button */
-#optionEmoji .mode-btn-menu:last-child,
+#optionEmojiVersion .mode-btn-menu:last-child,
 #optionDummyEmoji .mode-btn-menu:last-child { /* EXTENDED selector */
     border-bottom-right-radius: 6px;
 }
 
-/* Adjust the group styling selectors to EXCLUDE #optionEmoji now */
+/* Adjust the group styling selectors to EXCLUDE #optionEmojiVersion now */
 /* Style Cipher/Base rows like button groups */
 #optionAlgorithm,
 #optionIterations,
@@ -342,7 +342,7 @@ body {
     border-radius: 6px;
 }
 
-/* Specific styles for buttons INSIDE Cipher/Base rows (EXCLUDE #optionEmoji) */
+/* Specific styles for buttons INSIDE Cipher/Base rows (EXCLUDE #optionEmojiVersion) */
 #optionAlgorithm .mode-btn-menu,
 #optionIterations .mode-btn-menu,
 #optionBase .mode-btn-menu
@@ -353,7 +353,7 @@ body {
     border-right: 1px solid var(--input-border); /* Add dividing lines */
 }
 
-/* Remove right border from the last button in Cipher/Base groups (EXCLUDE #optionEmoji) */
+/* Remove right border from the last button in Cipher/Base groups (EXCLUDE #optionEmojiVersion) */
 #optionAlgorithm .mode-btn-menu:last-child,
 #optionIterations .mode-btn-menu:last-child,
 #optionBase .mode-btn-menu:last-child
@@ -361,7 +361,7 @@ body {
     border-right: none;
 }
 
-/* Apply border-radius to the first button's left corners in Cipher/Base groups (EXCLUDE #optionEmoji) */
+/* Apply border-radius to the first button's left corners in Cipher/Base groups (EXCLUDE #optionEmojiVersion) */
 #optionAlgorithm .mode-btn-menu:first-child,
 #optionIterations .mode-btn-menu:first-child,
 #optionBase .mode-btn-menu:first-child
@@ -370,7 +370,7 @@ body {
     border-bottom-left-radius: 5px;
 }
 
-/* Apply border-radius to the last button's right corners in Cipher/Base groups (EXCLUDE #optionEmoji) */
+/* Apply border-radius to the last button's right corners in Cipher/Base groups (EXCLUDE #optionEmojiVersion) */
 #optionAlgorithm .mode-btn-menu:last-child,
 #optionIterations .mode-btn-menu:last-child,
 #optionBase .mode-btn-menu:last-child
@@ -379,7 +379,7 @@ body {
     border-bottom-right-radius: 5px;
 }
 
-/* Remove press effect specifically from Cipher/Base buttons (EXCLUDE #optionEmoji) */
+/* Remove press effect specifically from Cipher/Base buttons (EXCLUDE #optionEmojiVersion) */
 #optionAlgorithm .mode-btn-menu:active,
 #optionIterations .mode-btn-menu:active,
 #optionBase .mode-btn-menu:active
@@ -390,7 +390,7 @@ body {
     color: var(--button-active-hover-color); /* Use var */
 }
 
-/* Re-allow press effect for general mode-btn-menu, which now includes #optionEmoji buttons */
+/* Re-allow press effect for general mode-btn-menu, which now includes #optionEmojiVersion buttons */
 .mode-btn-menu:active {
     background-color: var(--button-active-hover-bg) !important;
     color: var(--button-active-hover-color);
@@ -929,7 +929,7 @@ input[type="text"]:focus {
 #optionAlgorithm,
 #optionIterations,
 #optionBase,
-/* Remove #optionEmoji from this group, handled by .emoji-option-row */
+/* Remove #optionEmojiVersion from this group, handled by .emoji-option-row */
 .emoji-option-row {
     border: 1px solid var(--input-border);
     border-radius: 6px;
@@ -952,7 +952,7 @@ input[type="text"]:focus {
 #optionAlgorithm .mode-btn-menu,
 #optionIterations .mode-btn-menu,
 #optionBase .mode-btn-menu,
-/* #optionEmoji .mode-btn-menu, */ /* Replace with .emoji-option-row */
+/* #optionEmojiVersion .mode-btn-menu, */ /* Replace with .emoji-option-row */
 .emoji-option-row .mode-btn-menu {
     /* flex: 1; */ /* REMOVED: Let JS handle width */
     border: none; /* Remove individual borders */
@@ -964,7 +964,7 @@ input[type="text"]:focus {
 #optionAlgorithm .mode-btn-menu:last-child,
 #optionIterations .mode-btn-menu:last-child,
 #optionBase .mode-btn-menu:last-child,
-/* #optionEmoji .mode-btn-menu:last-child, */ /* Replace with .emoji-option-row */
+/* #optionEmojiVersion .mode-btn-menu:last-child, */ /* Replace with .emoji-option-row */
 .emoji-option-row .mode-btn-menu:last-child {
     border-right: none;
 }
@@ -973,7 +973,7 @@ input[type="text"]:focus {
 #optionAlgorithm .mode-btn-menu:first-child,
 #optionIterations .mode-btn-menu:first-child,
 #optionBase .mode-btn-menu:first-child,
-/* #optionEmoji .mode-btn-menu:first-child, */ /* Replace with .emoji-option-row */
+/* #optionEmojiVersion .mode-btn-menu:first-child, */ /* Replace with .emoji-option-row */
 .emoji-option-row .mode-btn-menu:first-child {
     border-top-left-radius: 5px; /* Slightly less than container radius */
     border-bottom-left-radius: 5px;
@@ -983,7 +983,7 @@ input[type="text"]:focus {
 #optionAlgorithm .mode-btn-menu:last-child,
 #optionIterations .mode-btn-menu:last-child,
 #optionBase .mode-btn-menu:last-child,
-/* #optionEmoji .mode-btn-menu:last-child, */ /* Replace with .emoji-option-row */
+/* #optionEmojiVersion .mode-btn-menu:last-child, */ /* Replace with .emoji-option-row */
 .emoji-option-row .mode-btn-menu:last-child {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
@@ -993,7 +993,7 @@ input[type="text"]:focus {
 #optionAlgorithm .mode-btn-menu:active,
 #optionIterations .mode-btn-menu:active,
 #optionBase .mode-btn-menu:active,
-#optionEmoji .mode-btn-menu:active,
+#optionEmojiVersion .mode-btn-menu:active,
 #optionDummyEmoji .mode-btn-menu:active
 /* .emoji-option-row .mode-btn-menu:active */ /* Removed */ {
     transform: none; /* Override scaling effect */
@@ -1365,7 +1365,7 @@ input[type="text"]:focus {
     /*    display: none; */
     /* } */
 
-    #optionEmoji, #optionDummyEmoji {
+    #optionEmojiVersion, #optionDummyEmoji {
         /* Apply horizontal scroll like other options */
         max-width: 100%; /* Prevent overflow of dropdown */
         overflow-x: auto;
@@ -1382,7 +1382,7 @@ input[type="text"]:focus {
         -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
     }
     /* Optional: Hide WebKit scrollbar for emoji grid too */
-    /* #optionEmoji::-webkit-scrollbar { */
+    /* #optionEmojiVersion::-webkit-scrollbar { */
     /*    display: none; */
     /* } */
 
@@ -1416,6 +1416,69 @@ input[type="text"]:focus {
     .action-btn,
     .file-msg {
         font-size: 12px;
+    }
+}
+
+/* Progress Bar Styles */
+.progress-bar-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 400px;
+    background-color: var(--menu-bg);
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    font-family: inherit;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: var(--input-border);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--button-hover);
+    width: 0;
+    transition: width 0.3s ease;
+    border-radius: 5px;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.subtask-text {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.8;
+    max-width: 90%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 16px;
+}
+
+/* When displaying on mobile, make sure progress bar fits */
+@media (max-width: 600px) {
+    .progress-bar-container {
+        width: 90%;
+        padding: 10px 15px;
     }
 }
 

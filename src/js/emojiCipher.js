@@ -3,6 +3,15 @@ const optionAlgorithmEmojiMap = {
   'ChaCha20-Poly1305': ['🙂', '😉', '😘', '😗', '🤔', '🙃', '🤐', '😐', '😶', '😕']
 };
 
+const optionIterationsEmojiMap = {
+  'Iterations-100k': ['🌑', '🌒', '🌓'],
+  'Iterations-500k': ['🌔', '🌕', '🌖'],
+  'Iterations-1M': ['🌗', '🌘', '🌙'],
+  'Iterations-5M': ['🌚', '🌛', '🌜'],
+  'Iterations-10M': ['☀️', '🌝', '🌞'],
+  'Iterations-50M': ['⭐', '🌟', '🌠']
+};
+
 const optionBaseEmojiMap = {
   'Base64': ['🛐', '🕉️', '✡️'],
   'Base128': ['☸️', '☯️', '✝️'],
@@ -12,6 +21,21 @@ const optionBaseEmojiMap = {
   'Base2048': ['♌', '♍', '♎'],
   'Base4096': ['♏', '♐', '♑'],
   'Base8192': ['♒', '♓', '⛎']
+};
+
+const optionDummyEmojiEmojiMap = {
+  'DummyEmoji-0%': ['🕛', '🕧'],
+  'DummyEmoji-5%': ['🕚', '🕦'],
+  'DummyEmoji-10%': ['🕐', '🕜'],
+  'DummyEmoji-20%': ['🕑', '🕝'],
+  'DummyEmoji-30%': ['🕒', '🕞'],
+  'DummyEmoji-40%': ['🕓', '🕟'],
+  'DummyEmoji-50%': ['🕔', '🕠'],
+  'DummyEmoji-60%': ['🕕', '🕡'],
+  'DummyEmoji-70%': ['🕖', '🕢'],
+  'DummyEmoji-80%': ['🕗', '🕣'],
+  'DummyEmoji-90%': ['🕘', '🕤'],
+  'DummyEmoji-100%': ['🕙', '🕥']
 };
 
 const optionEmojiVersionEmojiMap = {
@@ -75,6 +99,162 @@ const optionDummyEmojPercentageMap = {
   'DummyEmoji-90%': 90, 
   'DummyEmoji-100%': 100
 };  
+
+// Persistent worker instance
+let persistentWorker = null;
+let workerReady = false;
+let pendingRequests = [];
+let activeLibraryKey = null;
+
+/**
+ * Initialize persistent Web Worker for emoji operations
+ * @returns {Worker} The initialized worker instance
+ */
+function initializePersistentWorker() {
+  if (persistentWorker) {
+    return persistentWorker;
+  }
+  
+  try {
+    persistentWorker = new Worker('./js/emojiWorker.js');
+    
+    // Set up message handling
+    persistentWorker.onmessage = function(e) {
+      const data = e.data;
+      
+      // Handle progress updates
+      if (data.type === 'progress') {
+        // Forward progress events to main thread
+        if (window.updateProgress) {
+          window.updateProgress(data.task, data.progress, data.subtask, data.compressionInfo);
+        }
+        return;
+      }
+      
+      // Handle completed task results
+      if (data.type === 'result') {
+        // Find and resolve the pending request for this task
+        const index = pendingRequests.findIndex(req => req.task === data.task);
+        if (index !== -1) {
+          const request = pendingRequests[index];
+          pendingRequests.splice(index, 1);
+          
+          if (data.success) {
+            request.resolve(data.result);
+          } else {
+            request.reject(new Error(data.error || 'Unknown worker error'));
+          }
+        }
+        return;
+      }
+      
+      // Handle worker errors
+      if (!data.success) {
+        console.error('Worker error:', data.error);
+        // Reject all pending requests when a critical error occurs
+        pendingRequests.forEach(req => {
+          req.reject(new Error(data.error || 'Worker failed'));
+        });
+        pendingRequests = [];
+      }
+    };
+    
+    // Handle worker errors
+    persistentWorker.onerror = function(error) {
+      console.error('Worker error:', error);
+      workerReady = false;
+      
+      // Reject all pending requests
+      pendingRequests.forEach(req => {
+        req.reject(new Error('Worker error: ' + error.message));
+      });
+      pendingRequests = [];
+      
+      // Clean up and try to restart
+      persistentWorker = null;
+    };
+    
+    workerReady = true;
+    console.log('Persistent emoji worker initialized');
+    return persistentWorker;
+  } catch (error) {
+    console.error('Failed to initialize persistent worker:', error);
+    workerReady = false;
+    return null;
+  }
+}
+
+/**
+ * Preload emoji library in the worker to avoid repeated transfers
+ * @param {string[]} emojiLibrary The emoji library to preload
+ * @param {string} libraryKey A unique key to identify this library
+ * @returns {Promise<Object>} Result of the preload operation
+ */
+async function preloadEmojiLibrary(emojiLibrary, libraryKey) {
+  // Initialize worker if not already done
+  if (!persistentWorker) {
+    initializePersistentWorker();
+  }
+  
+  if (!persistentWorker || !workerReady) {
+    throw new Error('Cannot preload library: Worker not available');
+  }
+  
+  // If this library is already loaded, just return
+  if (activeLibraryKey === libraryKey) {
+    return { libraryKey, emojiCount: emojiLibrary.length, status: 'already_loaded' };
+  }
+  
+  // Create a new promise for this task
+  return new Promise((resolve, reject) => {
+    // Add this request to pending list
+    pendingRequests.push({
+      task: 'preloadLibrary',
+      resolve,
+      reject
+    });
+    
+    // Send the library to the worker
+    persistentWorker.postMessage({
+      task: 'preloadLibrary',
+      emojiLibrary,
+      libraryKey
+    });
+    
+    // Update active library key
+    activeLibraryKey = libraryKey;
+  });
+}
+
+/**
+ * Send task to the persistent worker and get response
+ * @param {Object} taskData Data to send to the worker
+ * @param {Array} transferables Transferable objects to pass to the worker
+ * @returns {Promise<any>} Response from the worker
+ */
+async function callPersistentWorker(taskData, transferables = []) {
+  // Initialize worker if needed
+  if (!persistentWorker) {
+    initializePersistentWorker();
+  }
+  
+  if (!persistentWorker || !workerReady) {
+    throw new Error('Worker not available');
+  }
+  
+  // Create a promise for this task
+  return new Promise((resolve, reject) => {
+    // Store this request
+    pendingRequests.push({
+      task: taskData.task,
+      resolve,
+      reject
+    });
+    
+    // Send the task to the worker
+    persistentWorker.postMessage(taskData, transferables);
+  });
+}
 
 // Helper function to select a random element from an array
 function getRandomElement(arr) {
@@ -254,27 +434,32 @@ async function setupEncryption(options) {
   const emojiAlgorithmSymbols = optionAlgorithmEmojiMap[selectedAlgorithm];
   const emojiBaseSymbols = optionBaseEmojiMap[selectedBase];
   const emojiVersionSymbols = optionEmojiVersionEmojiMap[emojiVersionKey];
+  const emojiDummySymbols = optionDummyEmojiEmojiMap[selectedDummyEmoji];
+  const emojiIterationsSymbols = optionIterationsEmojiMap[selectedIterations];
   
-  if (!emojiAlgorithmSymbols || !emojiBaseSymbols || !emojiVersionSymbols) {
-       throw new Error(`Could not find symbol lists for Algorithm: ${selectedAlgorithm}, Base: ${selectedBase}, or Version: ${emojiVersionKey}`);
+  if (!emojiAlgorithmSymbols || !emojiBaseSymbols || !emojiVersionSymbols || !emojiDummySymbols || !emojiIterationsSymbols) {
+       throw new Error(`Could not find symbol lists for Algorithm: ${selectedAlgorithm}, Base: ${selectedBase}, Version: ${emojiVersionKey}, DummyEmoji: ${selectedDummyEmoji}, or Iterations: ${selectedIterations}`);
   }
 
   const emojiAlgorithmKeySymbol = getRandomElement(emojiAlgorithmSymbols);
   const emojiBaseKeySymbol = getRandomElement(emojiBaseSymbols);
   const emojiVersionKeySymbol = getRandomElement(emojiVersionSymbols);
+  const emojiDummyKeySymbol = getRandomElement(emojiDummySymbols);
+  const emojiIterationsKeySymbol = getRandomElement(emojiIterationsSymbols);
   
   // Select two DIFFERENT emojis from the main loaded library for the password key part
   const [emojiPass1, emojiPass2] = getTwoDifferentRandomElements(emojiLibrary);
 
   // Validate that all key emojis were successfully selected
-  if (!emojiAlgorithmKeySymbol || !emojiBaseKeySymbol || !emojiVersionKeySymbol || !emojiPass1 || !emojiPass2) {
-      console.error("Failed to select one or more key emojis:", {emojiAlgorithmKeySymbol, emojiBaseKeySymbol, emojiVersionKeySymbol, emojiPass1, emojiPass2});
+  if (!emojiAlgorithmKeySymbol || !emojiBaseKeySymbol || !emojiVersionKeySymbol || !emojiDummyKeySymbol || !emojiIterationsKeySymbol || !emojiPass1 || !emojiPass2) {
+      console.error("Failed to select one or more key emojis:", {emojiAlgorithmKeySymbol, emojiBaseKeySymbol, emojiVersionKeySymbol, emojiDummyKeySymbol, emojiIterationsKeySymbol, emojiPass1, emojiPass2});
       throw new Error("Failed to randomly select all necessary key component emojis.");
   }
 
 
   // 4. Construct PBKDF2 Salt (ensure correct order and reversed password key)
-  const saltPBKDF2 = `${emojiAlgorithmKeySymbol}${emojiBaseKeySymbol}${emojiVersionKeySymbol}${emojiPass2}${emojiPass1}`; // Password parts reversed
+  // 这里保持Pass2和Pass1的位置顺序，确保解密时可以正确提取
+  const saltPBKDF2 = `${emojiAlgorithmKeySymbol}${emojiIterationsKeySymbol}${emojiBaseKeySymbol}${emojiDummyKeySymbol}${emojiVersionKeySymbol}${emojiPass2}${emojiPass1}`;
 
   console.log("Derived Encryption Parameters:"); // Debug log
   console.log(`  Algorithm: ${algorithm}`);
@@ -283,7 +468,7 @@ async function setupEncryption(options) {
   console.log(`  Dummy %: ${dummyPercentage}`);
   console.log(`  Emoji Version: ${emojiVersionKey} (using ${emojiLibrary.length} emojis)`);
   console.log(`  Salt (PBKDF2): ${saltPBKDF2}`);
-  console.log(`    Salt Components: Algo=${emojiAlgorithmKeySymbol}, Base=${emojiBaseKeySymbol}, Ver=${emojiVersionKeySymbol}, Pass2=${emojiPass2}, Pass1=${emojiPass1}`);
+  console.log(`    Salt Components: Algo=${emojiAlgorithmKeySymbol}, Iterations=${emojiIterationsKeySymbol}, Base=${emojiBaseKeySymbol}, Dummy=${emojiDummyKeySymbol}, Ver=${emojiVersionKeySymbol}, Pass2=${emojiPass2}, Pass1=${emojiPass1}`);
 
 
   // 5. Return all derived parameters needed for subsequent steps
@@ -293,7 +478,7 @@ async function setupEncryption(options) {
     baseN,              // e.g., 64
     dummyPercentage,    // e.g., 0
     emojiLibrary,       // The actual array of emojis loaded, e.g., ['#️⃣', '*️⃣', ...]
-    saltPBKDF2,         // The constructed 5-emoji salt string
+    saltPBKDF2,         // The constructed 7-emoji salt string
     emojiPass1,         // Return for default password generation
     emojiPass2          // Return for default password generation
   };
@@ -497,14 +682,22 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
             'pbkdf2': 40,
             'hkdf': 10,
             'shuffle': 10,
-            'encrypt': 15, // Adjusted weight to include compression
-            // 'compress': 10, // Removed separate weight, handled within encrypt
+            'encrypt': 15,
             'baseN': 10,
-            'dummies': 5,  // Adjusted weight
+            'dummies': 15,  // 增加dummies任务的权重，从5%到15%
             'finalize': 5
         };
         
-        // Calculate weighted progress
+        // 特殊处理finalize任务，只有在真正完成时才报告100%
+        if (task === 'finalize' && progress === 100) {
+            // 标记整个过程完成
+            overallProgress = 99; // 先设为99%，最后的返回前再设为100%
+            onProgress(overallProgress);
+            log.push(`[${new Date().toISOString()}] 最终处理中: ${progress}%, 整体: ${overallProgress}%`);
+            return;
+        }
+        
+        // 计算加权进度的原始逻辑
         if (task in weights) {
             // The total progress contribution of this task
             const taskWeight = weights[task];
@@ -521,19 +714,18 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
             }
             
             // Calculate new overall progress
-            // Ensure progress doesn't exceed 100%, accounting for potential rounding issues
-            const newOverallProgress = Math.min(100, Math.floor(offset + taskContribution)); 
+            // Ensure progress doesn't exceed 99%, reserving 100% for the very end
+            const newOverallProgress = Math.min(99, Math.floor(offset + taskContribution)); 
             
             // Only update if progress increased (avoid going backwards)
-            // Also ensure we don't log beyond 100%
-            if (newOverallProgress > overallProgress && overallProgress < 100) {
+            if (newOverallProgress > overallProgress && overallProgress < 99) {
                 overallProgress = newOverallProgress;
                 onProgress(overallProgress);
                 
                 // Add to log if progress is significant
-                if (progress % 25 === 0 || progress === 100 || newOverallProgress === 100) {
+                if (progress % 25 === 0 || progress === 100 || newOverallProgress === 99) {
                     const subtaskInfo = subtask ? ` (${subtask})` : '';
-                    log.push(`[${new Date().toISOString()}] ${task}${subtaskInfo}: ${progress}%, Overall: ${overallProgress}%`);
+                    log.push(`[${new Date().toISOString()}] ${task}${subtaskInfo}: ${progress}%, 整体: ${overallProgress}%`);
                 }
                 
                 // Log compression info at various stages
@@ -543,8 +735,6 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
                         const info = extraInfo.compressionInfo;
                         log.push(`[${new Date().toISOString()}] ${info.message}`);
                     } 
-                    // We don't need the other 'compress' specific logs here anymore, 
-                    // as they are implicitly part of the 'encrypt' task progress.
                 }
             }
         }
@@ -567,7 +757,15 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
         log.push(`[${new Date().toISOString()}] Deriving key material with PBKDF2 (iterations: ${encryptionParams.iterations})...`);
         
         // Determine password to use
-        const pbkdfPassword = (password && password.length > 0) ? password : (encryptionParams.emojiPass1 + encryptionParams.emojiPass2);
+        let pbkdfPassword;
+        if (password && password.length > 0) {
+            pbkdfPassword = password;
+            log.push(`[${new Date().toISOString()}] Using user-provided password.`);
+        } else {
+            // 使用Pass1+Pass2作为默认密码，与解密时的密码处理保持一致
+            pbkdfPassword = encryptionParams.emojiPass1 + encryptionParams.emojiPass2;
+            log.push(`[${new Date().toISOString()}] Using auto-generated password: ${encryptionParams.emojiPass1}${encryptionParams.emojiPass2}`);
+        }
         
         // Call worker for PBKDF2
         const keyMaterial = await callWorker('pbkdf2', {
@@ -635,41 +833,33 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
         combinedData.set(new Uint8Array(ciphertext), iv.length);
         log.push(`[${new Date().toISOString()}] Combined IV + Ciphertext: ${combinedData.length} bytes.`);
 
-        // 7. BaseN Encode (Using Web Worker)
-        log.push(`[${new Date().toISOString()}] Sending data to Base${encryptionParams.baseN} encoding worker...`);
+        // 7-8. 使用合并的Worker调用同时处理BaseN编码和虚拟表情符号插入
+        log.push(`[${new Date().toISOString()}] 将BaseN编码和虚拟表情符号处理委托给Worker处理...`);
         
-        // Call worker for BaseN encoding
-        const emojiOutputBaseN = await callWorker('baseN', {
-            dataUint8ArrayBuffer: combinedData.buffer,
+        // 调用worker同时处理BaseN编码、虚拟表情符号插入和最终串接
+        const finalResultWithSalt = await callWorker('combineBaseNAndDummies', {
+            dataUint8ArrayBuffer: combinedData.buffer,  // 原始二进制数据
             baseN: encryptionParams.baseN,
             emojiLibrary: encryptionParams.emojiLibrary,
-            emojiSeedRealIndices: derivedKeysAndSeeds.emojiSeedRealIndices
-        }, updateProgress);
-        
-        log.push(`[${new Date().toISOString()}] Received BaseN encoded result from worker. Length: ${emojiOutputBaseN.length} emojis.`);
-
-        // 8. 移动到Worker中: 插入虚拟表情符号
-        log.push(`[${new Date().toISOString()}] 将虚拟表情符号插入委托给Worker处理 (${encryptionParams.dummyPercentage}%)...`);
-        
-        // 调用worker处理虚拟表情符号插入和最终串接
-        const finalResultWithSalt = await callWorker('insertDummiesAndFinalize', {
-            baseNString: emojiOutputBaseN,
+            emojiSeedRealIndices: derivedKeysAndSeeds.emojiSeedRealIndices,
             dummyPercentage: encryptionParams.dummyPercentage,
-            emojiLibrary: encryptionParams.emojiLibrary,
             emojiSeedDummyIndices: derivedKeysAndSeeds.emojiSeedDummyIndices,
             saltPBKDF2: encryptionParams.saltPBKDF2
         }, updateProgress);
         
-        log.push(`[${new Date().toISOString()}] Worker完成了虚拟表情符号插入和最终拼接. 最终长度: ${finalResultWithSalt.length}`);
+        log.push(`[${new Date().toISOString()}] Worker完成了所有处理. 最终长度: ${finalResultWithSalt.length}`);
         
-        // 确保报告100%完成
-        updateProgress('finalize', 100);
-
-        // 10. 完成
+        // 准备返回结果
+        const result = finalResultWithSalt;
+        
+        // 10. 完成 - 在真正完成时设置100%进度
         log.push(`[${new Date().toISOString()}] --- 加密过程成功完成 ---`);
         console.log(log.join('\n')); // 输出日志到控制台
         
-        return finalResultWithSalt;
+        // 设置真正的100%完成进度（仅设置一次）
+        onProgress(100);
+        
+        return result;
 
     } catch (error) {
         console.error("--- Encryption Process Failed ---", error);
@@ -681,83 +871,486 @@ async function encrypt(jsonStringInput, password, options, onProgress = () => {}
     }
 }
 
+/**
+ * 自动分段处理大文件
+ * @param {string} inputText 要加密的内容
+ * @param {number} segmentSize 每段大小(bytes)，默认5MB
+ * @returns {Array} 分段数组
+ */
+function segmentLargeInput(inputText, segmentSize = 5 * 1024 * 1024) {
+  // 检查输入大小
+  const inputBytes = new TextEncoder().encode(inputText).length;
+  const segments = [];
+  
+  // 如果小于阈值，不分段
+  if (inputBytes <= segmentSize) {
+    return [inputText];
+  }
+  
+  // 为超大文件调整分段大小
+  let adjustedSegmentSize = segmentSize;
+  
+  if (inputBytes > 80 * 1024 * 1024) {
+    // 对于超大文件，使用较小的固定分段大小，确保每段不会太大
+    adjustedSegmentSize = 2 * 1024 * 1024; // 固定为2MB
+    console.log(`超大文件检测 (${(inputBytes/1024/1024).toFixed(2)}MB)，调整为2MB固定分段大小`);
+  }
+  
+  // 计算分段数量
+  const segmentCount = Math.ceil(inputBytes / adjustedSegmentSize);
+  console.log(`输入文件大小: ${(inputBytes/1024/1024).toFixed(2)}MB，分为${segmentCount}段处理`);
+  
+  // 直接根据字符串长度分段，更精确和均匀
+  const totalChars = inputText.length;
+  const charsPerSegment = Math.ceil(totalChars / segmentCount);
+  
+  try {
+    // 分段处理
+    for (let i = 0; i < segmentCount; i++) {
+      const startIndex = i * charsPerSegment;
+      const endIndex = Math.min((i + 1) * charsPerSegment, totalChars);
+      
+      // 验证索引范围有效性
+      if (startIndex >= totalChars || startIndex < 0 || endIndex > totalChars || endIndex <= startIndex) {
+        throw new Error(`无效的分段索引范围: ${startIndex}-${endIndex}, 总长度: ${totalChars}`);
+      }
+      
+      const segment = inputText.substring(startIndex, endIndex);
+      segments.push(segment);
+      
+      console.log(`创建分段 ${i+1}/${segmentCount}, 字符范围: ${startIndex}-${endIndex}, 长度: ${segment.length}`);
+    }
+    
+    return segments;
+  } catch (error) {
+    console.error(`分段处理出错:`, error);
+    
+    // 超大文件应急处理方案：使用固定大小切片
+    if (error.message.includes("Invalid string length") || segments.length === 0) {
+      console.warn("使用应急分段方案...");
+      segments.length = 0; // 清空之前的分段
+      
+      // 使用更小的固定段大小
+      const emergencyChunkSize = 1000000; // 约1MB字符长度
+      for (let pos = 0; pos < totalChars; pos += emergencyChunkSize) {
+        const endPos = Math.min(pos + emergencyChunkSize, totalChars);
+        segments.push(inputText.substring(pos, endPos));
+      }
+      
+      console.log(`应急分段完成，共${segments.length}段`);
+    } else {
+      throw error; // 其他错误重新抛出
+    }
+    
+    return segments;
+  }
+}
+
+/**
+ * 加密处理（带自动分段）
+ * @param {string} jsonStringInput 要加密的JSON字符串
+ * @param {string} password 密码
+ * @param {object} options 加密选项
+ * @param {function} onProgress 进度回调
+ * @returns {string} 加密后的emoji字符串
+ */
+async function encryptWithSegmentation(jsonStringInput, password, options, onProgress = () => {}) {
+  // 1. 分段
+  const segments = segmentLargeInput(jsonStringInput);
+  
+  // 如果只有一个段，直接加密
+  if (segments.length === 1) {
+    return await encrypt(jsonStringInput, password, options, onProgress);
+  }
+  
+  // 2. 首先进行一次加密参数设置，让所有分段共享相同参数
+  console.log("设置共享加密参数...");
+  
+  // 创建一个简化版的加密函数，它只进行实际的加密步骤而不重新生成参数
+  const encryptSegmentWithSharedParams = async (segment, encryptionParams, derivedKeysAndSeeds, segmentCallback) => {
+    try {
+      const log = ["分段加密日志:"];
+      
+      // 直接使用传入的加密参数，跳过参数生成步骤
+      log.push(`使用共享加密参数进行分段加密, Salt: ${encryptionParams.saltPBKDF2}`);
+      
+      // 5. 加密数据 (in Worker)
+      log.push(`开始加密分段数据...`);
+      segmentCallback(50); // 更新进度
+      
+      // 调用worker进行加密
+      const encryptResult = await callWorker('encrypt', {
+        jsonString: segment,
+        key: derivedKeysAndSeeds.cipherKey,
+        algorithmName: encryptionParams.algorithm
+      }, (task, progress) => {
+        // 映射进度到50%-80%范围
+        const mappedProgress = 50 + Math.floor(progress * 0.3);
+        segmentCallback(mappedProgress);
+      });
+      
+      // 从worker传输缓冲区重构结果
+      const iv = new Uint8Array(encryptResult.iv);
+      const ciphertext = encryptResult.ciphertext;
+      
+      log.push(`分段加密完成. IV: ${iv.length} bytes, Ciphertext: ${ciphertext.byteLength} bytes.`);
+      
+      // 6. 合并IV和密文
+      const combinedData = new Uint8Array(iv.length + ciphertext.byteLength);
+      combinedData.set(iv, 0);
+      combinedData.set(new Uint8Array(ciphertext), iv.length);
+      log.push(`合并IV + 密文: ${combinedData.length} bytes.`);
+      
+      segmentCallback(80);
+      
+      // 7-8. 使用合并的Worker调用同时处理BaseN编码和虚拟表情符号插入
+      log.push(`处理BaseN编码和虚拟表情符号插入...`);
+      
+      // 重要：这里传入相同的盐值，但不附加到结果中！最后一个参数设为空字符串
+      const finalResultRaw = await callWorker('combineBaseNAndDummies', {
+        dataUint8ArrayBuffer: combinedData.buffer,
+        baseN: encryptionParams.baseN,
+        emojiLibrary: encryptionParams.emojiLibrary,
+        emojiSeedRealIndices: derivedKeysAndSeeds.emojiSeedRealIndices,
+        dummyPercentage: encryptionParams.dummyPercentage,
+        emojiSeedDummyIndices: derivedKeysAndSeeds.emojiSeedDummyIndices,
+        saltPBKDF2: '' // 不附加盐值！非最后一段不需要盐值
+      }, (task, progress) => {
+        // 映射进度到80%-100%范围
+        const mappedProgress = 80 + Math.floor(progress * 0.2);
+        segmentCallback(mappedProgress);
+      });
+      
+      log.push(`分段处理完成. 输出长度: ${finalResultRaw.length}`);
+      segmentCallback(100);
+      
+      return finalResultRaw;
+    } catch (error) {
+      console.error("分段加密失败:", error);
+      throw error;
+    }
+  };
+  
+  // 3. 进行一次性的参数设置
+  try {
+    // 更新进度到5%
+    onProgress(5);
+    console.log("设置全局加密参数...");
+    
+    // 使用第一次encrypt的开始部分逻辑来生成共享参数
+    const encryptionParams = await setupEncryption(options);
+    console.log("全局加密参数已设置, Salt:", encryptionParams.saltPBKDF2);
+    
+    // 更新进度到15%
+    onProgress(15);
+    
+    // 确定要使用的密码
+    const pbkdfPassword = (password && password.length > 0) ? 
+      password : (encryptionParams.emojiPass2 + encryptionParams.emojiPass1);
+    
+    // 调用worker进行PBKDF2密钥派生
+    const keyMaterial = await callWorker('pbkdf2', {
+      password: pbkdfPassword,
+      saltString: encryptionParams.saltPBKDF2,
+      iterations: encryptionParams.iterations
+    }, (task, progress) => {
+      // 映射进度到15%-25%范围
+      const mappedProgress = 15 + Math.floor(progress * 0.1);
+      onProgress(mappedProgress);
+    });
+    
+    console.log("密钥材料生成完成");
+    
+    // 准备索引
+    const allIndices = encryptionParams.emojiLibrary.map((_, index) => index);
+    
+    // 提取盐值表情符号并查找它们的索引
+    const saltEmojis = Array.from(encryptionParams.saltPBKDF2);
+    const saltEmojiIndices = findEmojiIndices(saltEmojis, encryptionParams.emojiLibrary);
+    const uniqueSaltIndices = [...new Set(saltEmojiIndices.filter(idx => idx !== -1))];
+    
+    // 调用worker进行密钥派生和种子生成
+    const derivedKeysAndSeeds = await callWorker('deriveKeysAndSeeds', {
+      keyMaterial: keyMaterial,
+      baseN: encryptionParams.baseN,
+      allIndices: allIndices,
+      uniqueSaltIndices: uniqueSaltIndices
+    }, (task, progress) => {
+      // 映射进度到25%-35%范围
+      const mappedProgress = 25 + Math.floor(progress * 0.1);
+      onProgress(mappedProgress);
+    });
+    
+    console.log("密钥派生和种子生成完成");
+    
+    // 4. 设置增量合并逻辑
+    let combinedResult = '';
+    
+    // 分配每段的进度比例 - 分配60%给所有段(35%-95%)
+    const totalSegmentsWeight = 60; // 表示总的进度比例
+    let completedWeight = 0; // 已完成的进度比例
+    
+    // 追踪全局最高进度，避免后退
+    let highestProgress = 35;
+    
+    // 5. 逐段加密并立即合并 - 关键改进在这里
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      // 基于段大小计算权重
+      const segmentWeight = (segment.length / jsonStringInput.length) * totalSegmentsWeight;
+      
+      // 更新UI显示当前正在处理的段
+      if (window.updateSubtitle) {
+        window.updateSubtitle(`处理分段 ${i+1}/${segments.length}`);
+      }
+      
+      console.log(`正在处理分段 ${i+1}/${segments.length}, 长度: ${segment.length}, 权重: ${segmentWeight.toFixed(2)}%`);
+      
+      // 创建段进度回调，将段内进度映射到总进度
+      const segmentProgressCallback = (segmentProgress) => {
+        // 计算当前段对总进度的贡献
+        const segmentContribution = segmentWeight * (segmentProgress / 100);
+        
+        // 计算总进度：基础35% + 已完成段进度 + 当前段贡献
+        const newProgress = Math.floor(35 + completedWeight + segmentContribution);
+        
+        // 只有当新进度高于之前的最高进度时才更新
+        if (newProgress > highestProgress) {
+          highestProgress = newProgress;
+          onProgress(highestProgress);
+        }
+      };
+      
+      // 使用共享参数加密当前段
+      const isLastSegment = i === segments.length - 1;
+      let encryptedSegment;
+      
+      // 始终先不附加盐值处理段
+      encryptedSegment = await encryptSegmentWithSharedParams(
+        segment, encryptionParams, derivedKeysAndSeeds, segmentProgressCallback
+      );
+      
+      // 只在最后一段上附加盐值
+      if (isLastSegment) {
+        // 在最后一段加密结果上手动附加盐值
+        encryptedSegment += encryptionParams.saltPBKDF2;
+        console.log(`最后一段处理完成，已附加盐值: ${encryptionParams.saltPBKDF2}`);
+      }
+      
+      // 关键改进：立即将段合并到结果中，而不是存储在数组里等待最后合并
+      combinedResult += encryptedSegment;
+      
+      // 段完成后更新已完成权重
+      completedWeight += segmentWeight;
+      
+      // 确保段完成后进度至少达到理论值
+      const theoreticalProgress = Math.floor(35 + completedWeight);
+      if (theoreticalProgress > highestProgress) {
+        highestProgress = theoreticalProgress;
+        onProgress(highestProgress);
+      }
+      
+      console.log(`分段 ${i+1}/${segments.length} 处理并合并完成，当前结果长度: ${combinedResult.length}`);
+      
+      // 如果不是最后一段，在段之间让UI有机会更新并释放一些内存
+      if (!isLastSegment) {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+    }
+    
+    // 6. 所有段都已处理并合并，无需额外合并步骤
+    console.log(`所有分段处理完成并已合并，最终长度: ${combinedResult.length}`);
+    
+    // 设置完成进度(95%-100%)
+    for (let p = 95; p <= 100; p++) {
+      if (p > highestProgress) {
+        highestProgress = p;
+        onProgress(p);
+        // 短暂延迟让UI有机会显示进度
+        await new Promise(resolve => setTimeout(resolve, p === 100 ? 50 : 10));
+      }
+    }
+    
+    // 显示完成状态
+    if (window.updateSubtitle) {
+      window.updateSubtitle(`加密完成`);
+    }
+    
+    // 返回已完成的组合结果
+    return combinedResult;
+    
+  } catch (error) {
+    console.error("分段处理失败:", error);
+    throw error;
+  }
+}
 
 // --- Decryption Logic (Placeholder) ---
 // TODO: Implement decryption counterpart
-/*
-async function decrypt(finalEmojiString, password, onProgress = () => {}) {
+async function decrypt(finalEmojiString, password, options, onProgress = () => {}) {
     console.log("--- Starting Decryption Process ---");
     onProgress(0);
     let log = ["Decryption Process Log:"];
     
     try {
         log.push(`[${new Date().toISOString()}] Input emoji string length: ${Array.from(finalEmojiString).length}`);
-        // 1. Identify and Extract Salt Emojis (last 5 non-dummy? tricky!)
-        //    - Need a way to distinguish dummy vs non-dummy without the key first.
-        //    - This implies the structure needs rethinking, maybe salt isn't at the end, or dummies aren't inserted *after* salt?
-        //    - OR: The salt *must* be extracted first using the known algorithm/base/version key symbols? Yes, this is likely.
-        //      The first 3 emojis of the salt are the key symbols. We need to read those first.
-
-        // -------- Rethink Required for Decryption Start ----------
-        // Assume we can somehow extract the key symbols and salt first
-        // This means the final output structure should probably be:
-        // [Key Symbols (3)] + [BaseN(IV+Cipher)] + [Dummies interspersed in BaseN part] + [Salt Pass Emojis (2)]
-        // Or maybe: [Key Symbols (3)] + [Salt Pass Emojis (2)] + [BaseN(IV+Cipher) + Dummies interspersed]
-        // Let's assume the saltPBKDF2 (5 emojis) is reliably at the END for now, but acknowledge dummy removal is hard.
         
-        // TEMPORARY ASSUMPTION: We magically know which are dummies and remove them.
-        // This part needs solid implementation later.
-        const { nonDummyString, saltEmojis } = extractSaltAndRemoveDummies_MAGIC(finalEmojiString);
+        // 1. 识别并提取盐值（最后7个表情符号）
+        // 使用Intl.Segmenter正确处理复杂表情符号
+        const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+        const segments = Array.from(segmenter.segment(finalEmojiString));
+        const graphemes = segments.map(s => s.segment);
+        
+        console.log("输入文本中的图形簇总数:", graphemes.length);
+        
+        if (graphemes.length < 7) {
+            throw new Error("Invalid emoji string: too short to contain salt");
+        }
+        
+        // 提取最后7个表情符号
+        const saltEmojis = graphemes.slice(-7);
         const saltPBKDF2 = saltEmojis.join('');
-        log.push(`[${new Date().toISOString()}] Extracted Salt: ${saltPBKDF2}, String after dummy removal: ${Array.from(nonDummyString).length} emojis`);
-        onProgress(10);
-
-        // 2. Decode Key Symbols from Salt to get Options
-        const { algorithm, baseN, iterations, dummyPercentage, emojiVersionKey } = decodeOptionsFromSalt_MAGIC(saltPBKDF2);
-        const options = { selectedAlgorithm: algorithm, selectedIterations: `Iterations-${iterations}`, selectedBase: `Base${baseN}`, selectedDummyEmoji: `DummyEmoji-${dummyPercentage}%`, selectedEmojiVersion: emojiVersionKey };
-        log.push(`[${new Date().toISOString()}] Decoded options from salt.`);
-        onProgress(15);
+        console.log("提取的7个盐值表情符号:", saltEmojis);
+        console.log("完整的盐值字符串:", saltPBKDF2, "长度:", saltPBKDF2.length);
         
-        // 3. Setup Decryption Parameters (Load correct Emoji Lib)
-        const decryptionParams = await setupEncryption(options); // Re-use setup to get library etc.
-        log.push(`[${new Date().toISOString()}] Decryption parameters set.`);
+        log.push(`[${new Date().toISOString()}] Extracted Salt: ${saltPBKDF2}`);
+        // 设置10%的进度
+        onProgress(10);
+        
+        // 2. 确定密码
+        let pbkdfPassword;
+        if (password && password.length > 0) {
+            log.push(`[${new Date().toISOString()}] Using user-provided password.`);
+            pbkdfPassword = password;
+        } else {
+            // 注意密码表情符号的顺序在解密时需要互换回来
+            // 密钥顺序：盐值中倒数第二(Pass2)和倒数第一(Pass1)表情符号组合
+            // 但是需要按照Pass1+Pass2的顺序，而不是Pass2+Pass1
+            const pass1 = saltEmojis[6]; // 最后一个
+            const pass2 = saltEmojis[5]; // 倒数第二个
+            log.push(`[${new Date().toISOString()}] Using password from salt emojis. 从盐值中提取密码: ${pass1} + ${pass2}`);
+            pbkdfPassword = pass1 + pass2; // 按照Pass1+Pass2的顺序
+            console.log("解密使用的密码：", pbkdfPassword, "Pass1:", pass1, "Pass2:", pass2);
+        }
+        
+        // 3. 加载必要的emoji库
+        log.push(`[${new Date().toISOString()}] Loading emoji library for ${options.selectedEmojiVersion}...`);
+        const emojiLibrary = await loadEmojiLibrary(options.selectedEmojiVersion);
+        if (!emojiLibrary || emojiLibrary.length === 0) {
+            throw new Error(`Failed to load emoji library for ${options.selectedEmojiVersion}`);
+        }
+        log.push(`[${new Date().toISOString()}] Emoji library loaded with ${emojiLibrary.length} emojis.`);
         onProgress(20);
         
-        // 4. Derive Keys (PBKDF2 + HKDF) - same as encryption
-        log.push(`[${new Date().toISOString()}] Deriving keys for decryption...`);
-        const derivedKeys = await deriveKeysAndSeeds(decryptionParams, password);
-        log.push(`[${new Date().toISOString()}] Decryption keys derived.`);
-        onProgress(50); 
+        // 4. 派生密钥材料（PBKDF2）- 使用从输入提取的盐值
+        const iterations = optionIterationsCountMap[options.selectedIterations];
+        log.push(`[${new Date().toISOString()}] Deriving key material with PBKDF2 (iterations: ${iterations})...`);
+        const keyMaterial = await callWorker('pbkdf2', {
+            password: pbkdfPassword,
+            saltString: saltPBKDF2, // 使用从输入提取的盐值
+            iterations: iterations
+        }, (task, progress) => {
+            // 映射进度为整体进度的20%-30%
+            const mappedProgress = 20 + Math.floor(progress * 0.1);
+            onProgress(mappedProgress);
+        });
         
-        // 5. BaseN Decode the nonDummyString
-        log.push(`[${new Date().toISOString()}] Decoding Base${baseN} emojis...`);
-        const combinedData = decodeBaseN_MAGIC(nonDummyString, baseN, decryptionParams.emojiLibrary, derivedKeys.emojiSeedRealIndices);
-        log.push(`[${new Date().toISOString()}] BaseN decoding complete. ${combinedData.length} bytes.`);
-        onProgress(70);
+        log.push(`[${new Date().toISOString()}] PBKDF2 key derivation complete.`);
         
-        // 6. Split IV and Ciphertext
-        const ivLength = (algorithm === 'AES-256-GCM' || algorithm === 'ChaCha20-Poly1305') ? 12 : 0;
-        const iv = combinedData.slice(0, ivLength);
-        const ciphertext = combinedData.slice(ivLength);
-        log.push(`[${new Date().toISOString()}] Split IV (${iv.length} bytes) and Ciphertext (${ciphertext.length} bytes).`);
-        onProgress(80);
+        // 5. 派生密钥和种子
+        log.push(`[${new Date().toISOString()}] Deriving final keys and seeds...`);
         
-        // 7. Decrypt Data
-        log.push(`[${new Date().toISOString()}] Decrypting data...`);
-        const decryptedData = await decryptData_MAGIC(ciphertext, derivedKeys.cipherKey, iv, algorithm);
-        log.push(`[${new Date().toISOString()}] Decryption complete.`);
+        // 准备索引
+        const allIndices = emojiLibrary.map((_, index) => index);
+        
+        // 提取盐值表情符号并查找它们的索引
+        const saltEmojiIndices = findEmojiIndices(saltEmojis, emojiLibrary);
+        const uniqueSaltIndices = [...new Set(saltEmojiIndices.filter(idx => idx !== -1))];
+        
+        // 获取baseN值
+        const baseN = optionBaseValueMap[options.selectedBase];
+        
+        // 调用worker进行密钥派生和种子生成
+        const derivedKeysAndSeeds = await callWorker('deriveKeysAndSeeds', {
+            keyMaterial: keyMaterial,
+            baseN: baseN,
+            allIndices: allIndices,
+            uniqueSaltIndices: uniqueSaltIndices
+        }, (task, progress) => {
+            // 映射进度为整体进度的30%-40%
+            const mappedProgress = 30 + Math.floor(progress * 0.1);
+            onProgress(mappedProgress);
+        });
+        
+        log.push(`[${new Date().toISOString()}] Keys derived. Real indices count: ${derivedKeysAndSeeds.emojiSeedRealIndices.length}, Dummy indices count: ${derivedKeysAndSeeds.emojiSeedDummyIndices.length}`);
+        onProgress(40);
+        
+        // 6. 使用Worker执行实际解密过程
+        log.push(`[${new Date().toISOString()}] Starting actual decryption process in worker...`);
+        
+        const algorithm = optionAlgorithmSelectionMap[options.selectedAlgorithm];
+        
+        // 解密调试日志
+        console.log("解密参数详情：", {
+            algorithm,
+            baseN,
+            realIndicesCount: derivedKeysAndSeeds.emojiSeedRealIndices.length,
+            realIndicesSample: derivedKeysAndSeeds.emojiSeedRealIndices.slice(0, 5),
+            emojiAlphabetSample: derivedKeysAndSeeds.emojiSeedRealIndices.slice(0, 5).map(idx => emojiLibrary[idx]),
+            saltPBKDF2,
+            saltLength: saltPBKDF2.length,
+            saltEmojisSlice: saltEmojis.slice(0, 3), // 检查前三个表情符号
+            password: pbkdfPassword
+        });
+        
+        const decryptedJson = await callWorker('decrypt', {
+            encryptedEmojiString: finalEmojiString,
+            key: derivedKeysAndSeeds.cipherKey,
+            algorithm: algorithm,
+            baseN: baseN,
+            emojiLibrary: emojiLibrary,
+            realIndices: derivedKeysAndSeeds.emojiSeedRealIndices,
+            saltPBKDF2: saltPBKDF2  // 确保传递正确提取的盐值
+        }, (task, progress, subtask, extraInfo) => {
+            // 映射进度为整体进度的40%-95%
+            const mappedProgress = 40 + Math.floor(progress * 0.55);
+            onProgress(mappedProgress, subtask, extraInfo);
+            
+            // 记录进度日志
+            if (progress % 20 === 0 || subtask) {
+                log.push(`[${new Date().toISOString()}] ${task} progress: ${progress}% ${subtask ? '(' + subtask + ')' : ''}`);
+            }
+        });
+        
+        log.push(`[${new Date().toISOString()}] Decryption worker process complete.`);
         onProgress(95);
         
-        // 8. Convert back to JSON string
-        const jsonStringOutput = uint8ArrayToString_MAGIC(decryptedData);
-        log.push(`[${new Date().toISOString()}] Decrypted data converted to string (length ${jsonStringOutput.length}).`);
+        // 7. 解析JSON结果
+        let resultObject;
+        try {
+            resultObject = JSON.parse(decryptedJson);
+            log.push(`[${new Date().toISOString()}] Successfully parsed JSON result.`);
+            console.log("解析成功的JSON结构:", Object.keys(resultObject));
+        } catch (error) {
+            log.push(`[${new Date().toISOString()}] ERROR: Failed to parse JSON result: ${error.message}`);
+            console.error("JSON解析错误:", error, "原始JSON字符串:", decryptedJson.substring(0, 100) + "...");
+            throw new Error(`Failed to parse decrypted data as JSON: ${error.message}`);
+        }
         
-        // 9. Finalize
+        // 8. 转换回原始内容
+        const originalContent = base64ToUnicode(resultObject.data);
+        log.push(`[${new Date().toISOString()}] Converted Base64 to original Unicode text. Length: ${originalContent.length}.`);
+        
+        // 9. 完成解密过程
         log.push(`[${new Date().toISOString()}] --- Decryption Process Successful ---`);
         console.log(log.join('\n'));
         onProgress(100);
-        return jsonStringOutput;
 
+        // 返回一个包含原始内容和文件名的结果对象
+        return {
+            content: originalContent,
+            filename: resultObject.filename || "decrypted.txt"
+        };
     } catch (error) {
         console.error("--- Decryption Process Failed ---", error);
         log.push(`[${new Date().toISOString()}] --- ERROR: ${error.message} ---`);
@@ -767,4 +1360,3 @@ async function decrypt(finalEmojiString, password, onProgress = () => {}) {
         throw error;
     }
 }
-*/

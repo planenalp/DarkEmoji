@@ -24,7 +24,7 @@ const container = document.querySelector('.container'); // Get container element
 const optionAlgorithmContainer = document.getElementById('optionAlgorithm');
 const optionIterationsContainer = document.getElementById('optionIterations');
 const optionBaseContainer = document.getElementById('optionBase');
-const optionEmojiContainer = document.getElementById('optionEmoji');
+const optionEmojiContainer = document.getElementById('optionEmojiVersion');
 const optionDummyEmojiContainer = document.getElementById('optionDummyEmoji'); // ADDED
 
 // Button groups
@@ -65,6 +65,115 @@ let isDarkTheme = localStorage.getItem('theme') !== 'light'; // Default to dark 
 // State for preserving content across modes
 const encryptState = { input: '', output: '', password: '', cachedInputData: null, fullEncryptedOutput: null };
 const decryptState = { input: '', output: '', password: '', cachedInputData: null, fullEncryptedOutput: null };
+
+// 为加密和解密状态分别创建进度元素变量
+let encryptProgressElement = null; 
+let decryptProgressElement = null;
+
+// 性能优化相关变量
+let devicePerformanceLevel = null; // 将存储设备性能级别
+let optimalChunkSize = 500; // 默认中等值
+let optimalDisplayChunkSize = 40; // 默认显示分块大小
+let optimalConcatChunkSize = 1000; // 默认字符串拼接块大小
+let hasMeasuredPerformance = false; // 是否已经测量过性能
+
+// 设备性能检测函数
+function detectDevicePerformance() {
+    // 如果已经测量过，直接返回缓存的结果
+    if (devicePerformanceLevel !== null) {
+        return devicePerformanceLevel;
+    }
+    
+    console.log("正在测量设备性能...");
+    const start = performance.now();
+    
+    // 执行简单的基准测试
+    let sum = 0;
+    for (let i = 0; i < 1000000; i++) {
+        sum += i;
+    }
+    
+    // 加入字符串处理测试
+    let str = "";
+    for (let i = 0; i < 10000; i++) {
+        str += "a";
+    }
+    
+    // 再测试一下数组操作
+    const arr = new Array(100000);
+    for (let i = 0; i < 100000; i++) {
+        arr[i] = i;
+    }
+    
+    const duration = performance.now() - start;
+    console.log(`性能测试耗时: ${duration.toFixed(2)}ms`);
+    
+    // 根据性能测试结果分类
+    if (duration < 30) {
+        devicePerformanceLevel = 'high';
+    } else if (duration < 80) {
+        devicePerformanceLevel = 'medium';
+    } else {
+        devicePerformanceLevel = 'low';
+    }
+    
+    console.log(`设备性能级别: ${devicePerformanceLevel}`);
+    return devicePerformanceLevel;
+}
+
+// 根据设备性能设置最佳块大小
+function getOptimalChunkSizes() {
+    if (hasMeasuredPerformance) {
+        return {
+            processChunkSize: optimalChunkSize,
+            displayChunkSize: optimalDisplayChunkSize,
+            concatChunkSize: optimalConcatChunkSize
+        };
+    }
+    
+    const performance = detectDevicePerformance();
+    
+    switch (performance) {
+        case 'high':
+            optimalChunkSize = 5000;
+            optimalDisplayChunkSize = 200;
+            optimalConcatChunkSize = 10000;
+            break;
+        case 'medium':
+            optimalChunkSize = 1000;
+            optimalDisplayChunkSize = 100;
+            optimalConcatChunkSize = 4000;
+            break;
+        case 'low':
+            optimalChunkSize = 250;
+            optimalDisplayChunkSize = 40;
+            optimalConcatChunkSize = 1000;
+            break;
+        default:
+            // 保持默认值不变
+            break;
+    }
+    
+    hasMeasuredPerformance = true;
+    
+    console.log(`优化参数: 处理块大小=${optimalChunkSize}, 显示块大小=${optimalDisplayChunkSize}, 拼接块大小=${optimalConcatChunkSize}`);
+    
+    return {
+        processChunkSize: optimalChunkSize,
+        displayChunkSize: optimalDisplayChunkSize,
+        concatChunkSize: optimalConcatChunkSize
+    };
+}
+
+// 初始页面加载时进行一次性能测量
+document.addEventListener('DOMContentLoaded', () => {
+    // 延迟进行性能测量，让页面先加载完成
+    setTimeout(() => {
+        getOptimalChunkSizes();
+    }, 1000);
+    
+    // ... 其他现有的DOMContentLoaded处理代码 ...
+});
 
 // Get references to the new spans in the combined button
 const inputPasteBtn = document.getElementById('inputPaste');
@@ -391,17 +500,52 @@ function switchMode(mode, saveState = true) { // Add saveState flag
         // 保存当前模式的内容 (包括密码)
         if (previousMode === 'encrypt') {
             encryptState.input = inputText.value;
-            encryptState.output = outputText.value;
+            // 保存显示的输出结果，但限制大小以防止性能问题
+            const outputValue = outputText.value;
+            // 如果输出内容超过一定大小，只保存预览部分
+            if (outputValue && outputValue.length > 5000) {
+                // 检查是否已经是预览格式
+                if (outputValue.startsWith('Preview [')) {
+                    encryptState.output = outputValue;
+                } else {
+                    // 创建预览格式字符串
+                    encryptState.output = `Preview [5000/${outputValue.length}]\n${outputValue.substring(0, 5000)}...`;
+                    // 完整数据已经保存在fullEncryptedOutput或outputCache中，这里不再重复保存
+                }
+            } else {
+                encryptState.output = outputValue;
+            }
             encryptState.password = password.value;
         } else {
             decryptState.input = inputText.value;
-            decryptState.output = outputText.value;
+            // 同样处理解密模式下的输出
+            const outputValue = outputText.value;
+            if (outputValue && outputValue.length > 5000) {
+                if (outputValue.startsWith('Preview [')) {
+                    decryptState.output = outputValue;
+                } else {
+                    decryptState.output = `Preview [5000/${outputValue.length}]\n${outputValue.substring(0, 5000)}...`;
+                }
+            } else {
+                decryptState.output = outputValue;
+            }
             decryptState.password = password.value;
         }
     }
     
     isEncryptMode = mode === 'encrypt';
     window.isEncryptMode = isEncryptMode; // Update global variable
+    
+    // 清理两种状态的进度显示，确保切换模式时不会残留
+    if (encryptProgressElement) {
+        encryptProgressElement.remove();
+        encryptProgressElement = null;
+    }
+    
+    if (decryptProgressElement) {
+        decryptProgressElement.remove();
+        decryptProgressElement = null;
+    }
     
     // Update button states - MOVED OUTSIDE if(saveState)
     encryptBtn.classList.toggle('active', isEncryptMode);
@@ -419,14 +563,34 @@ function switchMode(mode, saveState = true) { // Add saveState flag
         // 恢复新模式的内容 (包括密码)
         if (isEncryptMode) {
             inputText.value = encryptState.input;
-            outputText.value = encryptState.output;
+            outputText.value = encryptState.output || '';
             password.value = encryptState.password;
+            
+            // 确保输出内容不会过大导致UI卡顿
+            if (outputText.value && outputText.value.length > 10000) {
+                // 如果输出过大，确保显示的只是预览
+                if (!outputText.value.startsWith('Preview [')) {
+                    outputText.value = `Preview [5000/${outputText.value.length}]\n${outputText.value.substring(0, 5000)}...`;
+                }
+            }
         } else {
             inputText.value = decryptState.input;
-            outputText.value = decryptState.output;
+            outputText.value = decryptState.output || '';
             password.value = decryptState.password;
+            
+            // 同样确保解密模式下输出内容不会过大
+            if (outputText.value && outputText.value.length > 10000) {
+                if (!outputText.value.startsWith('Preview [')) {
+                    outputText.value = `Preview [5000/${outputText.value.length}]\n${outputText.value.substring(0, 5000)}...`;
+                }
+            }
         }
     }
+    
+    // 始终确保输入框可编辑状态与当前模式匹配
+    // 修复Encrypt上传文件后，Decrypt无法输入的bug
+    inputText.readOnly = false;
+    inputText.classList.remove('filename-display');
     
     if (saveState) {
         // 重置所有按钮状态 (除了密码框内容)
@@ -488,43 +652,14 @@ encryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // --- New Cache Handling Logic for Encryption ---
-        let dataToOutput;
-        if (encryptState.cachedInputData) {
-            // Use cached data if available (from file upload)
-            dataToOutput = encryptState.cachedInputData;
-        } else {
-            // Generate cache data for direct input
-            try {
-                 dataToOutput = {
-                    filename: "content.txt",
-                    data: unicodeToBase64(inputText.value)
-                 };
-                 // Optionally update the cache for potential reuse
-                 // encryptState.cachedInputData = dataToOutput; 
-            } catch (error) {
-                 console.error('Error encoding direct input Base64:', error);
-                 alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding input content.'));
-                 outputText.value = ''; // Clear output on error
-                 return;
-            }
-        }
-        
-        try {
-            // Output the structured data as a JSON string
-            outputText.value = JSON.stringify(dataToOutput, null, 2); // Pretty print JSON
-        } catch (error) {
-             console.error('Error stringifying JSON data:', error);
-             alert(window.getTranslation('alertJSONError', 'Error formatting output data.'));
-             outputText.value = ''; // Clear output on error
-             return;
-        }
-        // --- End New Logic ---
+        // --- MODIFIED: Trigger action button click instead of showing JSON ---
+        actionBtn.click(); 
+        // --- End Modification ---
 
-        // 触发表单提交来激活浏览器密码保存功能
-        if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
-        }
+        // REMOVED: Redundant requestSubmit, handled by actionBtn handler
+        // if (password.value) {
+        //     document.getElementById('passwordForm').requestSubmit();
+        // }
     } else {
         switchMode('encrypt');
     }
@@ -537,13 +672,39 @@ decryptBtn.addEventListener('click', () => {
             alert(window.getTranslation('alertNoInput')); // Use global translation
             return;
         }
-        // Decrypt mode still uses placeholder logic
-        outputText.value = inputText.value; // Placeholder logic
-
-        // 触发表单提交来激活浏览器密码保存功能
-        if (password.value) {
-            document.getElementById('passwordForm').requestSubmit();
+        
+        // 在触发actionBtn点击前先尝试提取和设置参数
+        let inputContent = '';
+        if (decryptState.cachedInputData) {
+            try {
+                inputContent = base64ToUnicode(decryptState.cachedInputData.data);
+            } catch (error) {
+                console.error("解码上传文件内容失败:", error);
+                inputContent = inputText.value;
+            }
+        } else {
+            inputContent = inputText.value;
         }
+        
+        // 测试emoji提取逻辑
+        testEmojiExtraction(inputContent);
+        
+        const encryptionParams = extractEncryptionParametersFromSalt(inputContent);
+        if (encryptionParams) {
+            setDecryptionOptions(encryptionParams);
+            console.log("已自动设置解密参数:", encryptionParams);
+        } else {
+            console.log("无法识别加密参数，使用当前UI设置");
+        }
+        
+        // --- MODIFIED: Trigger action button click instead of placeholder ---
+        actionBtn.click(); 
+        // --- End Modification ---
+
+        // REMOVED: Redundant requestSubmit, handled by actionBtn handler
+        // if (password.value) {
+        //     document.getElementById('passwordForm').requestSubmit();
+        // }
     } else {
         switchMode('decrypt');
     }
@@ -595,9 +756,31 @@ async function pasteFromClipboard(textarea) {
 
 // --- NEW: Generic Copy to Clipboard Function ---
 async function copyToClipboard(textareaElement, buttonElement) {
-    const textToCopy = textareaElement.value;
+    // 获取要复制的文本，优先从outputCache获取完整内容
+    let textToCopy = '';
     
-    // Get references to the text spans WITHIN the specific button
+    // 判断是否为outputText元素的复制操作
+    if (textareaElement === outputText) {
+        // 首先检查缓存系统中是否有完整内容
+        textToCopy = outputCache.getOriginalText();
+    
+        // 如果缓存中没有，检查当前模式的完整输出
+        if (!textToCopy) {
+            if (isEncryptMode && encryptState.fullEncryptedOutput) {
+                textToCopy = encryptState.fullEncryptedOutput;
+            } else if (!isEncryptMode && decryptState.fullEncryptedOutput) {
+                textToCopy = decryptState.fullEncryptedOutput;
+            } else {
+                // 如果没有完整内容的记录，则使用显示的内容
+                textToCopy = textareaElement.value;
+            }
+        }
+    } else {
+        // 非输出框的复制操作，直接使用元素值
+        textToCopy = textareaElement.value;
+    }
+    
+    // 获取引用到各状态文本的span元素
     const defaultSpan = buttonElement.querySelector('.btn-text.default');
     const successSpan = buttonElement.querySelector('.btn-text.success');
     const querySpan = buttonElement.querySelector('.btn-text.query'); // Assuming .query class exists for empty state
@@ -848,37 +1031,106 @@ outputButtons.expand.addEventListener('click', (e) => {
 });
 
 outputButtons.copy.addEventListener('click', async () => {
-    let textToCopy = outputText.value;
-    let success = false;
+    // 立即更新按钮视觉状态，提供即时反馈
+    outputButtons.copy.classList.add('is-processing');
     
-    // 检查是否有缓存的完整加密结果
-    if (isEncryptMode && encryptState.fullEncryptedOutput) {
-        textToCopy = encryptState.fullEncryptedOutput;
-    } else if (!isEncryptMode && decryptState.fullEncryptedOutput) {
-        // (未来解密也可能需要截断和缓存)
-        textToCopy = decryptState.fullEncryptedOutput;
-    }
-    
-    if (textToCopy) {
+    // 使用微任务异步处理复制操作，避免UI卡死
+    setTimeout(async () => {
         try {
-            await navigator.clipboard.writeText(textToCopy);
-            success = true;
+            // 从多个来源中尝试获取完整内容
+            let textToCopy = null;
+            
+            // 1. 首先尝试从outputCache获取
+            textToCopy = outputCache.getOriginalText();
+            
+            // 2. 如果缓存中没有，尝试从状态中的完整内容变量获取
+            if (!textToCopy) {
+                if (isEncryptMode && encryptState.fullEncryptedOutput) {
+                    textToCopy = encryptState.fullEncryptedOutput;
+                } else if (!isEncryptMode && decryptState.fullEncryptedOutput) {
+                    textToCopy = decryptState.fullEncryptedOutput;
+                } else {
+                    // 3. 如果没有完整内容的记录，则使用当前显示的内容
+                    textToCopy = outputText.value;
+                }
+            }
+            
+            if (!textToCopy) {
+                // 没有内容可复制
+                outputButtons.copy.classList.remove('is-processing');
+                outputButtons.copy.classList.add('is-query');
+                setTimeout(() => outputButtons.copy.classList.remove('is-query'), 500);
+                return;
+            }
+            
+            // 检查是否需要分片处理
+            const isLargeContent = textToCopy.length > 100000; // 10万字符以上视为大量数据
+            
+            // 检查是否有已处理的Blob缓存
+            let cachedBlob = outputCache.getProcessedBlob();
+            
+            // 对于小内容直接处理
+            if (!isLargeContent) {
+                await navigator.clipboard.writeText(textToCopy);
+                outputButtons.copy.classList.remove('is-processing');
+                outputButtons.copy.classList.add('is-success');
+                setTimeout(() => outputButtons.copy.classList.remove('is-success'), 500);
+                return;
+            }
+            
+            // 对于大内容则分段处理
+            // 1. 首先让UI更新
+            await new Promise(resolve => setTimeout(resolve, 10));
+            
+            // 2. 检查并使用缓存的Blob或创建新的Blob
+            if (!cachedBlob) {
+                cachedBlob = new Blob([textToCopy], {type: 'text/plain'});
+                outputCache.setProcessedBlob(cachedBlob);
+            }
+            
+            // 3. 使用现代剪贴板API写入数据
+            const data = [new ClipboardItem({'text/plain': cachedBlob})];
+            await navigator.clipboard.write(data);
+            
+            outputButtons.copy.classList.remove('is-processing');
+            outputButtons.copy.classList.add('is-success');
+            setTimeout(() => outputButtons.copy.classList.remove('is-success'), 500);
         } catch (err) {
-            console.error('Failed to copy output: ', err);
-            alert(window.getTranslation('alertCopyFailed'));
+            console.error('复制失败:', err);
+            
+            // 降级方案：尝试使用传统方法
+            try {
+                // 创建临时textarea元素
+                const tempElement = document.createElement('textarea');
+                
+                // 从多个来源中尝试获取完整内容
+                let textToCopy = outputCache.getOriginalText();
+                if (!textToCopy) {
+                    if (isEncryptMode && encryptState.fullEncryptedOutput) {
+                        textToCopy = encryptState.fullEncryptedOutput;
+                    } else if (!isEncryptMode && decryptState.fullEncryptedOutput) {
+                        textToCopy = decryptState.fullEncryptedOutput;
+                    } else {
+                        textToCopy = outputText.value;
+                    }
+                }
+                    
+                tempElement.value = textToCopy;
+                document.body.appendChild(tempElement);
+                tempElement.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempElement);
+                
+                outputButtons.copy.classList.remove('is-processing');
+                outputButtons.copy.classList.add('is-success');
+                setTimeout(() => outputButtons.copy.classList.remove('is-success'), 500);
+            } catch (fallbackErr) {
+                console.error('降级复制也失败:', fallbackErr);
+                alert(window.getTranslation('alertCopyFailed'));
+                outputButtons.copy.classList.remove('is-processing');
+            }
         }
-    }
-
-    if (success) {
-        outputButtons.copy.classList.add('is-success');
-        setTimeout(() => outputButtons.copy.classList.remove('is-success'), 500);
-    } else {
-        // 如果复制失败或没有内容可复制，可以给用户反馈
-        // 例如，短暂显示错误状态或禁用按钮
-        if (!textToCopy) {
-             outputButtons.copy.disabled = true; // 没有内容可复制时禁用
-        }
-    }
+    }, 10);
 });
 
 outputButtons.clear.addEventListener('click', () => {
@@ -889,6 +1141,10 @@ outputButtons.clear.addEventListener('click', () => {
         container.classList.remove('output-expanded');
     }
     clearTextarea(outputText);
+    
+    // 清除当前模式的输出缓存
+    outputCache.clearCache();
+    
     outputText.blur();
     
     // 使用新的滚动函数
@@ -984,22 +1240,25 @@ fileDropArea.addEventListener('drop', (e) => {
 
     const file = e.dataTransfer.files[0];
     if (file) {
+        // Add processing state for visual feedback
+        fileDropArea.classList.add('is-processing');
+        
         const fileName = file.name;
         const fileExtension = fileName.split('.').pop().toLowerCase();
         const currentState = isEncryptMode ? encryptState : decryptState;
         currentState.cachedInputData = null; // Clear cache initially
 
         if (isEncryptMode) {
-            // Encrypt Mode: Allow any file, handle .txt specifically
+            // Encrypt Mode: Handle all files the same way
             if (fileExtension === 'txt') {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const content = e.target.result;
                         currentState.cachedInputData = { filename: fileName, data: unicodeToBase64(content) };
-                        inputText.value = content;
-                        inputText.readOnly = false; // Ensure input is enabled
-                        inputText.classList.remove('filename-display'); // Remove centering class
+                        inputText.value = `Uploaded [${fileName}]`;
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                         console.error('Error encoding Base64:', error);
                         alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding file content.'));
@@ -1007,6 +1266,9 @@ fileDropArea.addEventListener('drop', (e) => {
                         inputText.readOnly = false;
                         inputText.classList.remove('filename-display');
                         currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                 reader.onerror = () => {
@@ -1016,6 +1278,8 @@ fileDropArea.addEventListener('drop', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsText(file);
             } else {
@@ -1027,8 +1291,8 @@ fileDropArea.addEventListener('drop', (e) => {
                         const base64Data = dataUrl.substring(dataUrl.indexOf(',') + 1);
                         currentState.cachedInputData = { filename: fileName, data: base64Data };
                         inputText.value = `Uploaded [${fileName}]`;
-                        inputText.readOnly = true; // Disable input
-                        inputText.classList.remove('filename-display'); // 移除居中对齐类
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                          console.error('Error processing Data URL:', error);
                          alert(window.getTranslation('alertReadFileError', error.message || 'Error processing file.'));
@@ -1036,6 +1300,9 @@ fileDropArea.addEventListener('drop', (e) => {
                          inputText.readOnly = false;
                          inputText.classList.remove('filename-display');
                          currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                 reader.onerror = () => {
@@ -1045,6 +1312,8 @@ fileDropArea.addEventListener('drop', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsDataURL(file);
             }
@@ -1056,9 +1325,9 @@ fileDropArea.addEventListener('drop', (e) => {
                     try {
                         const content = e.target.result;
                         currentState.cachedInputData = { filename: fileName, data: unicodeToBase64(content) };
-                        inputText.value = content;
-                        inputText.readOnly = false; // Ensure input is enabled
-                        inputText.classList.remove('filename-display'); // Remove centering class
+                        inputText.value = `Uploaded [${fileName}]`;
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                         console.error('Error encoding Base64:', error);
                         alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding file content.'));
@@ -1066,6 +1335,9 @@ fileDropArea.addEventListener('drop', (e) => {
                         inputText.readOnly = false;
                         inputText.classList.remove('filename-display');
                         currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                  reader.onerror = () => {
@@ -1075,6 +1347,8 @@ fileDropArea.addEventListener('drop', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsText(file);
             } else {
@@ -1084,6 +1358,8 @@ fileDropArea.addEventListener('drop', (e) => {
                 inputText.readOnly = false; // Ensure input is enabled
                 inputText.classList.remove('filename-display'); // Remove centering class
                 currentState.cachedInputData = null; // Ensure cache is cleared
+                // Remove processing state immediately for invalid files
+                fileDropArea.classList.remove('is-processing');
             }
         }
         // Clear file input value AFTER processing/error to allow re-selection
@@ -1094,22 +1370,25 @@ fileDropArea.addEventListener('drop', (e) => {
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
+        // Add processing state for visual feedback
+        fileDropArea.classList.add('is-processing');
+        
         const fileName = file.name;
         const fileExtension = fileName.split('.').pop().toLowerCase();
         const currentState = isEncryptMode ? encryptState : decryptState;
         currentState.cachedInputData = null; // Clear cache initially
 
         if (isEncryptMode) {
-            // Encrypt Mode: Allow any file, handle .txt specifically
+            // Encrypt Mode: Handle all files the same way
             if (fileExtension === 'txt') {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
                         const content = e.target.result;
                         currentState.cachedInputData = { filename: fileName, data: unicodeToBase64(content) };
-                        inputText.value = content;
-                        inputText.readOnly = false; // Ensure input is enabled
-                        inputText.classList.remove('filename-display'); // Remove centering class
+                        inputText.value = `Uploaded [${fileName}]`;
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                         console.error('Error encoding Base64:', error);
                         alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding file content.'));
@@ -1117,6 +1396,9 @@ fileInput.addEventListener('change', (e) => {
                         inputText.readOnly = false;
                         inputText.classList.remove('filename-display');
                         currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                  reader.onerror = () => {
@@ -1126,7 +1408,8 @@ fileInput.addEventListener('change', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
-                    // fileInput.value = ''; // Clear input on error - ALREADY CLEARED LATER
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsText(file);
             } else {
@@ -1138,8 +1421,8 @@ fileInput.addEventListener('change', (e) => {
                         const base64Data = dataUrl.substring(dataUrl.indexOf(',') + 1);
                         currentState.cachedInputData = { filename: fileName, data: base64Data };
                         inputText.value = `Uploaded [${fileName}]`;
-                        inputText.readOnly = true; // Disable input
-                        inputText.classList.remove('filename-display'); // 移除居中对齐类
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                          console.error('Error processing Data URL:', error);
                          alert(window.getTranslation('alertReadFileError', error.message || 'Error processing file.'));
@@ -1147,6 +1430,9 @@ fileInput.addEventListener('change', (e) => {
                          inputText.readOnly = false;
                          inputText.classList.remove('filename-display');
                          currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                 reader.onerror = () => {
@@ -1156,7 +1442,8 @@ fileInput.addEventListener('change', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
-                    // fileInput.value = ''; // Clear input on error - ALREADY CLEARED LATER
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsDataURL(file);
             }
@@ -1168,9 +1455,9 @@ fileInput.addEventListener('change', (e) => {
                     try {
                         const content = e.target.result;
                         currentState.cachedInputData = { filename: fileName, data: unicodeToBase64(content) };
-                        inputText.value = content;
-                        inputText.readOnly = false; // Ensure input is enabled
-                        inputText.classList.remove('filename-display'); // Remove centering class
+                        inputText.value = `Uploaded [${fileName}]`;
+                        inputText.readOnly = true; // 禁用输入
+                        inputText.classList.add('filename-display'); // 添加文件名显示样式
                     } catch (error) {
                         console.error('Error encoding Base64:', error);
                         alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding file content.'));
@@ -1178,6 +1465,9 @@ fileInput.addEventListener('change', (e) => {
                         inputText.readOnly = false;
                         inputText.classList.remove('filename-display');
                         currentState.cachedInputData = null;
+                    } finally {
+                        // Remove processing state when complete
+                        fileDropArea.classList.remove('is-processing');
                     }
                 };
                  reader.onerror = () => {
@@ -1187,6 +1477,8 @@ fileInput.addEventListener('change', (e) => {
                     inputText.readOnly = false; // Ensure input is enabled on error
                     inputText.classList.remove('filename-display'); // Remove centering class
                     currentState.cachedInputData = null;
+                    // Remove processing state on error
+                    fileDropArea.classList.remove('is-processing');
                 };
                 reader.readAsText(file);
             } else {
@@ -1196,6 +1488,8 @@ fileInput.addEventListener('change', (e) => {
                 inputText.readOnly = false; // Ensure input is enabled
                 inputText.classList.remove('filename-display'); // Remove centering class
                 currentState.cachedInputData = null; // Ensure cache is cleared
+                // Remove processing state immediately for invalid files
+                fileDropArea.classList.remove('is-processing');
             }
         }
         // Clear file input value AFTER processing/error to allow re-selection
@@ -1213,30 +1507,100 @@ fileDropArea.addEventListener('click', () => {
 
 // Save file functionality
 downloadFileArea.addEventListener('click', () => {
-    // 确定要下载的内容
-    let contentToDownload = outputText.value;
-    if (isEncryptMode && encryptState.fullEncryptedOutput) {
-        // 如果是加密模式且有完整的缓存结果，使用缓存结果
-        contentToDownload = encryptState.fullEncryptedOutput;
-    } else if (!contentToDownload) {
-        // 如果没有缓存且文本框为空，则提示
+    // 立即提供视觉反馈
+    downloadFileArea.classList.add('is-processing');
+    
+    // 使用微任务处理下载逻辑，避免UI卡死
+    setTimeout(async () => {
+        try {
+            // 从多个来源中尝试获取完整内容
+            let contentToDownload = null;
+            
+            // 1. 首先尝试从outputCache获取
+            contentToDownload = outputCache.getOriginalText();
+            
+            // 2. 如果缓存中没有，尝试从状态中的完整内容变量获取
+            if (!contentToDownload) {
+                if (isEncryptMode && encryptState.fullEncryptedOutput) {
+                    contentToDownload = encryptState.fullEncryptedOutput;
+                } else if (!isEncryptMode && decryptState.fullEncryptedOutput) {
+                    contentToDownload = decryptState.fullEncryptedOutput;
+                } else {
+                    // 3. 如果没有完整内容的记录，则使用当前显示的内容
+                    contentToDownload = outputText.value;
+                }
+            }
+            
+            if (!contentToDownload) {
+                // 如果没有内容可下载，则提示
         alert(window.getTranslation('alertNoContentToDownload'));
+                downloadFileArea.classList.remove('is-processing');
         return;
     }
 
-    // 使用确定好的内容创建 Blob
-    const blob = new Blob([contentToDownload], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
+            // 检查缓存中是否已有处理好的Blob
+            let downloadBlob = outputCache.getProcessedBlob();
+            
+            // 对于大文件，先让UI刷新
+            if (contentToDownload.length > 100000 && !downloadBlob) { // 10万字符以上的大文件且没有缓存
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            // 使用缓存的Blob或创建新Blob
+            if (!downloadBlob) {
+                downloadBlob = new Blob([contentToDownload], { type: 'text/plain' });
+                outputCache.setProcessedBlob(downloadBlob);
+            }
+            
+            // 使用URL.createObjectURL创建临时URL
+            const url = URL.createObjectURL(downloadBlob);
+            
+            // 设置下载文件名
+            let fileName = 'DarkEmoji.txt';
+            
+            // 首先尝试从outputCache获取自定义文件名
+            let customFileName = outputCache.getCustomFilename();
+            if (customFileName) {
+                fileName = customFileName;
+                if (!fileName.toLowerCase().endsWith('.txt')) {
+                    fileName += '.txt';
+                }
+            }
+            // 如果没有自定义文件名，并且是解密结果，尝试使用解密结果中的文件名
+            else if (!isEncryptMode && decryptState.cachedOutputData && decryptState.cachedOutputData.filename) {
+                fileName = decryptState.cachedOutputData.filename;
+                if (!fileName.toLowerCase().endsWith('.txt')) {
+                    fileName += '.txt';
+                }
+            }
+            
+            // 创建下载链接并模拟点击
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'DarkEmoji.txt';
+            a.download = fileName;
+            a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
+            
+            // 延迟移除，确保下载已开始
+            setTimeout(() => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
-    // 自动设置焦点到输出框
-    // outputText.focus(); // Removed focus call
+                downloadFileArea.classList.remove('is-processing');
+                
+                // 显示成功状态
+                downloadFileArea.classList.add('is-success');
+                setTimeout(() => {
+                    downloadFileArea.classList.remove('is-success');
+                }, 500);
+            }, 100);
+            
+        } catch (error) {
+            console.error('下载失败:', error);
+            alert('下载失败: ' + error.message);
+            downloadFileArea.classList.remove('is-processing');
+        }
+    }, 10);
 });
 
 // Action button click handler
@@ -1247,44 +1611,102 @@ actionBtn.addEventListener('click', async () => { // Make the handler async
         return;
     }
     
+    // 记录操作开始时的模式，用于确保结果归属正确
+    const startingMode = isEncryptMode ? 'encrypt' : 'decrypt';
+    const currentModeState = isEncryptMode ? encryptState : decryptState;
+    
+    // 在解密模式下尝试提取和设置参数
+    if (!isEncryptMode) {
+        // 提取输入内容
+        let inputContent = '';
+        if (currentModeState.cachedInputData) {
+            try {
+                // 如果是上传的文件，从base64解码获取内容
+                inputContent = base64ToUnicode(currentModeState.cachedInputData.data);
+            } catch (error) {
+                console.error("解码上传文件内容失败:", error);
+                inputContent = inputText.value; // 降级使用显示内容
+            }
+        } else {
+            // 直接使用输入框内容
+            inputContent = inputText.value;
+        }
+        
+        // 测试emoji提取逻辑
+        testEmojiExtraction(inputContent);
+        
+        // 提取和设置解密参数
+        const encryptionParams = extractEncryptionParametersFromSalt(inputContent);
+        if (encryptionParams) {
+            setDecryptionOptions(encryptionParams);
+            console.log("已自动设置解密参数:", encryptionParams);
+        } else {
+            console.log("无法识别加密参数，使用当前UI设置");
+        }
+    }
+    
     // Disable button during operation
     actionBtn.disabled = true;
     actionBtn.classList.add('is-loading'); // Add loading visual state
-    outputText.value = ''; // Clear previous output
-    let progressElement = null; // Element to show progress text
     
-    // Function to update progress in the output textarea
-    const updateProgress = (percentage) => {
-        console.log(`Progress: ${percentage}%`); // Log progress
+    // 只清除当前模式的输出
+    if (isEncryptMode) {
+        outputText.value = ''; // Clear previous output in current mode
+    }
+    
+    let progressElement = null;
+    let currentProgressValue = 0;
+    
+    // 创建进度显示函数
+    const updateProgress = (progress, subtask = '', extraInfo = null) => {
+        currentProgressValue = progress;
+        
         if (!progressElement) {
-            // Style for top-center positioning with default font size
+            // 创建并插入进度条元素
             progressElement = document.createElement('div');
-            progressElement.style.textAlign = 'center';
-            progressElement.style.position = 'absolute';
-            progressElement.style.top = '10px'; // Small offset from the top
-            progressElement.style.left = '50%';
-            progressElement.style.transform = 'translateX(-50%)'; // Only horizontal centering
-            progressElement.style.color = 'var(--text-color)'; // Use theme color
-            progressElement.style.width = '100px'; // Give it some width to prevent text wrapping issue at 100%
-            progressElement.style.pointerEvents = 'none'; // Prevent blocking clicks on textarea
-            outputText.parentNode.insertBefore(progressElement, outputText.nextSibling); // Insert after textarea
+            progressElement.className = 'progress-bar-container';
+            progressElement.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">0%</div>
+                <div class="subtask-text"></div>
+            `;
+            document.querySelector('.container').appendChild(progressElement);
         }
-        // Update text, handle completion
-        if (percentage < 100) {
-            // Display only the percentage
-            progressElement.textContent = `${percentage}%`;
-            outputText.style.opacity = '0.5'; // Dim textarea during progress
-        } else {
-            // Clear progress on completion/error
-            if (progressElement) {
-                progressElement.textContent = '';
-                progressElement.remove(); // Remove the element
-                progressElement = null;
+        
+        // 更新进度条宽度
+        const progressBarFill = progressElement.querySelector('.progress-bar-fill');
+        progressBarFill.style.width = `${progress}%`;
+        
+        // 更新进度文本
+        const progressText = progressElement.querySelector('.progress-text');
+        progressText.textContent = `${Math.floor(progress)}%`;
+        
+        // 更新子任务文本
+        const subtaskText = progressElement.querySelector('.subtask-text');
+        
+        if (subtask) {
+            subtaskText.style.display = 'block';
+            subtaskText.textContent = subtask;
+                            } else {
+            subtaskText.style.display = 'none';
+        }
+        
+        // 如果有extraInfo，使用自定义更新逻辑
+        if (extraInfo && extraInfo.compressionInfo) {
+            const compressionInfo = extraInfo.compressionInfo;
+            // 如果包含压缩比信息，显示压缩相关的状态
+            if (compressionInfo.compressionRatio !== undefined || compressionInfo.ratio !== undefined) {
+                subtaskText.style.display = 'block';
+                const ratio = compressionInfo.compressionRatio || compressionInfo.ratio;
+                subtaskText.textContent = compressionInfo.message || `Compression: ${ratio}%`;
             }
-            outputText.style.opacity = '1'; // Restore textarea opacity
         }
     };
     
+    try {
+        // 根据当前模式执行操作
     if (isEncryptMode) {
          // --- New Cache Handling Logic for Encryption ---
         let dataToOutput;
@@ -1303,7 +1725,11 @@ actionBtn.addEventListener('click', async () => { // Make the handler async
             } catch (error) {
                  console.error('Error encoding direct input Base64:', error);
                  alert(window.getTranslation('alertEncodeError', error.message || 'Error encoding input content.'));
-                 outputText.value = ''; // Clear output on error
+                 if (startingMode === 'encrypt' && isEncryptMode) {
+                     outputText.value = ''; // 只有在仍在加密模式时才清空输出
+                 }
+                 actionBtn.disabled = false;
+                 actionBtn.classList.remove('is-loading');
                  return;
             }
         }
@@ -1314,115 +1740,138 @@ actionBtn.addEventListener('click', async () => { // Make the handler async
         } catch (error) {
              console.error('Error stringifying JSON data:', error);
              alert(window.getTranslation('alertJSONError', 'Error formatting output data.'));
-             outputText.value = ''; // Clear output on error
+             if (startingMode === 'encrypt' && isEncryptMode) {
+                 outputText.value = ''; // 只有在仍在加密模式时才清空输出
+             }
              actionBtn.disabled = false; // Re-enable button
              actionBtn.classList.remove('is-loading'); // Remove loading state
              updateProgress(100); // Clear progress indicator
              return;
         }
-        // --- End New Logic ---
         
-        // 2. Gather options and password
-        const options = {
-            selectedAlgorithm: currentEncrypt,
-            selectedIterations: currentIterations,
-            selectedBase: currentEncode,
-            selectedDummyEmoji: currentDummyEmoji,
-            selectedEmojiVersion: currentEmoji
-        };
-        const passwordValue = password.value;
-
-        // 3. Call the encrypt function
-        try {
-            updateProgress(0); // Start progress
-            const encryptedEmojiString = await encrypt(jsonStringToEncrypt, passwordValue, options, updateProgress);
+            // 2. 收集用户输入的设置（选项）
+            try {
+                // 获取加密设置
+                const encryptionOptions = {
+                    selectedAlgorithm: getSelectedOptionValue('algorithm'),
+                    selectedIterations: getSelectedOptionValue('iterations'),
+                    selectedBase: getSelectedOptionValue('base'),
+                    selectedDummyEmoji: getSelectedOptionValue('dummyEmoji'),
+                    selectedEmojiVersion: getSelectedOptionValue('emojiVersion')
+                };
+                console.log("Using encryption options:", encryptionOptions);
+                
+                // 3. 执行加密
+                console.log(`Starting encryption of ${jsonStringToEncrypt.length} characters...`);
+                const encryptedResult = await encrypt(jsonStringToEncrypt, password.value, encryptionOptions, updateProgress);
+                console.log(`Encryption complete. Result length: ${encryptedResult.length}`);
             
-            // 对结果进行处理：如果太长，则截断显示并提供复制按钮
-            const MAX_DISPLAY_LENGTH = 1000; // 定义最大显示长度
-            if (encryptedEmojiString.length > MAX_DISPLAY_LENGTH) {
-                // 将表情字符串分割成数组，确保不会切断表情符号
-                const emojiArray = Array.from(encryptedEmojiString);
-                const header = `Showing [${MAX_DISPLAY_LENGTH}/${encryptedEmojiString.length}]\n`;
-                const displayString = emojiArray.slice(0, MAX_DISPLAY_LENGTH).join('') + ' ...';
-                outputText.value = header + displayString;
-                
-                // 激活或显示复制按钮 (假设outputButtons.copy存在)
-                if (outputButtons.copy) {
-                    outputButtons.copy.disabled = false;
-                    // 移除可能存在的 is-success 状态
-                    outputButtons.copy.classList.remove('is-success');
-                    // 确保按钮可见（如果之前是隐藏的）
-                    // outputButtons.copy.style.display = ''; 
+                // 4. 处理和显示加密结果
+                if (startingMode === 'encrypt' && isEncryptMode) { // 确保用户没有切换模式
+                    
+                    // 存储完整结果，用于下载 
+                    encryptState.fullEncryptedOutput = encryptedResult;
+                    
+                    // 显示结果
+                    outputText.value = encryptedResult;
+                    
+                    // 缓存原始结果
+                    outputCache.setOriginalText(encryptedResult);
+                    
+                    // 显示成功提示
+                    console.log("Encrypted result successfully displayed");
+    } else {
+                    console.log("Mode changed during operation. Output not updated.");
+                    }
+            } catch (error) {
+                console.error('Encryption error:', error);
+                alert(`${window.getTranslation('alertEncryptError', 'Error during encryption')}: ${error.message}`);
+                if (startingMode === 'encrypt' && isEncryptMode) {
+                    outputText.value = ''; // 只有在仍在加密模式时才清空输出
                 }
-                
-                // 将完整结果暂存，以便复制按钮使用
-                encryptState.fullEncryptedOutput = encryptedEmojiString;
-                decryptState.fullEncryptedOutput = null; // 清除解密缓存
-                
-            } else { // 结果未截断
-                outputText.value = encryptedEmojiString; 
-                // 移除禁用逻辑，确保复制按钮始终可用
-                if (outputButtons.copy) {
-                    outputButtons.copy.disabled = false; // 确保按钮可用
-                    outputButtons.copy.classList.remove('is-success'); // 重置状态
-                }
-                encryptState.fullEncryptedOutput = null; // 清除缓存
-                decryptState.fullEncryptedOutput = null;
             }
+        } else {
+            // 解密模式
+            // 1. 获取输入内容
+            let inputToDecrypt = '';
+            if (decryptState.cachedInputData) {
+                try {
+                    inputToDecrypt = base64ToUnicode(decryptState.cachedInputData.data);
+                } catch (error) {
+                    console.error("解码上传文件内容失败:", error);
+                    inputToDecrypt = inputText.value;
+                }
+            } else {
+                inputToDecrypt = inputText.value;
+                    }
             
-        } catch (error) {
-            console.error('Encryption failed:', error);
-            // Display a user-friendly error message
-            outputText.value = `${window.getTranslation('errorPrefix', 'Error:')} ${error.message}`;
-            // Consider showing a specific alert or more detail depending on the error type
-            // alert(`${window.getTranslation('alertEncryptionFailed', 'Encryption failed:')} ${error.message}`);
-        } finally {
-            // 4. Re-enable button and clear progress regardless of success/failure
+            // 检查输入的有效性
+            if (!inputToDecrypt.trim()) {
+                alert(window.getTranslation('alertNoInput'));
             actionBtn.disabled = false;
             actionBtn.classList.remove('is-loading');
-            updateProgress(100);
-        }
-    } else {
-        // Decrypt mode still uses placeholder logic
-        outputText.value = inputText.value; // Placeholder logic
-        actionBtn.disabled = false; // Re-enable button (placeholder)
-        actionBtn.classList.remove('is-loading'); // Remove loading state (placeholder)
-        
-        // 对解密结果同样应用长度限制
-        const decryptedText = inputText.value;
-        const MAX_DISPLAY_LENGTH = 1000; // 定义最大显示长度
-        
-        if (decryptedText.length > MAX_DISPLAY_LENGTH) {
-            // 将字符串分割成数组，确保不会切断表情符号
-            const charArray = Array.from(decryptedText);
-            const header = `Showing [${MAX_DISPLAY_LENGTH}/${decryptedText.length}]\n`;
-            const displayString = charArray.slice(0, MAX_DISPLAY_LENGTH).join('') + ' ...';
-            outputText.value = header + displayString;
-            
-            // 激活或显示复制按钮 (假设outputButtons.copy存在)
-            if (outputButtons.copy) {
-                outputButtons.copy.disabled = false;
-                outputButtons.copy.classList.remove('is-success');
+                return;
             }
             
-            // 将完整结果暂存，以便复制按钮使用
-            decryptState.fullEncryptedOutput = decryptedText;
-            encryptState.fullEncryptedOutput = null; // 清除加密缓存
-        } else {
-            outputText.value = decryptedText;
-            // 移除禁用逻辑，确保复制按钮始终可用
-            if (outputButtons.copy) {
-                outputButtons.copy.disabled = false;
-                outputButtons.copy.classList.remove('is-success');
+            // 2. 收集解密设置
+            try {
+                const decryptionOptions = {
+                    selectedAlgorithm: getSelectedOptionValue('algorithm'),
+                    selectedIterations: getSelectedOptionValue('iterations'),
+                    selectedBase: getSelectedOptionValue('base'),
+                    selectedDummyEmoji: getSelectedOptionValue('dummyEmoji'),
+                    selectedEmojiVersion: getSelectedOptionValue('emojiVersion')
+                };
+                console.log("Using decryption options:", decryptionOptions);
+            
+                // 3. 执行解密 - 使用用户输入的密码或自动从末尾识别的两个表情符号构建密码
+                console.log(`Starting decryption of ${inputToDecrypt.length} characters...`);
+                const decryptResult = await decrypt(inputToDecrypt, password.value, decryptionOptions, updateProgress);
+                console.log(`Decryption complete. Content length: ${decryptResult.content.length}, filename: ${decryptResult.filename}`);
+            
+                // 4. 显示解密结果
+                if (startingMode === 'decrypt' && !isEncryptMode) { // 确保用户没有切换模式
+                    // 存储解密后的原始内容和文件名
+                    decryptState.cachedOutputData = {
+                        content: decryptResult.content,
+                        filename: decryptResult.filename
+                    };
+                
+                    // 直接显示解密后的内容
+                    outputText.value = decryptResult.content;
+                    
+                    // 缓存解密后的内容，用于下载
+                    outputCache.setOriginalText(decryptResult.content);
+                    outputCache.setCustomFilename(decryptResult.filename);
+                    
+                    // 显示成功提示
+                    console.log("Decrypted result successfully displayed");
+                } else {
+                    console.log("Mode changed during operation. Output not updated.");
             }
-            decryptState.fullEncryptedOutput = null;
-            encryptState.fullEncryptedOutput = null;
+        } catch (error) {
+                console.error('Decryption error:', error);
+                alert(`${window.getTranslation('alertDecryptError', 'Error during decryption')}: ${error.message}`);
+            if (startingMode === 'decrypt' && !isEncryptMode) {
+                    outputText.value = ''; // 只有在仍在解密模式时才清空输出
+            }
+            }
         }
-    }
-
-    // 触发表单提交来激活浏览器密码保存功能
-    if (password.value) {
-        document.getElementById('passwordForm').requestSubmit();
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        alert(`${window.getTranslation('alertUnexpectedError', 'Unexpected error')}: ${error.message}`);
+        } finally {
+        // 移除进度条
+        if (progressElement) {
+            setTimeout(() => {
+                progressElement.remove();
+                progressElement = null;
+            }, 1000); // 延迟1秒后移除，给用户一个完成的视觉反馈
+        }
+        
+        // 重新启用按钮
+            actionBtn.disabled = false;
+            actionBtn.classList.remove('is-loading');
     }
 });
 
@@ -2068,3 +2517,323 @@ outputText.addEventListener('click', () => {
     }
     */
 });
+
+// 添加到CSS部分或添加到<style>标签中
+// 添加到文件开头附近合适的位置
+document.head.insertAdjacentHTML('beforeend', `
+<style>
+.is-processing {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+.is-processing::after {
+    content: "";
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--primary-color, #333);
+    border-radius: 50%;
+    top: calc(50% - 0.5em);
+    left: calc(50% - 0.5em);
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+`);
+
+// 添加到现有的状态管理变量区域附近
+// 新增共用输出缓存对象
+const outputCache = {
+    encrypt: {
+        originalText: null,
+        processedBlob: null,
+        lastLength: 0
+    },
+    decrypt: {
+        originalText: null,
+        processedBlob: null,
+        lastLength: 0
+    },
+    // 获取当前模式的缓存
+    getCurrentCache() {
+        return isEncryptMode ? this.encrypt : this.decrypt;
+    },
+    // 获取原始文本
+    getOriginalText() {
+        const currentCache = this.getCurrentCache();
+        return currentCache.originalText;
+    },
+    // 设置原始文本
+    setOriginalText(text) {
+        const currentCache = this.getCurrentCache();
+            currentCache.originalText = text;
+        currentCache.processedBlob = null; // 清除旧的处理结果
+        currentCache.lastLength = text.length;
+    },
+    // 获取处理后的Blob
+    getProcessedBlob() {
+        const currentCache = this.getCurrentCache();
+        return currentCache.processedBlob;
+    },
+    // 设置处理后的Blob
+    setProcessedBlob(blob) {
+        const currentCache = this.getCurrentCache();
+        currentCache.processedBlob = blob;
+    },
+    // 清除当前模式的缓存
+    clearCache() {
+        const currentCache = this.getCurrentCache();
+        currentCache.originalText = null;
+        currentCache.processedBlob = null;
+        currentCache.lastLength = 0;
+        console.log(`清除了${isEncryptMode ? '加密' : '解密'}缓存`);
+    },
+    // 获取自定义文件名
+    getCustomFilename() {
+        if (!isEncryptMode && this.decrypt.customFilename) {
+            return this.decrypt.customFilename;
+        }
+        return null;
+    },
+    // 设置自定义文件名
+    setCustomFilename(filename) {
+        if (!isEncryptMode) {
+            this.decrypt.customFilename = filename;
+        }
+    }
+};
+
+// 添加函数：从输入中提取最后7个Emoji并识别加密参数
+function extractEncryptionParametersFromSalt(inputContent) {
+  try {
+    console.log("开始从输入中提取加密参数...");
+    console.log("输入内容长度:", inputContent.length);
+
+    // 提取所有表情符号，正确处理组合emoji
+    let emojis = [];
+    
+    // 使用Intl.Segmenter API
+    if (typeof Intl !== 'undefined' && typeof Intl.Segmenter !== 'undefined') {
+      console.log("使用Intl.Segmenter方法提取Emoji");
+      const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+      const segments = Array.from(segmenter.segment(inputContent));
+      
+      // 过滤只保留emoji字符
+      emojis = segments
+        .map(segment => segment.segment)
+        .filter(char => {
+          // 简单测试是否看起来像emoji的启发式方法
+          // 大多数emoji都在这些Unicode范围内
+          const cp = char.codePointAt(0);
+          return (cp >= 0x1F000 && cp <= 0x1FFFF) || // 表情符号和其他象形文字
+                 (cp >= 0x2600 && cp <= 0x27BF) ||   // 杂项符号和箭头
+                 /\p{Emoji}/u.test(char);            // 使用Unicode属性检测
+        });
+
+      console.log("提取到的emoji总数:", emojis.length);
+    } else {
+      console.warn('Intl.Segmenter不可用，无法提取Emoji');
+      return null;
+    }
+    
+    // 如果没有足够的表情符号，返回null
+    if (emojis.length < 7) {
+      console.log("输入中没有足够的表情符号，需要至少7个。实际数量:", emojis.length);
+      return null;
+    }
+    
+    // 提取最后7个表情符号作为saltPBKDF2
+    const lastSevenEmojis = emojis.slice(-7);
+    console.log("最终提取的最后7个表情符号:", lastSevenEmojis);
+    const fullSalt = lastSevenEmojis.join('');
+    console.log("完整salt字符串:", fullSalt);
+    
+    // 按照加密逻辑解析盐值中的参数
+    const emojiAlgorithmKeySymbol = lastSevenEmojis[0];
+    const emojiIterationsKeySymbol = lastSevenEmojis[1];
+    const emojiBaseKeySymbol = lastSevenEmojis[2];
+    const emojiDummyKeySymbol = lastSevenEmojis[3];
+    const emojiVersionKeySymbol = lastSevenEmojis[4];
+    // 最后两个表情符号是密码相关的，不需要解析
+    
+    // 找到对应的参数
+    let selectedAlgorithm = null;
+    let selectedIterations = null;
+    let selectedBase = null;
+    let selectedDummyEmoji = null;
+    let selectedEmojiVersion = null;
+    
+    // 反向查找算法
+    for (const [key, emojiArray] of Object.entries(window.optionAlgorithmEmojiMap || {})) {
+      if (emojiArray.includes(emojiAlgorithmKeySymbol)) {
+        selectedAlgorithm = key;
+        break;
+      }
+    }
+    
+    // 反向查找迭代次数
+    for (const [key, emojiArray] of Object.entries(window.optionIterationsEmojiMap || {})) {
+      if (emojiArray.includes(emojiIterationsKeySymbol)) {
+        selectedIterations = key;
+        break;
+      }
+    }
+    
+    // 反向查找BaseN
+    for (const [key, emojiArray] of Object.entries(window.optionBaseEmojiMap || {})) {
+      if (emojiArray.includes(emojiBaseKeySymbol)) {
+        selectedBase = key;
+        break;
+      }
+    }
+    
+    // 反向查找DummyEmoji百分比
+    for (const [key, emojiArray] of Object.entries(window.optionDummyEmojiEmojiMap || {})) {
+      if (emojiArray.includes(emojiDummyKeySymbol)) {
+        selectedDummyEmoji = key;
+        break;
+      }
+    }
+    
+    // 反向查找Emoji版本
+    for (const [key, emojiArray] of Object.entries(window.optionEmojiVersionEmojiMap || {})) {
+      if (emojiArray.includes(emojiVersionKeySymbol)) {
+        selectedEmojiVersion = key;
+        break;
+      }
+    }
+    
+    // 验证是否所有参数都找到了
+    if (!selectedAlgorithm || !selectedIterations || !selectedBase || 
+        !selectedDummyEmoji || !selectedEmojiVersion) {
+      console.log("无法识别全部加密参数", {
+        selectedAlgorithm,
+        selectedIterations,
+        selectedBase,
+        selectedDummyEmoji,
+        selectedEmojiVersion
+      });
+      return null;
+    }
+    
+    return {
+      selectedAlgorithm,
+      selectedIterations,
+      selectedBase,
+      selectedDummyEmoji,
+      selectedEmojiVersion
+    };
+  } catch (error) {
+    console.error("提取加密参数时出错:", error);
+    return null;
+  }
+}
+
+// 添加函数：设置UI选项
+function setDecryptionOptions(options) {
+  if (!options) return false;
+  
+  const {
+    selectedAlgorithm,
+    selectedIterations,
+    selectedBase,
+    selectedDummyEmoji,
+    selectedEmojiVersion
+  } = options;
+  
+  // 更新当前选项值
+  currentEncrypt = selectedAlgorithm;
+  currentIterations = selectedIterations;
+  currentEncode = selectedBase;
+  currentDummyEmoji = selectedDummyEmoji;
+  currentEmoji = selectedEmojiVersion;
+  
+  // 更新UI选项
+  setActiveOption(optionAlgorithmContainer, selectedAlgorithm);
+  setActiveOption(optionIterationsContainer, selectedIterations);
+  setActiveOption(optionBaseContainer, selectedBase);
+  setActiveOption(optionDummyEmojiContainer, selectedDummyEmoji);
+  setActiveOption(optionEmojiContainer, selectedEmojiVersion);
+  
+  // 检查是否切换到Custom模式
+  if (selectedAlgorithm === 'AES-256-GCM' && 
+      selectedIterations === 'Iterations-100k' && 
+      selectedBase === 'Base64' && 
+      selectedEmojiVersion === 'Emoji-v13.1' &&
+      selectedDummyEmoji === 'DummyEmoji-0%') {
+    switchCipherMode('default');
+  } else {
+    switchCipherMode('custom');
+  }
+  
+  // 更新小标题显示
+  updateSubtitle();
+  return true;
+}
+
+// 导出EmojiMap供解析使用
+window.optionAlgorithmEmojiMap = optionAlgorithmEmojiMap;
+window.optionIterationsEmojiMap = optionIterationsEmojiMap;
+window.optionBaseEmojiMap = optionBaseEmojiMap;
+window.optionDummyEmojiEmojiMap = optionDummyEmojiEmojiMap;
+window.optionEmojiVersionEmojiMap = optionEmojiVersionEmojiMap;
+
+// 添加一个测试函数来验证emoji提取
+function testEmojiExtraction(input) {
+  console.group('Emoji提取测试');
+  console.log('输入字符串:', input);
+  
+  // 只保留Intl.Segmenter方法
+  if (typeof Intl !== 'undefined' && typeof Intl.Segmenter !== 'undefined') {
+    try {
+      console.group('Intl.Segmenter方法');
+      const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+      const segments = Array.from(segmenter.segment(input));
+      
+      // 只保留emoji
+      const emojis = segments
+        .map(segment => segment.segment)
+        .filter(char => {
+          const cp = char.codePointAt(0);
+          return (cp >= 0x1F000 && cp <= 0x1FFFF) || 
+                 (cp >= 0x2600 && cp <= 0x27BF) || 
+                 /\p{Emoji}/u.test(char);
+        });
+      
+      console.log('提取的完整Emoji列表:', emojis);
+      console.log('最后7个Emoji:', emojis.slice(-7));
+      console.groupEnd();
+    } catch (e) {
+      console.warn('Intl.Segmenter测试失败:', e);
+      console.groupEnd();
+    }
+  } else {
+    console.log('该浏览器不支持Intl.Segmenter');
+  }
+  
+  console.groupEnd(); // 结束主测试组
+}
+
+// 添加一个函数来获取特定选项组的当前选中值
+function getSelectedOptionValue(optionType) {
+    switch (optionType) {
+        case 'algorithm':
+            return currentEncrypt || 'AES-256-GCM';
+        case 'iterations':
+            return currentIterations || 'Iterations-100k';
+        case 'base':
+            return currentEncode || 'Base64';
+        case 'dummyEmoji':
+            return currentDummyEmoji || 'DummyEmoji-0%';
+        case 'emojiVersion':
+            return currentEmoji || 'Emoji-v13.1';
+        default:
+            console.warn(`Unsupported option type: ${optionType}`);
+            return null;
+    }
+}
